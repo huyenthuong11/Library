@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&family=Quicksand:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
 .header {
   display: flex;
   justify-content: space-between;
@@ -111,12 +112,17 @@
 
 .card {
   display: flex;
+  flex-direction: column;
   grid-column: span 1;
   grid-row: span 1;
-  border-radius: 16px;
   font-weight: 500;
   background: rgba(255, 255, 255, 0.342);
   border: 1px #1384db solid;
+}
+
+.cardHeader {
+  font-family: Quicksand, sans-serif;
+  font-weight: 800;
 }
 
 .footer {

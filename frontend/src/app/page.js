@@ -25,15 +25,27 @@ export default function Page() {
       </div>
 
       <div className={styles.grid}>
-        <div className={styles.card}>SÁCH MỚI CẬP NHẬT</div>
-        <div className={styles.card}>DỊCH VỤ NỔI BẬT</div>
-        <div className={styles.card}>TIN TỨC & SỰ KIỆN</div>
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            SÁCH MỚI CẬP NHẬT
+          </div>
+        </div>
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            DỊCH VỤ NỔI BẬT
+          </div>
+        </div>
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            TIN TỨC & SỰ KIỆN
+          </div>
+        </div>
       </div>
 
       <div className={styles.footer}>
-        <div className={styles.word}>Cầu Giấy, Hà Nội, Việt Nam</div>
+        <div className={styles.word}>Address: Cầu Giấy, Hà Nội, Việt Nam</div>
         <div className={styles.word}>Contact: 0912 xxx xxx</div>
-        <div className={styles.word}>Copyright</div>
+        <div className={styles.word}>Copyright © Library System</div>
       </div>
     </>
   )
