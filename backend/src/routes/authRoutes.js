@@ -27,7 +27,7 @@ router.post("/sendOtp", async(req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000);
     const msg = {
         to: email,
-        from: 'ksbzw7eur@email.com', 
+        from: 'ksbzw7eur@gmail.com', 
         subject: 'Mã OTP của bạn',
         text: `Mã OTP của bạn là: ${otp}`,
     };
