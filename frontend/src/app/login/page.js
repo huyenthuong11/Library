@@ -2,22 +2,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import Link from "next/link";
 import Grid from "@mui/material/Grid";
-import { Typography, Alert, TextField } from "@mui/material";
+import { Typography, TextField, Alert } from "@mui/material";
 import { Box } from "@mui/system";
 import Button from "@mui/material/Button";
 import Image from "next/image";
 import styles from "./page.module.css";
 import api from "../../lib/axios.js";
 
-
-export default function RegisterPage({ params }) {
+export default function LoginPage() {
     const router = useRouter();
+    const {login} = useContext(AuthContext);
     const [successMessage, setSuccessMessage] = useState("");
-    const [otp, setOtp] = useState("");
-    const [showOtp, setShowOtp] = useState(false);
 
     function isValidEmailFormat(email) {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -98,20 +97,17 @@ export default function RegisterPage({ params }) {
             });
             
             if (response.status === 200 || response.status === 201) {
-                console.log("Login success  login:101 - page.js:101", response.data);
+                console.log("Login success  login:101 - page.js:100", response.data);
                 setSuccessMessage("Đăng nhập thành công");
                 setForm({
                     email: "",
                     password: "",
                 });
                 
-                login(response.data.user, response.data.token);
-                console.log("/ - page.js:109");
+                login(response.data.account, response.data.token);
+                console.log("/ - page.js:108");
                 router.push("/");
             }
-
-            
-
         } catch (err) {
             setErrors(prev => ({
                 ...prev,
@@ -124,7 +120,7 @@ export default function RegisterPage({ params }) {
         <>
             <div className={styles.wrapper}>
                 <div className={styles.fill}>
-                    <div className={styles.registerScreen}>
+                    <div className={styles.loginScreen}>
                         <Grid container justifyContent="center" alignItems="center" spacing={2}>
                             <Grid item xs={12} md={12} lg={12} xl={12}>
                                 <Box>
@@ -146,20 +142,20 @@ export default function RegisterPage({ params }) {
                                             <Alert severity="error" sx={{ mb: 2 }}>
                                                 {errors.server}
                                             </Alert>
-                                            )}
+                                        )}
                                             
-                                            {successMessage && (
+                                        {successMessage && (
                                             <Alert severity="success" sx={{ mb: 2 }}>
                                                 {successMessage}
                                             </Alert>
-                                            )}
+                                        )}
                                         <Box>
                                             <TextField
                                                 required
                                                 margin="normal"
                                                 fullWidth
                                                 name="email"
-                                                label="email"
+                                                label="Email"
                                                 type="email"
                                                 id="email"
                                                 autoComplete="email"
@@ -206,7 +202,7 @@ export default function RegisterPage({ params }) {
                                                 color: "#fff !important",
                                             }}
                                             >
-                                            ĐĂNG KÝ
+                                            ĐĂNG NHẬP
                                         </Button>
                                     </Box>
                                         

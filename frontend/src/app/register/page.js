@@ -16,9 +16,10 @@ import api from "../../lib/axios.js";
 export default function RegisterPage({ params }) {
     const router = useRouter();
     const [successMessage, setSuccessMessage] = useState("");
+    const [otpSuccessMessage, setOtpSuccessMessage] = useState("");
     const [otp, setOtp] = useState("");
     const [showOtp, setShowOtp] = useState(false);
-
+    
     function isValidEmailFormat(email) {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
@@ -30,6 +31,7 @@ export default function RegisterPage({ params }) {
         server: ''
     });
 
+    const [otpError, setOtpError] = useState("");
 
     //State để quản lý giá trị input
     const [form, setForm] = useState({
@@ -76,10 +78,9 @@ export default function RegisterPage({ params }) {
             newErrors.password = "Vui lòng nhập mật khẩu";
             isValid = false;
         } else if (form.password.length < 6) {
-            newErrors.password = t("auth.passwordMinLength");
+            newErrors.password = "Vui lòng nhập mật khẩu có nhiều hơn 6 ký tự";
             isValid = false;
         }
-
         setErrors(newErrors);
         return isValid;
     };
@@ -93,6 +94,7 @@ export default function RegisterPage({ params }) {
             if (res.status === 200 || res.status === 201) {
                 setShowOtp(true);
             }
+            setOtp("");
         } catch (err) {
             setErrors(prev => ({
                 ...prev,
@@ -103,12 +105,17 @@ export default function RegisterPage({ params }) {
 
 
     const handleRegister = async () => {
-        const res = await api.post("/auth/register", {
-            email: form.email,
-            password: form.password,
-            otp: otp,
-        })
-        router.push("/login");
+        try {
+            const res = await api.post("/auth/register", {
+                email: form.email,
+                password: form.password,
+                otp: otp,
+            })
+            setOtpSuccessMessage("Đăng ký thành công!");
+            router.push("/login");
+        } catch (err) {
+            setOtpError(err.response?.data?.message || "Đăng ký thất bại")
+        }
     }   
 
 
@@ -143,23 +150,22 @@ export default function RegisterPage({ params }) {
                                             <Alert severity="error" sx={{ mb: 2 }}>
                                                 {errors.server}
                                             </Alert>
-                                            )}
+                                        )}
                                             
-                                            {successMessage && (
+                                        {successMessage && (
                                             <Alert severity="success" sx={{ mb: 2 }}>
                                                 {successMessage}
                                             </Alert>
-                                            )}
+                                        )}
                                         <Box>
                                             <TextField
                                                 required
                                                 margin="normal"
                                                 fullWidth
                                                 name="email"
-                                                label="email"
+                                                label="Email"
                                                 type="email"
                                                 id="email"
-                                                autoComplete="email"
                                                 InputProps={{
                                                     style: { borderRadius: 8 },
                                                 }}
@@ -179,7 +185,6 @@ export default function RegisterPage({ params }) {
                                                 label="Mật khẩu"
                                                 type="password"
                                                 id="password"
-                                                autoComplete="current-password"
                                                 InputProps={{
                                                     style: { borderRadius: 8 },
                                                 }}
@@ -203,7 +208,7 @@ export default function RegisterPage({ params }) {
                                                 color: "#fff !important",
                                             }}
                                             >
-                                            ĐĂNG KÝ
+                                            GỬI MÃ OTP
                                         </Button>
 
                                         {
@@ -217,30 +222,58 @@ export default function RegisterPage({ params }) {
                                                     borderRadius: "20px",
                                                     background: "rgba(0,0,0,0.5)"
                                                 }}>
+                                                    
                                                     <div style={{
                                                         background: "white",
                                                         padding: 20,
+                                                        marginTop: "70px",
                                                         margin: "100px auto",
                                                         width: 300,
                                                         borderRadius: "20px",
                                                     }}>
-                                                        <h3>Nhập OTP</h3>
-                                                        <input
-                                                            value={otp}
-                                                            onChange={(e) => setOtp(e.target.value)}
-                                                            placeholder="6 số"
-                                                        />
-                                                        <Button onClick={handleRegister}>
-                                                            Xác nhận
-                                                        </Button>
-
-                                                        <Button onClick={handleSendOtp}>
-                                                            Gửi lại mã
-                                                        </Button>
-
-                                                        <Button onClick={() => setShowOtp(false)}>
-                                                            Đóng
-                                                        </Button>
+                                                    
+                                                        <Grid container justifyContent="center" alignItems="center" spacing={2}>
+                                                            <Grid item xs={12} md={12} lg={12} xl={12}>
+                                                                <Box>
+                                                                    <Typography as="h1" fontSize="18px" fontWeight="700" mb="5px">
+                                                                        NHẬP OTP
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Box noValidate sx={{ width: '100%', mt: 1 }}>
+                                                                    {otpSuccessMessage && (
+                                                                        <Alert severity="success" sx={{ mb: 2 }}>
+                                                                            {otpSuccessMessage}
+                                                                        </Alert>
+                                                                    )}
+                                                                    <Box>
+                                                                        <TextField
+                                                                            required
+                                                                            margin="normal"
+                                                                            fullWidth
+                                                                            name="otp"
+                                                                            label="Otp"
+                                                                            type="text"
+                                                                            id="otp"
+                                                                            InputProps={{
+                                                                                style: { borderRadius: 8 },
+                                                                                maxLength: 6,
+                                                                            }}
+                                                                            placeholder="6 số"
+                                                                            value={otp}
+                                                                            onChange={(e) => {
+                                                                                setOtp(e.target.value);
+                                                                                setOtpError("");
+                                                                            }}
+                                                                            error={!!otpError}
+                                                                            helperText={otpError}
+                                                                        />
+                                                                    </Box>
+                                                                    <Button onClick={handleRegister}> Xác nhận </Button>
+                                                                    <Button onClick={handleSendOtp}> Gửi lại mã </Button>
+                                                                    <Button onClick={() => setShowOtp(false)}> Đóng </Button>
+                                                                </Box>
+                                                            </Grid>
+                                                        </Grid>
                                                     </div>
                                                 </div>
                                             )

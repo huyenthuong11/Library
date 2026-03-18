@@ -28,8 +28,12 @@ router.post("/sendOtp", async(req, res) => {
     const msg = {
         to: email,
         from: 'ksbzw7eur@gmail.com', 
-        subject: 'Mã OTP của bạn',
-        text: `Mã OTP của bạn là: ${otp}`,
+        subject: '[Thư viện Cầu Giấy] Mã xác minh đăng ký tài khoản',
+        text: `Cảm ơn bạn đã đăng ký sử dụng dịch vụ tại Thư viện Cầu Giấy. Để hoàn tất quá trình tạo tài khoản, vui lòng sử dụng mã xác minh dưới đây:
+                \nMã OTP của bạn là: ${otp}
+                \nLưu ý: Mã này có hiệu lực trong vòng 5 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.
+                \nTrân trọng,
+                \nThư viện Cầu Giấy`,
     };
 
     await sgMail.send(msg);
@@ -55,11 +59,6 @@ router.post("/register", async(req, res) => {
         }
 
         const savedOtp = await client.get(`otp:${email}`);
-        if (savedOtp) {
-            return res.status(429).json({
-                message: "Vui lòng đợi trước khi gửi lại OTP"
-            });
-        }
 
         if (!savedOtp) {
             return res.status(400).json({ message: "OTP hết hạn" });

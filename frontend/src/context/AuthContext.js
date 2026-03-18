@@ -3,36 +3,36 @@ import { createContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext();
 export default function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
+    const [account, setAccount] = useState(null);
     const [loading, setLoading] = useState(true);
     
     useEffect(() => {
         const token = localStorage.getItem("token");
-        const userString = localStorage.getItem("user");
-        if (token && userString) {
+        const accountString = localStorage.getItem("account");
+        if (token && accountString) {
             try {
-                setUser(JSON.parse(userString));
+                setAccount(JSON.parse(accountString));
             } catch (error) {
-                console.error("Failed to parse user from localStorage - AuthContext.js:16", error);
-                localStorage.removeItem("user");
+                console.error("Failed to parse account from localStorage - AuthContext.js:16", error);
+                localStorage.removeItem("account");
             }
         }
         setLoading(false);
     }, []);
 
-    const login = (userData, token) => {
+    const login = (accountData, token) => {
         localStorage.setItem("token", token);
-        localStorage.setItem("account", JSON.stringify(userData));
-        setUser(userData);
+        localStorage.setItem("account", JSON.stringify(accountData));
+        setAccount(accountData);
     };
 
     const logout = () => {
         localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setUser(null);
+        localStorage.removeItem("account");
+        setAccount(null);
     };
     return(
-        <AuthContext.Provider value ={{ user, setUser, login, logout, loading }}>
+        <AuthContext.Provider value ={{ account, setAccount, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
