@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv"; 
 import mongoose from "mongoose";
 import "./config/env.js";
-
+import authRoutes from "./src/routes/authRoutes.js";
 //load env
 dotenv.config();
 
@@ -13,7 +13,7 @@ console.log("ENV TEST: - server.js:11", process.env.GEMINI_API_KEY);
 //middleware
 app.use(cors());
 app.use(express.json());
-
+app.use("/api/auth", authRoutes);
 
 //connect MongoDB
 mongoose.connect(process.env.MONGO_URI)
