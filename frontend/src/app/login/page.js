@@ -105,8 +105,7 @@ export default function LoginPage() {
                 });
                 
                 login(response.data.account, response.data.token);
-                console.log("/ - page.js:108");
-                router.push("/");
+                router.push("/reader/dashboard");
             }
         } catch (err) {
             setErrors(prev => ({

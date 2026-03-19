@@ -13,7 +13,7 @@ import styles from "./page.module.css";
 import api from "../../lib/axios.js";
 
 
-export default function RegisterPage({ params }) {
+export default function RegisterPage() {
     const router = useRouter();
     const [successMessage, setSuccessMessage] = useState("");
     const [otpSuccessMessage, setOtpSuccessMessage] = useState("");
