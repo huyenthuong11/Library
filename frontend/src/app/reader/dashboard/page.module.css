@@ -1,0 +1,14 @@
+.main {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    font-size: clamp(15px, 1vw, 20px);
+    background-color: rgba(171, 204, 222, 0.768);
+    flex: 1;
+}
+
+.header {
+    font-weight: 800;
+    font-size: clamp(25px, 2vw, 35px);
+    margin-bottom: 30px;
+}
