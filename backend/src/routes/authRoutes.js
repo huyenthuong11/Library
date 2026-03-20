@@ -1,5 +1,6 @@
 import express from "express";
 import Account from "../models/user/Account.js";
+import Reader from "../models/user/Reader.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import client from "../services/redis.service.js";
@@ -77,6 +78,13 @@ router.post("/register", async(req, res) => {
         });
         
         await newAccount.save();
+        
+        const newReader = new Reader({
+            accountId: newAccount._id
+        });
+
+        await newReader.save();
+        
         res.status(201).json({
             message: "Đăng ký thành công",
             accountId: newAccount._id,
@@ -132,6 +140,7 @@ router.post("/login", async(req, res) => {
             account: {
                 id: account._id,
                 email: account.email,
+                role: account.role
             },
         });
     } catch (err) {

@@ -4,8 +4,8 @@
     height: 100%;
     margin: auto;
     font-size: clamp(15px, 1vw, 20px);
-    background: rgb(6, 16, 119);
     flex: 1;
+    background: rgb(6, 16, 119);
 }
 
 .grid {
@@ -30,10 +30,10 @@
     background: rgb(255, 255, 255);
 }
 
-.cardWide {
+.cardHeight {
     font-family: Quicksand, sans-serif;
-    grid-column: span 2;
-    grid-row: span 2;
+    grid-column: span 1;
+    grid-row: span 4;
     border-radius: 16px;
     font-weight: 500;
     background: rgb(255, 255, 255);

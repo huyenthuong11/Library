@@ -10,7 +10,7 @@ export default function Page() {
   const { account, logout } = useContext(AuthContext);
   const handleLogout = () => {
         logout();
-        router.push("/login");
+        router.push("/");
     };
 
   return (
@@ -30,7 +30,7 @@ export default function Page() {
               </div>
             </div>
           ) : (
-            <div className={styles.sign}>
+            <div className="sign">
               <a onClick={() => router.push("/login")}>Đăng Nhập</a>  
               <a onClick={() => router.push("/register")}>Đăng Ký</a>
             </div>
@@ -38,10 +38,10 @@ export default function Page() {
           
         </div>
 
-        <div className={styles.banner}>
-          <div className={styles.bannerFill}>
-            <div className={styles.headerBanner}>KHÁM PHÁ THẾ GIỚI TRI THỨC</div>
-            <div className={styles.fullName}>Hệ thống Quản lý thư viện</div>
+        <div className="banner">
+          <div className="bannerFill">
+            <div className="headerBanner">KHÁM PHÁ THẾ GIỚI TRI THỨC</div>
+            <div className="fullName">Hệ thống Quản lý thư viện</div>
           </div>
         </div>
 
