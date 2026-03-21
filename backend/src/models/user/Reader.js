@@ -10,25 +10,30 @@ const readerSchema = new mongoose.Schema(
         },
         fullName: {
             type: String,
+            default: "",
         },
-        dateOfBird: {
+        avatar: {
+            type: String,
+            default: "",
+        },
+        dateOfBirth: {
             type: Date,
             default: Date.now,
         },
         phoneNumber: {
-            type: Number,
-            required: true,
+            type: String,
             unique: true,
+            default: "",
         },
         totalBorrow: {
             type: Number,
             required: true,
             unique: true,
+            default: 0,
         }
     }
 );
 
 
 
-readerSchema.index({ accountId: 1 })
 export default mongoose.model("Reader", readerSchema); ;

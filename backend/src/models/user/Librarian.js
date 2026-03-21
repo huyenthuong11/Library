@@ -18,6 +18,4 @@ const librarianSchema = new mongoose.Schema(
 );
 
 
-
-librarianSchema.index({ accountId: 1 })
 export default mongoose.model("Librarian", librarianSchema); ;

@@ -15,7 +15,7 @@ import api from "../../lib/axios.js";
 
 export default function LoginPage() {
     const router = useRouter();
-    const {login} = useContext(AuthContext);
+    const {account, login} = useContext(AuthContext);
     const [successMessage, setSuccessMessage] = useState("");
 
     function isValidEmailFormat(email) {
@@ -75,7 +75,7 @@ export default function LoginPage() {
             newErrors.password = "Vui lòng nhập mật khẩu";
             isValid = false;
         } else if (form.password.length < 6) {
-            newErrors.password = t("auth.passwordMinLength");
+            newErrors.password = "Vui lòng nhập mật khẩu có nhiều hơn 6 ký tự";
             isValid = false;
         }
 
@@ -105,7 +105,12 @@ export default function LoginPage() {
                 });
                 
                 login(response.data.account, response.data.token);
-                router.push("/reader/dashboard");
+                if (response.data.account.role === "reader") {
+                    router.push("/reader/dashboard");
+                } else if (response.data.account.role === "librarian") {
+                    router.push("/librarian/dashboard");
+                }   
+                
             }
         } catch (err) {
             setErrors(prev => ({

@@ -4,10 +4,7 @@ import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
 import { useContext } from "react";
 import { Avatar } from "@mui/material";
-import { HomeOutlined, CollectionsBookmarkOutlined, 
-    HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined } 
-    from '@mui/icons-material';
+
 export default function Dashboard() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
@@ -40,27 +37,8 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <nav>
-                        <a> <HomeOutlined></HomeOutlined>Trang chủ</a>
-                        <p onClick={() => router.push("/availableBooks")}>
-                            <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
-                            Kho sách thư viện
-                        </p>
-                        <p onClick={() => router.push("/reader/borrowedBooks")}>
-                            <LibraryAddCheckOutlined></LibraryAddCheckOutlined>
-                            Giá sách của bạn
-                        </p>
-                        <p onClick={() => router.push("/reader/history")}>
-                            <HistoryOutlined></HistoryOutlined>
-                            Lịch sử mượn sách
-                        </p>
-                        <p onClick={() => router.push("/reader/setinfo")}>
-                            <PermIdentityOutlined></PermIdentityOutlined>
-                            Hồ sơ cá nhân
-                        </p>
-                        <p onClick={() => router.push("/reader/setinfo")}>
-                            <HelpOutlineOutlined></HelpOutlineOutlined>
-                            Yêu cầu
-                        </p>
+                        <a>Tổng quan</a>
+                        <p onClick={() => router.push("/availableBooks")}>Kho sách thư viện</p>
                     </nav>
                 </aside>
 
@@ -72,12 +50,13 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className={styles.grid}>
-                        <div className={styles.cardWide}>Thông báo quan trọng</div>
-                        <div className={styles.cardWide}>Sách đang mượn</div>
-                        <div className={styles.card}>Yêu cầu của bạn</div>
-                        <div className={styles.card}>Sách gợi ý cho bạn</div>
-                        <div className={styles.card}>Sách được mượn nhiều nhất trong tuần</div>
-                        <div className={styles.card}>Tóm tắt tài khoản</div>
+                        <div className={styles.cardHeight}>Thông báo & Yêu cầu mới</div>
+                        <div className={styles.card}>Cơ cấu thể loại sách</div>
+                        <div className={styles.card}>Thống kê nhanh</div>
+                        <div className={styles.card}>top5 sách được mượn nhiều nhất</div>
+                        <div className={styles.card}>sách mượn theo tháng</div>
+                        <div className={styles.card}>tỷ lệ trạng thái sách</div>
+                        <div className={styles.card}>duyệt yêu cầu nhanh</div>
                     </div>
                 </div>
             </div>
