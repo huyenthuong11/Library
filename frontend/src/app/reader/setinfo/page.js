@@ -17,6 +17,17 @@ export default function Info() {
     const router = useRouter();
     const [readerInfo, setReaderInfo] = useState({});
     const { account, logout } = useContext(AuthContext);
+    const [passwordData, setPasswordData] = useState({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
+    const [errors, setErrors] = useState({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+        server: ""
+    });
     
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -25,7 +36,6 @@ export default function Info() {
             [name]: value
         }));
     };
-    
     const handleLogout = () => {
         logout();
         router.push("/");
@@ -39,12 +49,11 @@ export default function Info() {
             });
             const data = response.data;
             setReaderInfo(data);
-            console.log("DATA: - page.js:42", data);
+            console.log("DATA: - page.js:52", data);
         } catch (err) {
-            console.error("Failed to fetch reader info: - page.js:44", err);
+            console.error("Failed to fetch reader info: - page.js:54", err);
         }
     }
-
 
     useEffect(() => {
         if(!account?.id) return;
@@ -58,22 +67,86 @@ export default function Info() {
         await api.put(`/reader/${readerInfo._id}/avatar`, formData);
         alert("Update avatar thành công!");
         getReaderInfo();
-        console.log("avatar changed - page.js:61")
+        console.log("avatar changed - page.js:70")
     };
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const formData = new FormData();
-        formData.append("fullName", readerInfo.fullName);
-        formData.append("dateOfBirth", readerInfo.dateOfBirth);
-        formData.append("phoneNumber", readerInfo.phoneNumber);
-        await api.put(`/reader/${readerInfo.id}`, formData);    
-        alert("Cập nhật thành công!");
-        getReaderInfo();
+        try {
+            await api.put(`/reader/${readerInfo._id}`,{
+                fullName: readerInfo.fullName,
+                dateOfBirth: readerInfo.dateOfBirth,
+                phoneNumber: readerInfo.phoneNumber
+            });    
+            alert("Cập nhật thành công!");
+            getReaderInfo();
+        } catch (error) {
+            console.error("Failed to update reader info: - page.js:85", error);
+        }
     };
 
+    const handlePasswordChange = (e) => {
+        const {name, value} = e.target;
+        setPasswordData(prev => ({
+            ...prev, 
+            [name]: value
+        }));
+    };
 
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        const newErrors = {
+            oldPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+            server: ""
+        };
+        if (!passwordData.oldPassword) {
+            newErrors.oldPassword = "Vui lòng nhập mật khẩu hiện tại";
+            setErrors(newErrors);
+            return;
+        }
+        if (!passwordData.newPassword) {
+            newErrors.newPassword = "Vui lòng nhập mật khẩu mới";
+            setErrors(newErrors);
+            return;
+        } else if (passwordData.newPassword.length < 6) {
+            newErrors.newPassword = "Vui lòng nhập mật khẩu có nhiều hơn 6 ký tự";
+            setErrors(newErrors);
+            return;
+        }        
+        if (!passwordData.confirmPassword) {
+            newErrors.confirmPassword = "Vui lòng nhập mật khẩu xác nhận";
+            setErrors(newErrors);
+            return;
+        } else if (passwordData.newPassword !== passwordData.confirmPassword) {
+            newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
+            setErrors(newErrors);
+            return;
+        }
+        try {
+            await api.put(`/auth/${account.id}/change-password`, {
+                oldPassword: passwordData.oldPassword,
+                newPassword: passwordData.newPassword
+            });
+            alert("Đổi mật khẩu thành công");
+            setPasswordData({
+                oldPassword: "",
+                newPassword: "",
+                confirmPassword: ""
+            });
+            setErrors({
+                oldPassword: "",
+                newPassword: "",
+                confirmPassword: "",
+                server: ""
+            });
+        } catch (err) {
+            newErrors.oldPassword = err.response?.data?.message;
+            setErrors(newErrors);
+        }
+    } 
   return (
         <>
             <div className="container">
@@ -86,25 +159,31 @@ export default function Info() {
                                     </div>
                                 </div>
                                 <div className="user">
-                                    {readerInfo.avatar? (
-                                            <Avatar
-                                                alt="User Avatar"
-                                                src={`http://localhost:5000/${readerInfo.avatar}`}
-                                                sx={{
-                                                    objectFit: 'cover',
-                                                    border: '1px solid rgba(150, 149, 149, 0.65)'
-                                                }}
-                                            />
-                                            ) : (
-                                            <Avatar
-                                                alt="User Avatar"
-                                                sx={{
-                                                    objectFit: 'cover',
-                                                }}
-                                            />
-                                            )
-                                        }
-                                    <span>{account?.email}</span> 
+                                    {readerInfo.avatar ? (
+                                        <Avatar
+                                            alt="User Avatar"
+                                            src={`http://localhost:5000/${readerInfo.avatar}`}
+                                            sx={{
+                                                objectFit: 'cover',
+                                                border: '1px solid rgba(150, 149, 149, 0.65)'
+                                            }}
+                                        />
+                                    ) : (
+                                        <Avatar
+                                            alt="User Avatar"
+                                            sx={{
+                                                objectFit: 'cover',
+                                            }}
+                                        />
+                                    )
+                                    }
+                                    {readerInfo.fullName ? (
+                                        <span>{readerInfo.fullName}</span>
+                                    ):(
+                                        <span>{account?.email}</span>
+                                    )
+                                    }
+                                     
                                     <div className="sign">
                                         <a onClick={handleLogout}>Đăng xuất</a>
                                     </div>
@@ -190,7 +269,8 @@ export default function Info() {
                                                     marginTop:'20px',
                                                     background: '#083d5e',
                                                     color: '#f6f8f9',
-                                                    fontSize: '13px'
+                                                    fontSize: '13px',
+                                                    textAlign: "center"
                                                 }}
                                             >
                                                 Cập nhật ảnh
@@ -318,7 +398,7 @@ export default function Info() {
                                                         type="submit"
                                                         sx={{
                                                             marginTop:'20px',
-                                                            marginLeft: 'clamp(140px, 2vw, 200px)',
+                                                            marginLeft: '10vw',
                                                             background: '#083d5e',
                                                             color: '#f6f8f9',
                                                             fontSize: '13px'
@@ -338,7 +418,108 @@ export default function Info() {
                                     Cài đặt tài khoản & Bảo mật
                                 </div>
                                 <div className={styles.cardMainFrame}>
-                                    
+                                    <Grid container justifyContent="center" alignItems="center" spacing={2} sx={{ width: '97%', m: 0 }}>
+                                        <Grid item xs={12} md={12} lg={12} xl={12} sx={{ width: '97%', m: 0 }}>
+                                            <Box component="form" onSubmit={handleChangePassword} noValidate sx={{ width: '100%', mt: 1 }}>
+                                                <Box mb={1}>
+                                                    <Typography
+                                                        component="label"
+                                                        sx={{
+                                                            fontWeight: "500",
+                                                            fontSize: "14px",
+                                                            display: "block",
+                                                        }}
+                                                    >
+                                                        Mật khẩu hiện tại
+                                                    </Typography>
+                                                    <TextField
+                                                        required
+                                                        fullWidth
+                                                        size="small"
+                                                        name="oldPassword"
+                                                        type="oldPassword"
+                                                        id="oldPassword"
+                                                        autoComplete="oldPassword"
+                                                        InputProps={{
+                                                            style: { borderRadius: 8 },
+                                                        }}
+                                                        value={passwordData.oldPassword}
+                                                        onChange={handlePasswordChange}
+                                                        error={!!errors.oldPassword}
+                                                        helperText={errors.oldPassword}
+                                                    />
+                                                </Box>
+                                                <Box mb={1}>
+                                                    <Typography
+                                                        component="label"
+                                                        sx={{
+                                                            fontWeight: "500",
+                                                            fontSize: "14px",
+                                                            display: "block",
+                                                        }}
+                                                    >
+                                                        Mật khẩu mới
+                                                    </Typography>
+                                                    <TextField
+                                                        required
+                                                        fullWidth
+                                                        size="small"
+                                                        name="newPassword"
+                                                        type="newPassword"
+                                                        id="newPassword"
+                                                        autoComplete="newPassword"
+                                                        InputProps={{
+                                                            style: { borderRadius: 8 },
+                                                        }}
+                                                        value={passwordData.newPassword}
+                                                        onChange={handlePasswordChange}
+                                                        error={!!errors.newPassword}
+                                                        helperText={errors.newPassword}
+                                                    />
+                                                </Box>
+                                                <Box mb={1}>
+                                                    <Typography
+                                                        component="label"
+                                                        sx={{
+                                                            fontWeight: "500",
+                                                            fontSize: "14px",
+                                                            display: "block",
+                                                        }}
+                                                    >
+                                                        Xác nhận mật khẩu mới
+                                                    </Typography>
+                                                    <TextField
+                                                        required
+                                                        fullWidth
+                                                        size="small"
+                                                        name="confirmPassword"
+                                                        type="confirmPassword"
+                                                        id="confirmPassword"
+                                                        autoComplete="confirmPassword"
+                                                        InputProps={{
+                                                            style: { borderRadius: 8 },
+                                                        }}
+                                                        value={passwordData.confirmPassword}
+                                                        onChange={handlePasswordChange}
+                                                        error={!!errors.confirmPassword}
+                                                        helperText={errors.confirmPassword}
+                                                    />
+                                                </Box>
+                                                <Button
+                                                    type="submit"
+                                                    sx={{
+                                                        marginTop:'20px',
+                                                        marginLeft: '15vw',
+                                                        background: '#083d5e',
+                                                        color: '#f6f8f9',
+                                                        fontSize: '13px'
+                                                    }}
+                                                >
+                                                    Lưu thay đổi
+                                                </Button>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
                                 </div>
                             </div>
                         </div>

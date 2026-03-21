@@ -84,7 +84,7 @@ router.post("/register", async(req, res) => {
         });
 
         await newReader.save();
-        
+
         res.status(201).json({
             message: "Đăng ký thành công",
             accountId: newAccount._id,
@@ -140,7 +140,7 @@ router.post("/login", async(req, res) => {
             account: {
                 id: account._id,
                 email: account.email,
-                role: account.role
+                role: account.role,
             },
         });
     } catch (err) {
@@ -150,5 +150,24 @@ router.post("/login", async(req, res) => {
         })
     }
 })
+
+//PUT /api/auth/:id/change-password
+router.put("/:id/change-password", async(req, res) => {
+    try {
+        const {oldPassword, newPassword} = req.body;
+        const user = await Account.findById(req.params.id);
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({message: "Mật khẩu cũ không đúng"})
+        }
+        user.password = newPassword;
+        await user.save();
+        res.json({ message: "Đổi mật khẩu thành công" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: "Lỗi server"});
+    }
+})
+
 
 export default router; 

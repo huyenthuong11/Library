@@ -35,6 +35,7 @@ router.put("/:id", async(req, res) => {
             data: updateReader
         });
     } catch (err) {
+        console.error("Error: - readerRoutes.js:38", err)
         res.status(500).json({ message: "Failed to update reader profile" });
     }
 });

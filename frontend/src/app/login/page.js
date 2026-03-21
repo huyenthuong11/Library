@@ -75,7 +75,7 @@ export default function LoginPage() {
             newErrors.password = "Vui lòng nhập mật khẩu";
             isValid = false;
         } else if (form.password.length < 6) {
-            newErrors.password = t("auth.passwordMinLength");
+            newErrors.password = "Vui lòng nhập mật khẩu có nhiều hơn 6 ký tự";
             isValid = false;
         }
 
