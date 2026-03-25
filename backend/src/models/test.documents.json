@@ -1,0 +1,34 @@
+[
+  {
+    "accountId": "65f1a2b3c4d5e6f7a8b9c001",
+    "fullName": "Nguyễn Văn A",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=A",
+    "dateOfBirth": "1995-10-15T00:00:00.000Z",
+    "phoneNumber": "0901234567",
+    "totalBorrow": 5
+  },
+  {
+    "accountId": "65f1a2b3c4d5e6f7a8b9c002",
+    "fullName": "Trần Thị B",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=B",
+    "dateOfBirth": "1998-05-20T00:00:00.000Z",
+    "phoneNumber": "0912345678",
+    "totalBorrow": 2
+  },
+  {
+    "accountId": "65f1a2b3c4d5e6f7a8b9c003",
+    "fullName": "Lê Văn C",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=C",
+    "dateOfBirth": "2000-01-01T00:00:00.000Z",
+    "phoneNumber": "0987654321",
+    "totalBorrow": 0
+  },
+  {
+    "accountId": "65f1a2b3c4d5e6f7a8b9c004",
+    "fullName": "Phạm Minh D",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=D",
+    "dateOfBirth": "1992-12-12T00:00:00.000Z",
+    "phoneNumber": "0933445566",
+    "totalBorrow": 10
+  }
+]

@@ -8,9 +8,12 @@ import { HomeOutlined, CollectionsBookmarkOutlined,
     HistoryOutlined, PermIdentityOutlined, 
     LibraryAddCheckOutlined, HelpOutlineOutlined } 
     from '@mui/icons-material';
+import useReaderInfo from "@/hook/useReaderInfo";
+
 export default function Dashboard() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
+    const {fullName, avatar} = useReaderInfo(account?.id);
     const handleLogout = () => {
         logout();
         router.push("/");
@@ -21,11 +24,25 @@ export default function Dashboard() {
         <div className={styles.m}>
             <div className="main">
                     <div className="header">
-                        <div className="webicon">
-                        </div>
+                        <div className="webicon"></div>
                         <div className="user">
-                            <Avatar></Avatar>
-                            <span>{account?.email}</span> 
+                            {avatar ? (
+                                <Avatar
+                                    alt="User Avatar"
+                                    src={`http://localhost:5000/${avatar}`}
+                                    sx={{
+                                    objectFit: 'cover',
+                                    border: '1px solid rgba(150, 149, 149, 0.65)'
+                                    }}
+                                />
+                            ) : (
+                                <Avatar></Avatar>
+                            )}
+                            {fullName ? (
+                                <span>{fullName}</span>
+                            ):(
+                                <span>{account?.email || "Email"}</span>
+                            )}
                             <div className="sign">
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
@@ -41,7 +58,7 @@ export default function Dashboard() {
                     </div>
                     <nav>
                         <a> <HomeOutlined></HomeOutlined>Trang chủ</a>
-                        <p onClick={() => router.push("/availableBooks")}>
+                        <p onClick={() => router.push("/reader/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
                         </p>
@@ -57,7 +74,7 @@ export default function Dashboard() {
                             <PermIdentityOutlined></PermIdentityOutlined>
                             Hồ sơ cá nhân
                         </p>
-                        <p onClick={() => router.push("/reader/setinfo")}>
+                        <p onClick={() => router.push("/reader/ask")}>
                             <HelpOutlineOutlined></HelpOutlineOutlined>
                             Yêu cầu
                         </p>

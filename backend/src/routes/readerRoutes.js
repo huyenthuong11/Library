@@ -1,6 +1,8 @@
 import express from "express";
 import Reader from "../models/user/Reader.js";
 import upload from "../middleware/imageMiddleware.js";
+import fs from "fs";
+import path from "path";
 
 const router = express.Router();
 
@@ -35,7 +37,7 @@ router.put("/:id", async(req, res) => {
             data: updateReader
         });
     } catch (err) {
-        console.error("Error: - readerRoutes.js:38", err)
+        console.error("Error: - readerRoutes.js:40", err)
         res.status(500).json({ message: "Failed to update reader profile" });
     }
 });
@@ -45,6 +47,13 @@ router.put("/:id/avatar", upload.single("avatar"), async(req, res) => {
     try {
         const updateFields = {};
         if (req.file) {updateFields.avatar = req.file.path;}
+        const reader = await Reader.findById(req.params.id);
+        if (reader.avatar) {
+            const oldPath = path.join(process.cwd(), reader.avatar);
+            if (fs.existsSync(oldPath)) {
+                fs.unlinkSync(oldPath);
+            }
+        }
         const updateReader = await Reader.findByIdAndUpdate(
             req.params.id,
             updateFields,

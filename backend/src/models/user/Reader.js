@@ -28,7 +28,6 @@ const readerSchema = new mongoose.Schema(
         totalBorrow: {
             type: Number,
             required: true,
-            unique: true,
             default: 0,
         }
     }
