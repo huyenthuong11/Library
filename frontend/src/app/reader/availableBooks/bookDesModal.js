@@ -19,85 +19,91 @@ export default function BookDesModal({
     return (
         <>
             <div className={styles.fullScreen}>
-                Thông tin chi tiết sách
-                <Button
-                    className={styles.closeIcon}
-                    onClick={() => handleClose()}
-                >
-                    <CancelOutlinedIcon></CancelOutlinedIcon>
-                </Button>
-                <div className={styles.board}>
-                    <div className={styles.image}>
-                        <img src={image}/>
-                        <div>Còn : {availableCopies} cuốn</div>
+                <div className={styles.main}>
+                    <div className={styles.header}>
+                        Thông tin chi tiết sách
+                        <Button
+                            className={styles.closeIcon}
+                            onClick={() => handleClose()}
+                        >
+                            <CancelOutlinedIcon></CancelOutlinedIcon>
+                        </Button>
                     </div>
-                    <div className={styles.content}>
-                        <div style={{fontWeight: "bold", fontSize: "20px"}}>
-                            {title}
+                    <div className={styles.board}>
+                        <div className={styles.image}>
+                            <img src={image}/>
+                            <div>Còn : {availableCopies} cuốn</div>
                         </div>
-                        <div style={{display: "flex"}}>
-                            <div style={{fontWeight: "bold", fontSize: "15px"}}>
-                                Tác giả:
-                            </div>      
-                            <div>{author}</div>                      
-                        </div>
-                        <div style={{display: "flex"}}>
-                            <div style={{fontWeight: "bold", fontSize: "15px"}}>
-                                Ngày xuất bản:
-                            </div>      
-                            <div>{publishDate}</div>                      
-                        </div>
-                        <div style={{display: "flex"}}>
-                            <div style={{fontWeight: "bold", fontSize: "15px"}}>
-                                Số trang:
-                            </div>      
-                            <div>{pages}</div>                      
-                        </div>
-                        <div style={{display: "flex"}}>
-                            <div style={{fontWeight: "bold", fontSize: "15px"}}>
-                                Ngôn ngữ:
-                            </div>      
-                            <div>
-                                {
-                                    languageList.map((l) => {
-                                        if (l.value === language) return l.label;
-                                    })
-                                }
-                            </div>                      
-                        </div>
-                        <div style={{display: "flex"}}>
-                            <div style={{fontWeight: "bold", fontSize: "15px"}}>
-                                Nhà xuất bản:
-                            </div>      
-                            <div>{publisher}</div>                      
-                        </div>
-                        <div style={{display: "flex"}}>
-                            <div style={{fontWeight: "bold", fontSize: "15px"}}>
-                                Mô tả tóm tắt:
-                            </div>      
-                            <div>{description}</div>                      
-                        </div>
-                        <div style={{display: "flex"}}>
-                            <div style={{fontWeight: "bold", fontSize: "15px"}}>
-                                Thể loại:
-                            </div>      
-                            <div>{category}</div>                     
+                        <div style={{display: "flex", flexDirection: "column"}}>
+                            <div className={styles.content}>
+                                <div style={{fontWeight: "bold", fontSize: "20px"}}>
+                                    {title}
+                                </div>
+                                <div style={{display: "flex"}}>
+                                    <div style={{fontWeight: "bold", fontSize: "15px"}}>
+                                        Tác giả:
+                                    </div>      
+                                    <div>{author}</div>                      
+                                </div>
+                                <div style={{display: "flex"}}>
+                                    <div style={{fontWeight: "bold", fontSize: "15px"}}>
+                                        Ngày xuất bản:
+                                    </div>      
+                                    <div>{publishDate}</div>                      
+                                </div>
+                                <div style={{display: "flex"}}>
+                                    <div style={{fontWeight: "bold", fontSize: "15px"}}>
+                                        Số trang:
+                                    </div>      
+                                    <div>{pages}</div>                      
+                                </div>
+                                <div style={{display: "flex"}}>
+                                    <div style={{fontWeight: "bold", fontSize: "15px"}}>
+                                        Ngôn ngữ:
+                                    </div>      
+                                    <div>
+                                        {
+                                            languageList.map((l) => {
+                                                if (l.value === language) return l.label;
+                                            })
+                                        }
+                                    </div>                      
+                                </div>
+                                <div style={{display: "flex"}}>
+                                    <div style={{fontWeight: "bold", fontSize: "15px"}}>
+                                        Nhà xuất bản:
+                                    </div>      
+                                    <div>{publisher}</div>                      
+                                </div>
+                                <div style={{display: "flex"}}>
+                                    <div style={{fontWeight: "bold", fontSize: "15px"}}>
+                                        Mô tả tóm tắt:
+                                    </div>      
+                                    <div>{description}</div>                      
+                                </div>
+                                <div style={{display: "flex"}}>
+                                    <div style={{fontWeight: "bold", fontSize: "15px"}}>
+                                        Thể loại:
+                                    </div>      
+                                    <div>{category}</div>                     
+                                </div>
+                            </div>
+                            <Button component="span"
+                                sx={{
+                                    background: '#083d5e',
+                                    color: '#f6f8f9',
+                                    fontSize: '13px',
+                                    textAlign: "center",
+                                    height: "20px",
+                                    width:"30%",
+                                    margin: "auto"
+                                }}
+                            >
+                                Mượn sách
+                            </Button>
                         </div>
                     </div>
                 </div>
-                <Button component="span"
-                    sx={{
-                        background: '#083d5e',
-                        color: '#f6f8f9',
-                        fontSize: '13px',
-                        textAlign: "center",
-                        height: "70%",
-                        width:"10%",
-                        margin: "auto"
-                    }}
-                >
-                    Mượn sách
-                </Button>
             </div>
         </>
     )
