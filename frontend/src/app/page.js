@@ -2,19 +2,19 @@
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../context/AuthContext";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Avatar } from "@mui/material";
-import useReaderInfo from "../hook/useReaderInfo";
 
 export default function Page() {
   const router = useRouter();
   const { account, logout } = useContext(AuthContext);
-  const {fullName, avatar} = useReaderInfo(account.id);
   const handleLogout = () => {
     logout();
     router.push("/");
   };
-  
+  useEffect (()=>{
+    handleLogout();
+  }, [])
 
   return (
     <>
@@ -24,37 +24,10 @@ export default function Page() {
             <div className="logo"></div>
             <div className="websiteName">LMS</div>
           </div>
-          {account ? (
-            <div className="user">
-              {avatar ? (
-              <Avatar
-                alt="User Avatar"
-                src={`http://localhost:5000/${avatar}`}
-                sx={{
-                  objectFit: 'cover',
-                  border: '1px solid rgba(150, 149, 149, 0.65)'
-                }}
-              />
-              ) : (
-                <Avatar></Avatar>
-              )}
-              {fullName ? (
-                <span>{fullName}</span>
-              ):(
-                <span>{account?.email || "Email"}</span>
-              )}
-               
-              <div className="sign">
-                <a onClick={handleLogout}>Đăng xuất</a>
-              </div>
-            </div>
-          ) : (
             <div className="sign">
               <a onClick={() => router.push("/login")}>Đăng Nhập</a>  
               <a onClick={() => router.push("/register")}>Đăng Ký</a>
-            </div>
-          )}
-          
+            </div>          
         </div>
 
         <div className="banner">

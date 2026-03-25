@@ -6,7 +6,7 @@ import "./src/config/env.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import readerRoutes from "./src/routes/readerRoutes.js";
 import librarianRoutes from "./src/routes/librarianRoutes.js";
-
+import bookRoutes from "./src/routes/bookRoutes.js";
 
 //load env
 dotenv.config();
@@ -21,16 +21,17 @@ app.use("/api/auth", authRoutes);
 app.use("/api/reader", readerRoutes);
 app.use("/api/librarian", librarianRoutes);
 app.use("/uploads", express.static("uploads"));
+app.use("/api/books", bookRoutes);
 
 
 //connect MongoDB
 mongoose.connect(process.env.MONGO_URI)
-.then(()=> console.log("MongoDB connected - server.js:28"))
-.catch((err) => console.log("MongoDB error - server.js:29", err));
+.then(()=> console.log("MongoDB connected - server.js:29"))
+.catch((err) => console.log("MongoDB error - server.js:30", err));
 
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT} - server.js:34`);
+    console.log(`Server running on port ${PORT} - server.js:35`);
 });
 
