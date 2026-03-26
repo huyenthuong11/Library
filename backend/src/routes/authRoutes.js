@@ -42,6 +42,7 @@ router.post("/sendOtp", async(req, res) => {
     res.json({ message: "OTP đã gửi" });
 });
 
+
 //POST /api/auth/register
 router.post("/register", async(req, res) => {
     try {
@@ -168,6 +169,7 @@ router.put("/:id/change-password", async(req, res) => {
         res.status(500).json({message: "Lỗi server"});
     }
 })
+
 
 
 export default router; 
