@@ -13,14 +13,33 @@ import useAvailableBooks from "@/hook/useAvailableBooks";
 import { useState } from "react";
 import BookDesModal from "./bookDesModal";
 
-import { format } from 'date-fns';
 export default function AvailableBook() {
     const router = useRouter();
-    const { account, logout } = useContext(AuthContext);
+    const {account, logout} = useContext(AuthContext);
     const {fullName, avatar} = useReaderInfo(account?.id);
     const [currentPage, setCurrentPage] = useState(1);
-    const {availableBooks, totalPages, refreshAvailableBooks} = useAvailableBooks(currentPage);
     const [selectedBook, setSelectedBook] = useState(null);
+    const [search, setSearch] = useState("");
+    const [choosenCategory, setChoosenCategory] = useState("");
+    const {availableBooks, totalPages, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory);
+    const categoryList = [
+        {value: [""], label: "Tất cả"},
+        {value: ["history"], label: "Lịch sử"},
+        {value: ["children"], label: "Trẻ em"},
+        {value: ["business"], label: "Kinh doanh"},
+        {value: ["science"], label: "Khoa học"},
+        {value: ["technology"], label: "Kỹ thuật"},
+        {value: ["education"], label: "Giáo dục"},
+        {value: ["exam-prep"], label: "Luyện thi"},
+        {value: ["comics"], label: "Truyện tranh"},
+        {value: ["health"], label: "Sức khỏe"},
+        {value: ["travel"], label: "Du lịch"},
+        {value: ["cooking"], label: "Ẩm thực"},
+        {value: ["self-help"], label: "Tâm lý"},
+        {value: ["art"], label: "Nghệ thuật"},
+        {value: ["geography"], label: "Địa lý"},
+        {value: ["novel"], label: "Tiểu thuyết"},
+    ];
     const handleLogout = () => {
         logout();
         router.push("/");
@@ -29,6 +48,17 @@ export default function AvailableBook() {
     useEffect(() => {
         console.log("selectedBook:", selectedBook);
     }, [selectedBook]);
+
+    const filteredBooks = availableBooks
+    .filter((book) => {
+        const q = search.trim().toLowerCase();
+        if(!q) return true;
+        return (
+            book.title?.toLowerCase().includes(q) ||
+            book.author?.toLowerCase().includes(q)
+        )
+    })
+    
   return (
     <>
     <div className="container">
@@ -97,29 +127,22 @@ export default function AvailableBook() {
                     <input
                         className={styles.search}
                         placeholder="Tìm kiếm sách..."
+                        value={search}
+                        onChange={(e)=>setSearch(e.target.value)}
                     />
-                    <select id="searchFilter" className={styles.searchFilter}>
-                        <option value="all">Tất cả</option>
-                        <option value="title">Tên sách</option>
-                        <option value="author">Tác giả</option>
-                        <option value="publisher">Nhà xuất bản</option>
+                    <select
+                        className={styles.searchFilter}
+                        value={choosenCategory}
+                        onChange={(e) => setChoosenCategory(e.target.value)}
+                    >
+                        {categoryList.map((c) => (
+                            <option key={c.value} value={c.value}>{c.label}</option>
+                        ))}
                     </select>
-                    <Button component="span"
-                        sx={{
-                            background: '#083d5e',
-                            color: '#f6f8f9',
-                            fontSize: '13px',
-                            textAlign: "center",
-                            height: "70%",
-                            width:"10%",
-                            margin: "auto"
-                        }}>
-                        Tìm kiếm
-                    </Button>
                 </div>
                 <div className={styles.grid}>
-                    {availableBooks.length > 0 ? (
-                        availableBooks.map((availableBook) => (
+                    {filteredBooks.length > 0 ? (
+                        filteredBooks.map((availableBook) => (
                             <div 
                                 className={styles.card} 
                                 key={availableBook._id}
@@ -140,7 +163,16 @@ export default function AvailableBook() {
                                     <div>
                                         Tác giả: {availableBook.author}
                                     </div>
-                                    <div style={{color: '#8a0d0d', fontWeight: "bold"}}>
+                                    <div>
+                                        Thể loại: {   
+                                            categoryList
+                                            .filter(c => Array.isArray(c.value) && c.value.some(v => availableBook.category.includes(v)))
+                                            .map(c => c.label)
+                                            .join(', ')
+                                        }
+                                    </div> 
+
+                                    <div style={{color: '#8a0d0d', fontWeight: "bolder"}}>
                                         Còn: {availableBook.availableCopies} cuốn
                                     </div>
                                 </div>
