@@ -7,7 +7,7 @@ import authRoutes from "./src/routes/authRoutes.js";
 import readerRoutes from "./src/routes/readerRoutes.js";
 import librarianRoutes from "./src/routes/librarianRoutes.js";
 import bookRoutes from "./src/routes/bookRoutes.js";
-
+import forgotPasswordRoutes from "./src/routes/forgotPasswordRoutes.js";
 //load env
 dotenv.config();
 
@@ -22,7 +22,7 @@ app.use("/api/reader", readerRoutes);
 app.use("/api/librarian", librarianRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/books", bookRoutes);
-
+app.use("/api/forgotPassword", forgotPasswordRoutes);
 
 //connect MongoDB
 mongoose.connect(process.env.MONGO_URI)

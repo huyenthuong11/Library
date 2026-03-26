@@ -144,7 +144,12 @@ export default function RegisterPage() {
                                     <Typography as="h2" fontSize="15px" mb="30px">    
                                         Vui lòng điền thông tin để tham gia cộng đồng mọt sách!
                                     </Typography>
-
+                                    <Typography as="h2" fontSize="15px" mb="30px" mt="10px">    
+                                        Đã có tài khoản?
+                                        <Link href="/login">
+                                            Đăng nhập ngay
+                                        </Link>
+                                    </Typography>
                                     <Box component="form" noValidate sx={{ width: '100%', mt: 1 }}>
                                         {errors.server && (
                                             <Alert severity="error" sx={{ mb: 2 }}>
@@ -254,7 +259,7 @@ export default function RegisterPage() {
                                                                             label="Otp"
                                                                             type="text"
                                                                             id="otp"
-                                                                            InputProps={{
+                                                                            inputProps={{
                                                                                 style: { borderRadius: 8 },
                                                                                 maxLength: 6,
                                                                             }}
@@ -281,9 +286,9 @@ export default function RegisterPage() {
                                     </Box>
                                         
                                     <Typography as="h2" fontSize="15px" mb="30px" mt="10px">    
-                                        Đã có tài khoản?
-                                        <Link href="/login">
-                                            Đăng nhập ngay
+                                        Quên mật khẩu?
+                                        <Link href="/forgot-password">
+                                            Tìm lại tài khoản!
                                         </Link>
                                     </Typography>
                                 </Box>
