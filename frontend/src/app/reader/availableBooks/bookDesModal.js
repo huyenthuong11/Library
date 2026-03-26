@@ -3,6 +3,7 @@
 import styles from "./bookDesModal.module.css"
 import { Button } from "@mui/material";
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import { format } from 'date-fns';
 
 export default function BookDesModal({
     image, category, publisher, title, publishDate,
@@ -14,6 +15,25 @@ export default function BookDesModal({
         {value: "en", label: "Tiếng anh"},
         {value: "vi", label: "Tiếng việt"},
     ];
+
+    const categoryList = [
+        {value: ["history"], label: "Lịch sử"},
+        {value: ["children"], label: "Trẻ em"},
+        {value: ["business"], label: "Kinh doanh"},
+        {value: ["science"], label: "Khoa học"},
+        {value: ["technology"], label: "Kỹ thuật"},
+        {value: ["education"], label: "Giáo dục"},
+        {value: ["exam-prep"], label: "Luyện thi"},
+        {value: ["comics"], label: "Truyện tranh"},
+        {value: ["health"], label: "Sức khỏe"},
+        {value: ["travel"], label: "Du lịch"},
+        {value: ["cooking"], label: "Ẩm thực"},
+        {value: ["self-help"], label: "Tâm lý"},
+        {value: ["art"], label: "Nghệ thuật"},
+        {value: ["geography"], label: "Địa lý"},
+        {value: ["novel"], label: "Tiểu thuyết"},
+    ];
+    
     
     console.log("RENDER modal - page.js:30");
     return (
@@ -39,29 +59,35 @@ export default function BookDesModal({
                                 <div style={{fontWeight: "bold", fontSize: "20px"}}>
                                     {title}
                                 </div>
-                                <div style={{display: "flex"}}>
+                                <div style={{display: "flex", gap: "10px"}}>
                                     <div style={{fontWeight: "bold", fontSize: "15px"}}>
                                         Tác giả:
                                     </div>      
-                                    <div>{author}</div>                      
+                                    <div style={{fontWeight: "normal"}}>{author}</div>                      
                                 </div>
-                                <div style={{display: "flex"}}>
+                                <div style={{display: "flex", gap: "10px"}}>
                                     <div style={{fontWeight: "bold", fontSize: "15px"}}>
                                         Ngày xuất bản:
                                     </div>      
-                                    <div>{publishDate}</div>                      
+                                    <div style={{fontWeight: "normal"}}>
+                                        {
+                                            publishDate
+                                            ? format(new Date(publishDate), 'dd-MM-yyyy')
+                                            :""
+                                        }
+                                    </div>                      
                                 </div>
-                                <div style={{display: "flex"}}>
+                                <div style={{display: "flex", gap: "10px"}}>
                                     <div style={{fontWeight: "bold", fontSize: "15px"}}>
                                         Số trang:
                                     </div>      
-                                    <div>{pages}</div>                      
+                                    <div style={{fontWeight: "normal"}}>{pages}</div>                      
                                 </div>
-                                <div style={{display: "flex"}}>
+                                <div style={{display: "flex", gap: "10px"}}>
                                     <div style={{fontWeight: "bold", fontSize: "15px"}}>
                                         Ngôn ngữ:
                                     </div>      
-                                    <div>
+                                    <div style={{fontWeight: "normal"}}>
                                         {
                                             languageList.map((l) => {
                                                 if (l.value === language) return l.label;
@@ -69,34 +95,43 @@ export default function BookDesModal({
                                         }
                                     </div>                      
                                 </div>
-                                <div style={{display: "flex"}}>
+                                <div style={{display: "flex", gap: "10px"}}>
                                     <div style={{fontWeight: "bold", fontSize: "15px"}}>
                                         Nhà xuất bản:
                                     </div>      
-                                    <div>{publisher}</div>                      
+                                    <div style={{fontWeight: "normal"}}>{publisher}</div>                      
                                 </div>
-                                <div style={{display: "flex"}}>
-                                    <div style={{fontWeight: "bold", fontSize: "15px"}}>
+                                <div style={{display: "flex", gap: "10px"}}>
+                                    <div style={{fontWeight: "bold", fontSize: "15px", whiteSpace: "nowrap"}}>
                                         Mô tả tóm tắt:
                                     </div>      
-                                    <div>{description}</div>                      
+                                    <div style={{fontWeight: "normal"}}>{description}</div>                      
                                 </div>
-                                <div style={{display: "flex"}}>
+                                <div style={{display: "flex", gap: "10px"}}>
                                     <div style={{fontWeight: "bold", fontSize: "15px"}}>
                                         Thể loại:
                                     </div>      
-                                    <div>{category}</div>                     
+                                    <div style={{fontWeight: "normal"}}>
+                                        {   
+                                            categoryList
+                                            .filter(c => c.value.some(v => category.includes(v)))
+                                            .map(c => c.label)
+                                            .join(', ')
+                                        }
+                                    </div>                     
                                 </div>
                             </div>
                             <Button component="span"
                                 sx={{
                                     background: '#083d5e',
                                     color: '#f6f8f9',
-                                    fontSize: '13px',
+                                    fontSize: '10px',
                                     textAlign: "center",
                                     height: "20px",
                                     width:"30%",
-                                    margin: "auto"
+                                    margin: "auto",
+                                    marginTop: "10px",
+                                    marginBottom: "10px"
                                 }}
                             >
                                 Mượn sách

@@ -8,13 +8,17 @@ router.get("/availableBook", async(req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const skip = (page - 1) * 20;
-
+        const {category} = req.query;
+        let query = {};
+        if (category && category !== '') {
+            query.category = { $in: [category] }; 
+        }
 
         const books = await Document
-            .find()
+            .find(query)
             .skip(skip)
             .limit(20);
-        const totalBooks = await Document.countDocuments();
+        const totalBooks = await Document.countDocuments(query);
         res.json({
             data: books,
             totalPages: Math.ceil(totalBooks / 20),
@@ -24,5 +28,8 @@ router.get("/availableBook", async(req, res) => {
         res.status(500).json({ message: "Failed to get available book" });
     }
 })
+
+
+
 
 export default router;
