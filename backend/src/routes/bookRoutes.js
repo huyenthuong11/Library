@@ -8,10 +8,17 @@ router.get("/availableBook", async(req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const skip = (page - 1) * 20;
-        const {category} = req.query;
+        const {search, category} = req.query;
         let query = {};
         if (category && category !== '') {
             query.category = { $in: [category] }; 
+        }
+        if (search && search.trim()) {
+            const searchRegex = new RegExp(search.trim(), 'i');
+            query.$or = [
+                { title: { $regex: searchRegex } },
+                { author: { $regex: searchRegex } }
+            ];
         }
 
         const books = await Document

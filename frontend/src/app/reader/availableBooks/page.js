@@ -21,7 +21,7 @@ export default function AvailableBook() {
     const [selectedBook, setSelectedBook] = useState(null);
     const [search, setSearch] = useState("");
     const [choosenCategory, setChoosenCategory] = useState("");
-    const {availableBooks, totalPages, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory);
+    const {availableBooks, totalPages, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory, search);
     const categoryList = [
         {value: [""], label: "Tất cả"},
         {value: ["history"], label: "Lịch sử"},
@@ -48,16 +48,6 @@ export default function AvailableBook() {
     useEffect(() => {
         console.log("selectedBook:", selectedBook);
     }, [selectedBook]);
-
-    const filteredBooks = availableBooks
-    .filter((book) => {
-        const q = search.trim().toLowerCase();
-        if(!q) return true;
-        return (
-            book.title?.toLowerCase().includes(q) ||
-            book.author?.toLowerCase().includes(q)
-        )
-    })
     
   return (
     <>
@@ -141,8 +131,8 @@ export default function AvailableBook() {
                     </select>
                 </div>
                 <div className={styles.grid}>
-                    {filteredBooks.length > 0 ? (
-                        filteredBooks.map((availableBook) => (
+                    {availableBooks.length > 0 ? (
+                        availableBooks.map((availableBook) => (
                             <div 
                                 className={styles.card} 
                                 key={availableBook._id}
