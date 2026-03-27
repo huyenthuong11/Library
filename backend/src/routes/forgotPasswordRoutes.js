@@ -2,7 +2,7 @@ import express from "express";
 import Account from "../models/user/Account.js";
 import client from "../services/redis.service.js";
 import sgMail from '@sendgrid/mail';
-
+import jwt from "jsonwebtoken";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -24,6 +24,7 @@ router.post("/sendOtp", async(req, res) => {
         });
     }
     const otp = Math.floor(100000 + Math.random() * 900000);
+    console.log(otp);
     const msg = {
         to: email,
         from: 'ksbzw7eur@gmail.com', 
@@ -34,7 +35,7 @@ router.post("/sendOtp", async(req, res) => {
                 \nTrân trọng,
                 \nThư viện Cầu Giấy`,
     };
-
+    
     await sgMail.send(msg);
     await client.set(`otp:${email}`, otp.toString(), { EX: 300 });
     res.json({ message: "OTP đã gửi" });
@@ -57,17 +58,30 @@ router.post("/receiveOtp", async(req, res) => {
     if (savedOtp !== otp) {
         return res.status(400).json({ message: "OTP sai" });
     }
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+        expiresIn: "5m"
+    });
     await client.del(`otp:${email}`);
-    return res.json({ message: "Xác nhận OTP thành công" });
+    return res.json({ 
+        message: "Xác nhận OTP thành công",
+        token
+    });
 })
 
 
 //PUT /api/forgotPassword/changePassword
 router.put("/changePassword", async(req, res) => {
     try {
-        
-        const {newPassword, email} = req.body;
-        const user = await Account.findOne({ email });
+        const {newPassword, token} = req.body;
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({
+                message: "Token không hợp lệ hoặc hết hạn",
+            })
+        }
+        const user = await Account.findOne({ email: decoded.email });
         user.password = newPassword;
         await user.save();
         res.json({ message: "Đổi mật khẩu thành công" });
