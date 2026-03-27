@@ -202,15 +202,15 @@ export default function Info() {
                                     <HomeOutlined></HomeOutlined>
                                     Trang chủ
                                 </p>
-                                <p onClick={() => router.push("/availableBooks")}>
+                                <p onClick={() => router.push("/reader/availableBooks")}>
                                     <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                                     Kho sách thư viện
                                 </p>
-                                <p onClick={() => router.push("/borrowedBooks")}>
+                                <p onClick={() => router.push("/reader/borrowedBooks")}>
                                     <LibraryAddCheckOutlined></LibraryAddCheckOutlined>
                                     Giá sách của bạn
                                 </p>
-                                <p onClick={() => router.push("/history")}>
+                                <p onClick={() => router.push("/reader/history")}>
                                     <HistoryOutlined></HistoryOutlined>
                                     Lịch sử mượn sách
                                 </p>
@@ -218,7 +218,7 @@ export default function Info() {
                                     <PermIdentityOutlined></PermIdentityOutlined>
                                     Hồ sơ của bạn
                                 </a>
-                                <p onClick={() => router.push("/reader/setinfo")}>
+                                <p onClick={() => router.push("/reader/ask")}>
                                     <HelpOutlineOutlined></HelpOutlineOutlined>
                                     Yêu cầu
                                 </p>

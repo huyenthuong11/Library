@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+"use client";
+import { AuthContext } from "@/context/AuthContext";
+import { useState, useEffect, useContext } from "react";
 import api from "../lib/axios";
 
 export default function useReaderInfo(accountId) {
-    const [readerInfo, setReaderInfo] = useState({});
+    const [readerInfo, setReaderInfo] = useState([]);
     const { account } = useContext(AuthContext);
     const getReaderInfo = async () => {
         try {
@@ -13,9 +15,9 @@ export default function useReaderInfo(accountId) {
             });
             const data = response.data;
             setReaderInfo(data);
-            console.log("DATA:  page.js:52 - useReaderInfo.js:16", data);
+            console.log("DATA:  page.js:52 - useReaderInfo.js:18", data);
         } catch (err) {
-            console.error("Failed to fetch reader info:  page.js:54 - useReaderInfo.js:18", err);
+            console.error("Failed to fetch reader info:  page.js:54 - useReaderInfo.js:20", err);
         }
     }
 
