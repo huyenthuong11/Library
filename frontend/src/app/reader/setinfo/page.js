@@ -331,7 +331,8 @@ export default function Info() {
                                                             type="phoneNumber"
                                                             id="phoneNumber"
                                                             autoComplete="phoneNumber"
-                                                            InputProps={{
+                                                            inputProps={{
+                                                                maxLength: 10,
                                                                 style: { borderRadius: 8 },
                                                             }}
                                                             value={readerInfo.phoneNumber}

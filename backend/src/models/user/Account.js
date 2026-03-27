@@ -16,7 +16,7 @@ const accountSchema = new mongoose.Schema(
         status: String,
         role: {
             type: String,   
-            enum: ["reader", "librarian"]   
+            enum: ["reader", "librarian", "admin"]   
         },
     },
     {
