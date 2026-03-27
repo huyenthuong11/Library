@@ -26,6 +26,7 @@ router.post("/sendOtp", async(req, res) => {
         });
     }
     const otp = Math.floor(100000 + Math.random() * 900000);
+    console.log(otp);
     const msg = {
         to: email,
         from: 'ksbzw7eur@gmail.com', 
@@ -41,6 +42,7 @@ router.post("/sendOtp", async(req, res) => {
     await client.set(`otp:${email}`, otp.toString(), { EX: 300 });
     res.json({ message: "OTP đã gửi" });
 });
+
 
 //POST /api/auth/register
 router.post("/register", async(req, res) => {
@@ -168,6 +170,7 @@ router.put("/:id/change-password", async(req, res) => {
         res.status(500).json({message: "Lỗi server"});
     }
 })
+
 
 
 export default router; 

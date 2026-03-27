@@ -140,7 +140,12 @@ export default function LoginPage() {
                                     <Typography as="h1" fontSize="28px" fontWeight="700" mb="5px">
                                         ĐĂNG NHẬP VÀO TÀI KHOẢN CỦA BẠN
                                     </Typography>
-
+                                    <Typography as="h2" fontSize="15px" mb="30px" mt="10px">    
+                                        Chưa có tài khoản?
+                                        <Link href="/register">
+                                            Đăng ký ngay
+                                        </Link>
+                                    </Typography>
                                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ width: '100%', mt: 1 }}>
                                         {errors.server && (
                                             <Alert severity="error" sx={{ mb: 2 }}>
@@ -211,9 +216,9 @@ export default function LoginPage() {
                                     </Box>
                                         
                                     <Typography as="h2" fontSize="15px" mb="30px" mt="10px">    
-                                        Chưa có tài khoản?
-                                        <Link href="/register">
-                                            Đăng ký ngay
+                                        Quên mật khẩu?
+                                        <Link href="/forgot-password">
+                                            Tìm lại tài khoản!
                                         </Link>
                                     </Typography>
                                 </Box>
