@@ -11,6 +11,9 @@
 .inner {
   width: 95%;
   margin: auto;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
 }
 .detailsHeader {
   margin-bottom: 32px;

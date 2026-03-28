@@ -20,8 +20,9 @@ router.get("/getNews", async (req, res) => {
 //GET api/news/getNewsDetails/:id
 router.get("/getNewsDetails/:id", async(req, res) => {
     try {
-        const id = req.query.id;
-        const news = await News.findOne(id);
+        const {id} = req.params;
+        const news = await News.findById(id);
+        if (!news) return res.status(404).json({ message: "News not found" });
         res.json({data: news});
     } catch (err) {
         res.status(500).json({ message: "Failed to get news details", err });

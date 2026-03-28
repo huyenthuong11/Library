@@ -1,7 +1,7 @@
 "use client";
 import api from "@/lib/axios";
 import styles from "./page.module.css";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
 import { useContext, useEffect, useState } from "react";
 import { format } from 'date-fns';
@@ -11,16 +11,17 @@ import { HomeOutlined, CollectionsBookmarkOutlined,
     LibraryAddCheckOutlined, HelpOutlineOutlined,} 
     from '@mui/icons-material';
 import useReaderInfo from "@/hook/useReaderInfo";
-export default function NewsDetails ({params}) {
+export default function NewsDetails () {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
     const [news, setNews] = useState(null);
     const {fullName, avatar} = useReaderInfo(account?.id);
-    
+    const params = useParams();
+    const id = params.id;
+    console.log(id);
+
     const getNews = async () => {
         try {
-            const p = await params;
-            const id = p.id;
             const response = await api.get(`news/getNewsDetails/${id}`);
             const data = response.data.data;
             setNews(data);
@@ -35,7 +36,7 @@ export default function NewsDetails ({params}) {
     };
      useEffect(() => {
         getNews();
-    }, [params])
+    }, [id])
 
     return (
         <>
@@ -146,7 +147,7 @@ export default function NewsDetails ({params}) {
                                 <img
                                     src={news.image} 
                                     alt={news.title} 
-                                    style={{ width: '100%', height: 'auto' }}
+                                    style={{ width: '100%', height: '400px' }}
                                     className={styles.featuredImage}
                                 />
                                 <div className={styles.bodyText}>
@@ -156,6 +157,21 @@ export default function NewsDetails ({params}) {
                                         ))
                                     }
                                 </div>
+                                <Button
+                                    variant="contained"
+                                    sx={{
+                                        background: '#083d5e',
+                                        color: '#f6f8f9',
+                                        height: "30px",
+                                        width:"100px",
+                                        margin: "auto",
+                                        marginTop: "20px",
+                                        fontSize: "14px"
+                                    }}
+                                    onClick={() => {router.push("/")}}
+                                >
+                                    Quay lại
+                                </Button>
                             </div>
                         </div>
                     )}

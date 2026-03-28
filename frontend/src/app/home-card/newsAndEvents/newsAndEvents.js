@@ -32,6 +32,7 @@ export default function NewsAndEvents() {
                     <Link 
                         href={`/newsDetails/${n._id}`}
                         key={n._id}
+                        style={{ textDecoration: 'none', color: 'unset' }}
                     >
                         <div className={styles.card}>
                             <div className={styles.newsImage}>
