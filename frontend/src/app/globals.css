@@ -18,6 +18,8 @@ body {
   align-items: center;
   width: 100%;
   flex-direction: column;
+  overflow-x: hidden;
+  
 }
 
 .main {
