@@ -36,7 +36,40 @@ router.get("/availableBook", async(req, res) => {
     }
 })
 
+// GET /api/books/5newestBooks
+router.get("/10newestBooks", async(req, res) => {
+    try {
+        const books = await Document
+        .find()
+        .sort({createAt: -1})
+        .limit(10);
 
+        res.json({
+            data: books,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to get 5 newest book", err });
+    }
+})
+
+// GET /api/books/mostBorrowedBooks?limit=limit
+router.get("/mostBorrowedBooks", async(req, res) => {
+    try {
+        const limit = parseInt(req.query.limit);
+        const books = await Document
+        .find()
+        .sort({borrowedCount: -1})
+        .limit(limit);
+
+        res.json({
+            data: books,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to get 5 newest book", err });
+    }
+})
 
 
 export default router;

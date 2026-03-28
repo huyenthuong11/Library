@@ -3,11 +3,11 @@ import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../context/AuthContext";
 import { useContext, useEffect } from "react";
-import { Avatar } from "@mui/material";
-
+import NewestBooks from "./home-card/newestBook/newestBook";
+import Top3MostBorrowed from "./home-card/top3mostBorrowed/top3mostBorrowed";
 export default function Page() {
   const router = useRouter();
-  const { account, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
   const handleLogout = () => {
     logout();
     router.push("/");
@@ -42,16 +42,13 @@ export default function Page() {
             <div className={styles.cardHeader}>
               SÁCH MỚI CẬP NHẬT
             </div>
+            <NewestBooks/>
           </div>
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               TOP 3 SÁCH ĐƯỢC MƯỢN NHIỀU NHẤT
             </div>
-            <div className={styles.cardMain2}>
-              <div style={{border: '1px solid #8684849d', boxShadow: '0 0 1px 1px #868484bb', width: "30%", height: "100%", borderRadius: "8px"}}></div>
-              <div style={{border: '1px solid #f0a4a4b0', boxShadow: '0 0 1px 1px #f0a4a4b0', width: "30%", height: "100%", borderRadius: "8px"}}></div>
-              <div style={{border: '1px solid #868484b4', boxShadow: '0 0 1px 1px #868484bb', width: "30%", height: "100%", borderRadius: "8px"}}></div>
-            </div>
+            <Top3MostBorrowed/>
           </div>
           <div className={styles.card}>
             <div className={styles.cardHeader}>

@@ -123,7 +123,10 @@ export default function AvailableBook() {
                     <select
                         className={styles.searchFilter}
                         value={choosenCategory}
-                        onChange={(e) => setChoosenCategory(e.target.value)}
+                        onChange={(e) => {
+                            setChoosenCategory(e.target.value);
+                            setCurrentPage(1);
+                        }}
                     >
                         {categoryList.map((c) => (
                             <option key={c.value} value={c.value}>{c.label}</option>

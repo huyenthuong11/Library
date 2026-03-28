@@ -59,7 +59,12 @@ const documentSchema = new mongoose.Schema(
             type: Number,
             required: true,
             min: 0,
-        },  
+        },
+        borrowedCount: {
+            type: Number,
+            required: true,
+            min: 0,
+        },    
         numberOfCopy: {
             type: Number,
             required: true,
