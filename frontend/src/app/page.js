@@ -5,6 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useContext, useEffect } from "react";
 import NewestBooks from "./home-card/newestBook/newestBook";
 import Top3MostBorrowed from "./home-card/top3mostBorrowed/top3mostBorrowed";
+import NewsAndEvents from "./home-card/newsAndEvents/newsAndEvents";
 export default function Page() {
   const router = useRouter();
   const { logout } = useContext(AuthContext);
@@ -54,6 +55,7 @@ export default function Page() {
             <div className={styles.cardHeader}>
               TIN TỨC & SỰ KIỆN
             </div>
+            <NewsAndEvents/>
           </div>
         </div>
 
