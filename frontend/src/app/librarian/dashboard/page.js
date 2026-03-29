@@ -4,7 +4,10 @@ import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
 import { useContext } from "react";
 import { Avatar } from "@mui/material";
-
+import { HomeOutlined, CollectionsBookmarkOutlined, 
+    HistoryOutlined, PermIdentityOutlined, 
+    LibraryAddCheckOutlined, HelpOutlineOutlined,} 
+    from '@mui/icons-material';
 export default function Dashboard() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
@@ -37,8 +40,11 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <nav>
-                        <a>Tổng quan</a>
-                        <p onClick={() => router.push("/availableBooks")}>Kho sách thư viện</p>
+                        <a><HomeOutlined></HomeOutlined>Tổng quan</a>
+                        <p onClick={() => router.push("/librarian/availableBooks")}>
+                            <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
+                            Kho sách thư viện
+                        </p>
                     </nav>
                 </aside>
 

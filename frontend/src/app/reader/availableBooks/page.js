@@ -118,7 +118,10 @@ export default function AvailableBook() {
                         className={styles.search}
                         placeholder="Tìm kiếm sách..."
                         value={search}
-                        onChange={(e)=>setSearch(e.target.value)}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setCurrentPage(1);
+                        }}
                     />
                     <select
                         className={styles.searchFilter}

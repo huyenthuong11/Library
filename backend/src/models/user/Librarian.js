@@ -11,6 +11,7 @@ const librarianSchema = new mongoose.Schema(
         fullName: {
             type: String,
         },
+        avatar: String,
         hireDate: {
             type: Date,
         },

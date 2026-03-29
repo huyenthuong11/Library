@@ -17,7 +17,8 @@ router.get("/availableBook", async(req, res) => {
             const searchRegex = new RegExp(search.trim(), 'i');
             query.$or = [
                 { title: { $regex: searchRegex } },
-                { author: { $regex: searchRegex } }
+                { author: { $regex: searchRegex } },
+                { isbn: { $regex: searchRegex }}
             ];
         }
 

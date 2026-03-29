@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const documentSchema = new mongoose.Schema(
     {
+        isbn: {
+            type: String,
+            required: true,
+            trim: true,
+        },
         image: {
             type: String,
             default: "",
@@ -13,63 +18,62 @@ const documentSchema = new mongoose.Schema(
         },
         style: {
             type: String,   
-            enum: ["newspaper", "book", "magazine"],
+            enum: ["book"],
             required: true,
         },
         publisher: {
             type: String,
-            required: true,
             trim: true,
         },
         title: {
             type: String,
-            required: true,
             trim: true,
         },
         coverPrice: {
             type: Number,
-            required: true,
             min: 0,
         },
         publishDate: {
             type: Date,
-            required: true,
         },
         author: {
             type: String,
-            required: true,
             trim: true,
         },
         description: {
             type: String,
-            required: true,
             trim: true,
         },
         language: {
             type: String,
-            required: true,
             trim: true,
         },
         pages: {
             type: Number,
-            required: true,
             min: 1,
         },
         availableCopies: {
             type: Number,
-            required: true,
             min: 0,
         },
         borrowedCount: {
             type: Number,
-            required: true,
             min: 0,
         },    
         numberOfCopy: {
             type: Number,
-            required: true,
             min: 0,
         },  
+        locations: [
+            {
+                position: { type: String }, 
+                status: { 
+                    type: String, 
+                    enum: ["available", "reserved", "borrowed", "overdue"], 
+                    default: "available" 
+                }
+            }
+        ]
     },
     {
         timestamps: true,
