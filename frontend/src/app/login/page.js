@@ -109,7 +109,9 @@ export default function LoginPage() {
                     router.push("/reader/dashboard");
                 } else if (response.data.account.role === "librarian") {
                     router.push("/librarian/dashboard");
-                }   
+                }  else if (response.data.account.role === "admin") {
+                    router.push("/admin/dashboard");
+                }  
                 
             }
         } catch (err) {

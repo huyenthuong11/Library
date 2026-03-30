@@ -21,7 +21,6 @@ export default function Dashboard() {
   return (
     <>
     <div className="container">
-        <div className={styles.m}>
             <div className="main">
                     <div className="header">
                         <div className="webicon"></div>
@@ -98,7 +97,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-        </div>
+        
     </div>
     </>
     )

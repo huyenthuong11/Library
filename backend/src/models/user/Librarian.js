@@ -12,9 +12,6 @@ const librarianSchema = new mongoose.Schema(
             type: String,
         },
         avatar: String,
-        hireDate: {
-            type: Date,
-        },
     }
 );
 

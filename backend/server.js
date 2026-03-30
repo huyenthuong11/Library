@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv"; 
 import mongoose from "mongoose";
 import "./src/config/env.js";
+import startCronJobs from "./src/services/cronJobService.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import readerRoutes from "./src/routes/readerRoutes.js";
 import librarianRoutes from "./src/routes/librarianRoutes.js";
@@ -25,6 +26,9 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/books", bookRoutes);
 app.use("/api/forgotPassword", forgotPasswordRoutes);
 app.use("/api/news", newsRoutes);
+
+//cron
+startCronJobs();
 
 //connect MongoDB
 mongoose.connect(process.env.MONGO_URI)

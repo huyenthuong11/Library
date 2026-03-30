@@ -8,11 +8,9 @@ import { HomeOutlined, CollectionsBookmarkOutlined,
     HistoryOutlined, PermIdentityOutlined, 
     LibraryAddCheckOutlined, HelpOutlineOutlined,} 
     from '@mui/icons-material';
-import useLibrarianInfo from "@/hook/useLibrarianInfo";
 export default function Dashboard() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
-    const {fullName, avatar} = useLibrarianInfo(account?.id);
     const handleLogout = () => {
         logout();
         router.push("/");
@@ -20,28 +18,14 @@ export default function Dashboard() {
   return (
     <>
     <div className="container">
+        <div className={styles.m}>
             <div className="main">
                     <div className="header">
                         <div className="webicon">
                         </div>
                         <div className="user">
-                            {avatar ? (
-                                <Avatar
-                                    alt="User Avatar"
-                                    src={avatar}
-                                    sx={{
-                                        objectFit: 'cover',
-                                        border: '1px solid rgba(150, 149, 149, 0.65)'
-                                    }}
-                                />
-                            ) : (
-                                <Avatar></Avatar>
-                            )}
-                            {fullName ? (
-                                <span>{fullName}</span>
-                            ):(
-                                <span>{account?.email || "Email"}</span>
-                            )}
+                            <Avatar></Avatar>
+                            <span>{account?.email}</span> 
                             <div className="sign">
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
@@ -82,7 +66,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-        
+        </div>
     </div>
     </>
     )

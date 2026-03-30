@@ -3,11 +3,14 @@ import Reader from "../models/user/Reader.js";
 import upload from "../middleware/imageMiddleware.js";
 import fs from "fs";
 import path from "path";
+import authMiddleware from "../middleware/authMiddleware.js";
+import checkRole from "../middleware/authRoleMiddleware.js";
+
 
 const router = express.Router();
 
 // GET /api/reader/readerProfile
-router.get("/readerProfile", async(req, res) => {
+router.get("/readerProfile", authMiddleware, checkRole(["reader"]), async(req, res) => {
     try {
         const {accountId} = req.query;
         const readerProfile = await Reader
@@ -19,7 +22,7 @@ router.get("/readerProfile", async(req, res) => {
 });
 
 //PUT api/reader/:id
-router.put("/:id", async(req, res) => {
+router.put("/:id", authMiddleware, checkRole(["reader"]), async(req, res) => {
     try {
         const { fullName, dateOfBirth, phoneNumber } = req.body;
         const updateFields = {};
@@ -43,7 +46,7 @@ router.put("/:id", async(req, res) => {
 });
 
 //PUT api/reader/:id/avatar
-router.put("/:id/avatar", upload.single("avatar"), async(req, res) => {
+router.put("/:id/avatar", authMiddleware, checkRole(["reader"]), upload.single("avatar"), async(req, res) => {
     try {
         const updateFields = {};
         if (req.file) {updateFields.avatar = req.file.path;}

@@ -69,9 +69,17 @@ const documentSchema = new mongoose.Schema(
                 position: { type: String }, 
                 status: { 
                     type: String, 
-                    enum: ["available", "reserved", "borrowed", "overdue"], 
+                    enum: ["available", "reserved", "borrowed"], 
                     default: "available" 
-                }
+                },
+                readerId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Reader",
+                    default: null
+                },
+                readerName: {type: String, default: null},
+                createdAt: { type: Date, default: null },
+                dueDate: { type: Date, default: null }
             }
         ]
     },

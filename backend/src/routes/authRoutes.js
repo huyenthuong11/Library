@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import client from "../services/redis.service.js";
 import sgMail from '@sendgrid/mail';
+import authMiddleware from "../middleware/authMiddleware.js";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -131,7 +132,10 @@ router.post("/login", async(req, res) => {
         }
 
         const token = jwt.sign(
-            { accountId: account._id },
+            { 
+                accountId: account._id,
+                role: account.role
+            },
             process.env.JWT_SECRET,
             { expiresIn: "7d"}
         );
@@ -154,7 +158,7 @@ router.post("/login", async(req, res) => {
 })
 
 //PUT /api/auth/:id/change-password
-router.put("/:id/change-password", async(req, res) => {
+router.put("/:id/change-password", authMiddleware, async(req, res) => {
     try {
         const {oldPassword, newPassword} = req.body;
         const user = await Account.findById(req.params.id);
