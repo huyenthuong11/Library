@@ -6,13 +6,14 @@ const startCronJobs = () => {
         try {
             const result = await Document.updateMany(
                 {
-                    "location.status": "reserved",
+                    "locations.status": "reserved",
                     "locations.dueDate": {$lt: now}
                 },
                 {
                     $set: {
                         "locations.$[elem].status": "available",
-                        "locations.$[elem].userId": null,
+                        "locations.$[elem].readerId": null,
+                        "locations.$[elem].readerName": null,
                         "locations.$[elem].createdAt": null,
                         "locations.$[elem].dueDate": null
                     }
@@ -25,12 +26,12 @@ const startCronJobs = () => {
             console.error('Lỗi quét reserved:', err);
         }
     });
-    cron.schedule('0 0 * * *', async () => {
+    cron.schedule('0 * * * *', async () => {
         const now = new Date();
         try {
             const result = await Document.updateMany(
                 {
-                    "location.status": "borrowed",
+                    "locations.status": "borrowed",
                     "locations.dueDate": {$lt: now}
                 },
                 {
@@ -39,12 +40,15 @@ const startCronJobs = () => {
                     }
                 },
                 {
-                    arrayFilters: [{ "elem.status": "borrowed", "elem.dueDate": { $lt: today } }]
+                    arrayFilters: [{ "elem.status": "borrowed", "elem.dueDate": { $lt: now } }]
                 }
             );
         } catch (err) {
             console.error('Lỗi quét overdue:', err);
         }
+    }, {
+        scheduled: true,
+        timezone: "Asia/Ho_Chi_Minh" 
     });
 }
 

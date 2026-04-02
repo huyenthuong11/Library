@@ -21,9 +21,9 @@ const documentSchema = new mongoose.Schema(
             enum: ["book"],
             required: true,
         },
-        publisher: {
-            type: String,
-            trim: true,
+        publisherId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Publisher'
         },
         title: {
             type: String,

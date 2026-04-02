@@ -38,59 +38,60 @@ export default function NewsDetails () {
         getNews();
     }, [id])
 
+    const getImageUrl = (path) => {
+        if (path.startsWith("http")) return path;
+        return `http://localhost:5000/${path}`;
+    };
+
     return (
         <>
             <div className="container">
                 <div className="main">
-                    
-                            {account ? (
-                                <>
-                                    <div className="header">
-                                        <div className="user">
-                                            {avatar ? (
-                                                <Avatar
-                                                    alt="User Avatar"
-                                                    src={`http://localhost:5000/${avatar}`}
-                                                    sx={{
-                                                        objectFit: 'cover',
-                                                        border: '1px solid rgba(150, 149, 149, 0.65)'
-                                                    }}
-                                                />
-                                            ) : (
-                                                <Avatar></Avatar>
-                                            )}
-                                    
-                                        
-                                            {fullName ? (
-                                                <span>{fullName}</span>
-                                            ):(
-                                                <span>{account?.email || "Email"}</span>
-                                            )}
-                                        
-                                            <div className="sign">
-                                                <a onClick={handleLogout}>Đăng xuất</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <div style={{
-                                    width: "100%",
-                                    display: "flex",
-                                    justifyContent: "space-between",  
-                                    alignItems: "center", 
-                                    gridColumn: "1 / -1"   
-                                }}>
-                                    <div className="webicon">
-                                        <div className="logo"></div>
-                                        <div className="websiteName">LMS</div>
-                                    </div>
+                    {account ? (
+                        <>
+                            <div className="header">
+                                <div className="user">
+                                    {avatar ? (
+                                        <Avatar
+                                            alt="User Avatar"
+                                            src={`http://localhost:5000/${avatar}`}
+                                            sx={{
+                                                objectFit: 'cover',
+                                                border: '1px solid rgba(150, 149, 149, 0.65)'
+                                            }}
+                                        />
+                                    ) : (
+                                        <Avatar></Avatar>
+                                    )}
+                                    {fullName ? (
+                                        <span>{fullName}</span>
+                                    ):(
+                                        <span>{account?.email || "Email"}</span>
+                                    )}        
                                     <div className="sign">
-                                        <a onClick={() => router.push("/login")}>Đăng Nhập</a>  
-                                        <a onClick={() => router.push("/register")}>Đăng Ký</a>
+                                        <a onClick={handleLogout}>Đăng xuất</a>
                                     </div>
                                 </div>
-                            )}
+                            </div>
+                        </>
+                    ) : (
+                        <div style={{
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "space-between",  
+                            alignItems: "center", 
+                            gridColumn: "1 / -1"   
+                        }}>
+                            <div className="webicon">
+                                <div className="logo"></div>
+                                <div className="websiteName">LMS</div>
+                            </div>
+                            <div className="sign">
+                                <a onClick={() => router.push("/login")}>Đăng Nhập</a>  
+                                <a onClick={() => router.push("/register")}>Đăng Ký</a>
+                            </div>
+                        </div>
+                    )}
                         
                     { account && ( 
                         <aside className="sidebar">
@@ -145,7 +146,7 @@ export default function NewsDetails () {
                                     </div>
                                 </header>
                                 <img
-                                    src={news.image} 
+                                    src={getImageUrl(news.image)} 
                                     alt={news.title} 
                                     style={{ width: '100%', height: '400px' }}
                                     className={styles.featuredImage}

@@ -18,6 +18,10 @@ export default function NewsAndEvents() {
         }
     }
 
+    const getImageUrl = (path) => {
+        if (path.startsWith("http")) return path;
+        return `http://localhost:5000/${path}`;
+    };
     
     console.log(news.map((newestBook) => (newestBook.image)));
 
@@ -37,7 +41,7 @@ export default function NewsAndEvents() {
                         <div className={styles.card}>
                             <div className={styles.newsImage}>
                                 <img
-                                    src={n.image}
+                                    src={getImageUrl(n.image)}
                                 />
                             </div>
                             <div className={styles.newsContent}>

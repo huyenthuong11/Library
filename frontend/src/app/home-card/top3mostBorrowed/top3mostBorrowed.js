@@ -20,24 +20,30 @@ export default function Top3MostBorrowed() {
         getTop3MostBorrowedtBooks();
     }, []);
 
+    const getImageUrl = (path) => {
+        if(!path) return "http://localhost:5000/default-book-cover.jpg";
+        if (path.startsWith("http") || path.startsWith("https")) return path;
+        return `http://localhost:5000/${path}`;
+    };
+
     return (
         <>
             <div className={styles.cardMain}>
                 <div className={styles.bookCard1}>
                     <img
-                        src={top3MostBorrowedBooks[1]?.image}
+                        src={getImageUrl(top3MostBorrowedBooks[1]?.image)}
                     />
                     <div>{top3MostBorrowedBooks[1]?.title}</div>
                 </div>
                 <div className={styles.bookCard2}>
                     <img
-                        src={top3MostBorrowedBooks[0]?.image}
+                        src={getImageUrl(top3MostBorrowedBooks[0]?.image)}
                     />
                     <div>{top3MostBorrowedBooks[0]?.title}</div>
                 </div>
                 <div className={styles.bookCard1}>
                     <img
-                        src={top3MostBorrowedBooks[2]?.image}
+                        src={getImageUrl(top3MostBorrowedBooks[2]?.image)}
                     />
                     <div>{top3MostBorrowedBooks[2]?.title}</div>
                 </div>

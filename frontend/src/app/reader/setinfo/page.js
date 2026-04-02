@@ -150,7 +150,6 @@ export default function Info() {
   return (
         <>
             <div className="container">
-                <div className={styles.m}>
                     <div className="main">
                             <div className="header">
                                 <div className="webicon">
@@ -526,7 +525,7 @@ export default function Info() {
                         </div>
                     </div>
                 </div>
-            </div>  
+              
         </>
     )
 }

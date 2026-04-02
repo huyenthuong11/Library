@@ -1,9 +1,13 @@
 import express from "express";
 import Document from "../models/Document.js";
+import Publisher from "../models/Publisher.js";
+import Reader from "../models/user/Reader.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import checkRole from "../middleware/authRoleMiddleware.js";
+import upload from "../middleware/imageMiddleware.js";
 const router = express.Router();
-
+import path from "path";
+import fs from "fs";
 // GET /api/books/availableBook
 router.get("/availableBook", async(req, res) => {
     try {
@@ -38,6 +42,8 @@ router.get("/availableBook", async(req, res) => {
         const total = await Document.countDocuments();
         const books = await Document
             .find(query)
+            .populate('publisherId')
+            .populate("locations.readerId")
             .skip(skip)
             .limit(20);
         const totalBooks = await Document.countDocuments(query);
@@ -123,5 +129,108 @@ router.delete("/deleteCopy/:id", authMiddleware, checkRole(["admin", "librarian"
         res.status(500).json({ message: "Xóa sách thất bại", err });
     }
 })
+
+//PATCH /api/books/updateBook/:id
+router.patch("/updateBook/:id", authMiddleware, checkRole(["admin", "librarian"]), upload.single("image"), async(req, res) => {
+    try {
+        const { category, style, publisherId, 
+            title, coverPrice, publishDate, author, 
+            description, language, pages} = req.body;
+        const book = await Document.findById(req.params.id);
+        if (!book) {
+            return res.status(404).json({ message: "Không tìm thấy sách" });
+        }
+        const updateFields = {};
+        if (category) {
+            updateFields.category = Array.isArray(category) ? category : [category];
+        }
+        if (style) updateFields.style = style;
+        if (publisherId) updateFields.publisherId = publisherId;
+        if (title) updateFields.title = title;
+        if (coverPrice) updateFields.coverPrice = coverPrice;
+        if (publishDate) updateFields.publishDate = publishDate;
+        if (author) updateFields.author = author;
+        if (description) updateFields.description = description;
+        if (language) updateFields.language = language;
+        if (pages) updateFields.pages = pages;
+        if (req.file) {
+            updateFields.image = req.file.path;
+            if (book.image) {
+                const oldPath = path.join(process.cwd(), book.image);
+                if (fs.existsSync(oldPath)) {
+                    fs.unlinkSync(oldPath);
+                }
+            }
+        }
+        const updateBook = await Document.findByIdAndUpdate(
+            req.params.id,
+            updateFields,
+            {new: true, runValidators: true}
+        );
+        if (!updateBook) {
+            return res.status(404).json({ message: "Không tìm thấy sách" });
+        }
+         res.json({
+            message: "Chỉnh sửa thành công",
+            data: updateBook
+        });       
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Chỉnh sửa thất bại", err });
+    }
+})
+
+
+
+//PATCH /api/books/updateCopy/:id
+router.patch("/updateCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+    try {
+        const { position, status, readerId } = req.body;
+        const updateFields = {
+            $set: {},
+            $inc: {}
+        };
+        updateFields.$set["locations.$.createdAt"] = new Date();
+        if (position) updateFields.$set["locations.$.position"] = position;
+        if (status) updateFields.$set["locations.$.status"] = status;
+        if (readerId) {
+            const reader = await Reader.findById(readerId);
+            if (reader) {
+                updateFields.$set["locations.$.readerId"] = readerId;
+                updateFields.$set["locations.$.readerName"] = reader.fullName;
+            }
+        }
+        if (status === "borrowed") {
+            updateFields.$inc = { borrowedCount: 1, availableCopies: -1 };
+            updateFields.$set["locations.$.dueDate"] = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+        } else if (status === "reserved") {
+            updateFields.$set["locations.$.dueDate"] = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+        } else if (status === "available") {
+            updateFields.$inc = { availableCopies: 1 };
+            updateFields.$set["locations.$.readerId"] = null;
+            updateFields.$set["locations.$.readerName"] = null;
+            updateFields.$set["locations.$.dueDate"] = null;
+            updateFields.$set["locations.$.createdAt"] = null;
+        }
+
+        const updateCopy = await Document.findOneAndUpdate(
+            {"locations._id": req.params.id},
+            updateFields,
+            { new: true, runValidators: true }
+        ).populate("locations.readerId");
+
+        if (!updateCopy) {
+            return res.status(404).json({ message: "Không tìm thấy bản copy" });
+        }
+        res.json({
+            message: "Cập nhật bản copy thành công",
+            data: updateCopy
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Xóa sách thất bại", err });
+    }
+})
+
 
 export default router;

@@ -2,12 +2,13 @@
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
-import { useContext, useEffect } from "react";
+import { use, useContext, useEffect } from "react";
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
     LibraryAddCheckOutlined, HelpOutlineOutlined,
-    AddBoxOutlined, EditSquare, ListAltRounded} 
+    AddBoxOutlined, EditSquare, ListAltRounded,
+    SaveOutlined} 
     from '@mui/icons-material';
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import useAvailableBooks from "@/hook/useAvailableBooks";
@@ -16,17 +17,49 @@ import { format } from 'date-fns';
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ListRounded } from "@mui/icons-material";
 import api from "@/lib/axios";
+import EditBook from "./EditBook";
+
 export default function AvailableBook() {
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
     const {fullName, avatar} = useLibrarianInfo(account?.id);
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedBook, setSelectedBook] = useState(null);
     const [search, setSearch] = useState("");
     const [choosenCategory, setChoosenCategory] = useState("");
     const {availableBooks, totalPages, inventorySummary, total, loading, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory, search);
     const [activeFilter, setActiveFilter] = useState(null);
     const [openDetailsBar, setOpenDetailsBar] = useState(null);
+    const [openEditBar, setOpenEditBar] = useState(null);
+    const [selectedBook, setSelectedBook] = useState(null);
+    const [openEditCopyBar, setOpenCopyEditBar] = useState(null);
+    const [tempReaderName, setTempReaderName] = useState("");
+    const [editData, setEditData] = useState({
+        position: "",
+        status: "",
+        readerId: "",
+    });
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setEditData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    useEffect(() => {
+        if (editData.readerId) {
+            const fetchReaderName = async () => {
+                try {
+                    const response = await api.get(`/admin/readerProfile/${editData.readerId}`);
+                    setTempReaderName(response.data.fullName);
+                } catch (err) {
+                    console.error("Failed to fetch reader name - page.js:123", err);
+                    setTempReaderName("Không tìm thấy người dùng");
+                }
+            };
+            fetchReaderName();
+        }
+    }, [editData.readerId]);
 
     const categoryList = [
         {value: [""], label: "Tất cả"},
@@ -104,6 +137,28 @@ export default function AvailableBook() {
         );
     });
 
+    const getImageUrl = (path) => {
+        if (path.startsWith("http")) return path;
+        return `http://localhost:5000/${path}`;
+    };
+
+    
+
+    const handleSubmit = async () => {
+        try {           
+            await api.patch(`/books/updateCopy/${openEditCopyBar}`, {
+                position: editData.position,
+                status: editData.status,
+                readerId: editData.readerId,
+            });
+            alert("Cập nhật sách thành công!");
+            refreshAvailableBooks();
+            setOpenCopyEditBar(null);
+        } catch (err) {
+            console.error("Failed to updateCopy - page.js:72", err);
+            alert(err.response?.data?.message || "Đã có lỗi xảy ra khi chỉnh sửa sách!");
+        }
+    }
 
     return (
         <>
@@ -250,6 +305,7 @@ export default function AvailableBook() {
                                     <th>Thể Loại</th>
                                     <th>Nhà XB</th>
                                     <th>Năm XB</th>
+                                    <th>Giá bìa</th>
                                     <th>Tổng Copies</th>
                                     <th>Sẵn có</th>
                                     <th>
@@ -274,10 +330,11 @@ export default function AvailableBook() {
                                                     <td>{availableBook.isbn}</td>
                                                     <td>
                                                         <img 
-                                                            src={availableBook.image} 
+                                                            src={getImageUrl(availableBook.image)} 
                                                             className={styles.bookCover}
                                                         />
                                                     </td>
+                                                    {console.log(getImageUrl(availableBook.image))}
                                                     <td>
                                                         <span className={styles.bookTitle}>{availableBook.title}</span>
                                                     </td>
@@ -292,7 +349,7 @@ export default function AvailableBook() {
                                                             .join(', ')
                                                         }
                                                     </td>
-                                                    <td>{availableBook.publisher}</td>
+                                                    <td>{availableBook.publisherId.name}</td>
                                                     <td style={{width: "100px"}}>
                                                         {
                                                             availableBook.publishDate
@@ -300,6 +357,7 @@ export default function AvailableBook() {
                                                             :""
                                                         }
                                                     </td>
+                                                    <td>{availableBook.coverPrice.toLocaleString()} VND</td>
                                                     <td>{availableBook.numberOfCopy}</td>
                                                     <td>{availableBook.availableCopies}</td>
                                                     <td style={{width: "250px"}}>
@@ -315,6 +373,14 @@ export default function AvailableBook() {
                                                                 borderRadius: "5px",
                                                                 cursor: "pointer",
                                                             }}
+                                                            onClick={
+                                                                () => {
+                                                                    setOpenEditBar(prev => 
+                                                                        prev === availableBook._id ? null : availableBook._id
+                                                                    );
+                                                                    setSelectedBook(availableBook);
+                                                                }
+                                                            }
                                                         >
                                                             <EditSquare/>
                                                         </Button>
@@ -357,14 +423,33 @@ export default function AvailableBook() {
                                                                     <thead>
                                                                         <tr>
                                                                             <th>ID</th>
-                                                                            <th>Vị Trí</th>
-                                                                            <th>Trạng Thái</th>
+                                                                            <th>
+                                                                                <div
+                                                                                    style={{
+                                                                                        display: "flex", 
+                                                                                        justifyContent: "center",
+                                                                                        width: "150px"
+                                                                                    }}
+                                                                                >
+                                                                                    Vị trí
+                                                                                </div>
+                                                                            </th>
+                                                                            <th>Trạng thái</th>
+                                                                            <th>Thông tin</th>
                                                                             <th>
                                                                                 <div style={{
                                                                                     display: "flex", 
                                                                                     justifyContent: "center",
                                                                                 }}>            
                                                                                     Hành động
+                                                                                </div>
+                                                                            </th>
+                                                                            <th>
+                                                                                <div style={{
+                                                                                    display: "flex", 
+                                                                                    justifyContent: "center",
+                                                                                }}> 
+                                                                                    Lịch sử mượn
                                                                                 </div>
                                                                             </th>
                                                                         </tr>
@@ -375,76 +460,196 @@ export default function AvailableBook() {
                                                                             .filter((l) => !activeFilter || l.status === activeFilter)
                                                                             .map((l) => (
                                                                                 <tr key={l._id}>
-                                                                                    <td>
-                                                                                        {formatShortId(l._id)}
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        {l.position}
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                                                            <div className={`${styles['status']} ${styles[`${l.status}`]}`}></div>
-                                                                                            {(() => {
-                                                                                                const matchedStatus = statusList.find(
-                                                                                                    s => s.value === l.status
-                                                                                                );
-                                                                                                return matchedStatus ? matchedStatus.label : l.status;
-                                                                                            })()}
-                                                                                        </div>
-                                                                                    </td>
-                                                                                    { 
-                                                                                        l.readerId ? (
+                                                                                    {openEditCopyBar === l._id ? (
+                                                                                        <>
                                                                                             <td>
-                                                                                                <div>Người mượn: {l.readerId} - {l.readerName}</div>
-                                                                                                <div>
-                                                                                                    Vào lúc: {
-                                                                                                        l.createdAt
-                                                                                                        ? format(new Date(l.createdAt), 'dd-MM-yyyy HH:mm')
-                                                                                                        :""
-                                                                                                    }
-                                                                                                </div>
-                                                                                                <div>
-                                                                                                    Hạn trả: {
-                                                                                                        l.dueDate
-                                                                                                        ? format(new Date(l.dueDate), 'dd-MM-yyyy HH:mm')
-                                                                                                        :""
-                                                                                                    }
-                                                                                                </div>
-                                                                                                {l.status === "overdue" && (
-                                                                                                    <div>Đã muộn {Math.floor((Date.now() - new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày</div>
-                                                                                                )}
+                                                                                                {formatShortId(l._id)}
                                                                                             </td>
-                                                                                        ):(
+                                                                                            <td>
+                                                                                            <input
+                                                                                                type="text"
+                                                                                                name="position"
+                                                                                                className={styles.positionInput}
+                                                                                                value={editData.position ?? l.position}
+                                                                                                onChange={handleChange}
+                                                                                            />
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <select
+                                                                                                    style={{
+                                                                                                        width: "100%", 
+                                                                                                        padding: "5px", 
+                                                                                                        borderRadius: "5px", 
+                                                                                                        border: "1px solid #ccc"
+                                                                                                    }}
+                                                                                                    name="status"
+                                                                                                    value={editData.status || l.status}
+                                                                                                    onChange={handleChange}   
+                                                                                                >
+                                                                                                    {statusList.slice(1).map((c) => (
+                                                                                                        <option key={c.value} value={c.value}>{c.label}</option>
+                                                                                                    ))}
+                                                                                                </select>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                {editData.status === "borrowed" || editData.status === "reserved" ? (
+                                                                                                    <>
+                                                                                                    <input
+                                                                                                        type="text"
+                                                                                                        name="readerId"
+                                                                                                        value={editData.readerId ?? (l.readerId?._id || l.readerId || "")}
+                                                                                                        onChange={handleChange}
+                                                                                                        className={styles.idInput}
+                                                                                                    /> - {editData.readerId ? (
+                                                                                                        <span>{tempReaderName}</span>
+                                                                                                    ) : (
+                                                                                                        <span>{"Không có thông tin người dùng"}</span>
+                                                                                                    )}
+                                                                                                    </>
+                                                                                                ) : (
+                                                                                                    <span>Hiện sách đang ở trên kệ</span>
+                                                                                                )} 
+                                                                                            </td>
+                                                                                                    <td>
+                                                                                                        <div style={{
+                                                                                                            display: "flex", 
+                                                                                                            justifyContent: "center",
+                                                                                                            
+                                                                                                        }}>
+                                                                                                        <Button
+                                                                                                            sx={{
+                                                                                                                color: "#0b485e", 
+                                                                                                                border: "none",
+                                                                                                                borderRadius: "5px",
+                                                                                                                cursor: "pointer",
+                                                                                                            }}
+                                                                                                            onClick={handleSubmit}
+                                                                                                        >
+                                                                                                            <SaveOutlined/>
+                                                                                                        </Button>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                 
                                                                                             <td>
                                                                                                 <div style={{
                                                                                                     display: "flex", 
                                                                                                     justifyContent: "center",
-                                                                                                    
                                                                                                 }}>
-                                                                                                <Button
-                                                                                                sx={{
-                                                                                                    color: "#0b485e", 
-                                                                                                    border: "none",
-                                                                                                    borderRadius: "5px",
-                                                                                                    cursor: "pointer",
-                                                                                                }}
-                                                                                                >
-                                                                                                    <EditSquare/>
-                                                                                                </Button>
-                                                                                                <Button 
-                                                                                                    onClick={() => {
-                                                                                                        if (confirm("Bạn có chắc muốn xoá bản copy này không?")) {
-                                                                                                            handleDeleteCopy(l._id);
-                                                                                                        }
-                                                                                                    }}
-                                                                                                    sx={{color: "error.main"}}
-                                                                                                >
-                                                                                                    <DeleteIcon/>
-                                                                                                </Button>
+                                                                                                    <Button
+                                                                                                        sx={{
+                                                                                                            color: "#0b485e", 
+                                                                                                            border: "none",
+                                                                                                            borderRadius: "5px",
+                                                                                                            cursor: "pointer",
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <ListRounded/>
+                                                                                                    </Button>
                                                                                                 </div>
                                                                                             </td>
-                                                                                        )
-                                                                                    }
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <td>
+                                                                                                {formatShortId(l._id)}
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                {l.position}
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                                                                                    <div className={`${styles['status']} ${styles[`${l.status}`]}`}></div>
+                                                                                                    {(() => {
+                                                                                                        const matchedStatus = statusList.find(
+                                                                                                            s => s.value === l.status
+                                                                                                        );
+                                                                                                        return matchedStatus ? matchedStatus.label : l.status;
+                                                                                                    })()}
+                                                                                                </div>
+                                                                                            </td>
+                                                                                            { 
+                                                                                                l.readerId ? (
+                                                                                                    <td>
+                                                                                                        <div>Người mượn: {l.readerId?.fullName || l.readerName}</div>
+                                                                                                        <div>
+                                                                                                            Vào lúc: {
+                                                                                                                l.createdAt
+                                                                                                                ? format(new Date(l.createdAt), 'dd-MM-yyyy HH:mm')
+                                                                                                                :""
+                                                                                                            }
+                                                                                                        </div>
+                                                                                                        <div>
+                                                                                                            Hạn trả: {
+                                                                                                                l.dueDate
+                                                                                                                ? format(new Date(l.dueDate), 'dd-MM-yyyy HH:mm')
+                                                                                                                :""
+                                                                                                            }
+                                                                                                        </div>
+                                                                                                        {l.status === "overdue" && (
+                                                                                                            <div>Đã muộn {Math.floor((Date.now() - new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày</div>
+                                                                                                        )}
+                                                                                                    </td>
+                                                                                                ) : (
+                                                                                                        <td>Hiện sách đang ở trên kệ</td>
+                                                                                                    )
+                                                                                                }
+                                                                                                    <td>
+                                                                                                        <div style={{
+                                                                                                            display: "flex", 
+                                                                                                            justifyContent: "center",
+                                                                                                            
+                                                                                                        }}>
+                                                                                                        <Button
+                                                                                                            sx={{
+                                                                                                                color: "#0b485e", 
+                                                                                                                border: "none",
+                                                                                                                borderRadius: "5px",
+                                                                                                                cursor: "pointer",
+                                                                                                            }}
+                                                                                                            onClick={() => {
+                                                                                                                setOpenCopyEditBar(prev => 
+                                                                                                                    prev === l._id ? null : l._id
+                                                                                                                );  
+                                                                                                                setEditData({
+                                                                                                                    position: l.position || "",
+                                                                                                                    status: l.status || "",
+                                                                                                                    readerId: l.readerId?._id || ""
+                                                                                                                });
+                                                                                                            }}
+                                                                                                        >
+                                                                                                            <EditSquare/>
+                                                                                                        </Button>
+                                                                                                        <Button 
+                                                                                                            onClick={() => {
+                                                                                                                if (confirm("Bạn có chắc muốn xoá bản copy này không?")) {
+                                                                                                                    handleDeleteCopy(l._id);
+                                                                                                                }
+                                                                                                            }}
+                                                                                                            sx={{color: "error.main"}}
+                                                                                                        >
+                                                                                                            <DeleteIcon/>
+                                                                                                        </Button>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                            <td>
+                                                                                                <div style={{
+                                                                                                    display: "flex", 
+                                                                                                    justifyContent: "center",
+                                                                                                }}>
+                                                                                                    <Button
+                                                                                                        sx={{
+                                                                                                            color: "#0b485e", 
+                                                                                                            border: "none",
+                                                                                                            borderRadius: "5px",
+                                                                                                            cursor: "pointer",
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <ListRounded/>
+                                                                                                    </Button>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        </>
+                                                                                    )}
                                                                                 </tr>        
                                                                             ))
                                                                         }
@@ -458,15 +663,15 @@ export default function AvailableBook() {
                                         )
                                     )) : (
                                         <tr>
-                                        <td colSpan="10" style={{ textAlign: "center", color: "white" }}>
-                                            Không có cuốn sách nào.
+                                        <td colSpan="12" style={{ textAlign: "center", color: "white" }}>
+                                            Hiện đang không có cuốn sách nào.
                                         </td>
                                     </tr>
                                     ) 
                                 }
                                 {loading && (
                                     <tr>
-                                        <td colSpan="10" style={{ textAlign: "center", color: "white" }}>
+                                        <td colSpan="12" style={{ textAlign: "center", color: "white" }}>
                                             Đang tải...
                                         </td>
                                     </tr>
@@ -490,6 +695,13 @@ export default function AvailableBook() {
                         </div>
                     </div>
                 </div>
+                {openEditBar && (
+                    <EditBook
+                        book={selectedBook}
+                        handleClose={() => setOpenEditBar(null)}
+                        refreshAvailableBooks={refreshAvailableBooks}
+                    />
+                )}
             </div>
         </>
     )

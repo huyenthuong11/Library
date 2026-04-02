@@ -159,6 +159,8 @@ export default function AvailableBook() {
                                     <div>
                                         Tác giả: {availableBook.author}
                                     </div>
+                                    
+                                    {console.log(availableBook.publisherId.name)}
                                     <div>
                                         Thể loại: {   
                                             categoryList
@@ -232,7 +234,7 @@ export default function AvailableBook() {
                 <BookDesModal
                     image = {selectedBook.image}
                     category = {selectedBook.category} 
-                    publisher = {selectedBook.publisher} 
+                    publisher = {selectedBook.publisherId.name} 
                     title = {selectedBook.title} 
                     publishDate = {selectedBook.publishDate}
                     author = {selectedBook.author}

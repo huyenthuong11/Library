@@ -20,6 +20,11 @@ export default function NewestBooks() {
         getNewestBooks();
     }, []);
 
+    const getImageUrl = (path) => {
+        if (path.startsWith("http")) return path;
+        return `http://localhost:5000/${path}`;
+    };
+
     return (
         <>
             <div className={styles.cardMain}>
@@ -32,7 +37,7 @@ export default function NewestBooks() {
                                 key={newestBook._id}
                             >
                                 <img
-                                    src={newestBook.image}
+                                    src={getImageUrl(newestBook.image)}
                                 />
                                 <div>{newestBook.title}</div>
                             </div>
