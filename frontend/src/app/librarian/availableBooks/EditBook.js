@@ -37,6 +37,11 @@ export default function EditBook({book, refreshAvailableBooks, handleClose}) {
         label: p.name 
     }));
 
+    const languageOptions = [
+        { value: "vi", label: "Tiếng Việt" },
+        { value: "en", label: "Tiếng Anh" },
+    ];
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setEditData(prev => ({
@@ -68,7 +73,9 @@ export default function EditBook({book, refreshAvailableBooks, handleClose}) {
             formData.append("publisherId", editData.publisherId._id);
             formData.append("publishDate", editData.publishDate);
             formData.append("pages", editData.pages);
-            formData.append("coverPrice", editData.coverPrice);  
+            formData.append("coverPrice", editData.coverPrice);
+            formData.append("description", editData.description);
+            formData.append("language", editData.language);  
             await api.patch(`/books/updateBook/${book._id}`, formData);
             alert("Cập nhật sách thành công!");
             refreshAvailableBooks();
@@ -241,6 +248,33 @@ export default function EditBook({book, refreshAvailableBooks, handleClose}) {
                                     }}
                                     value={publisherOptions.find(opt => opt.value === editData.publisherId._id)}
                                     onChange={(selected) => setEditData({ ...editData, publisherId: { _id: selected.value } })}
+                                />
+                            </Box>
+                            <Box mb={1}>
+                                <Typography
+                                    component="label"
+                                    sx={{
+                                        fontWeight: "500",
+                                        fontSize: "14px",
+                                        display: "block",
+                                    }}
+                                >
+                                    Ngôn ngữ
+                                </Typography>
+                                <Select
+                                    options={languageOptions}
+                                    isSearchable
+                                    placeholder="Chọn ngôn ngữ"
+                                    fullwidth
+                                    size="small"
+                                    name="language"
+                                    type="language"
+                                    id="language"
+                                    InputProps={{
+                                        style: { borderRadius: 8 },
+                                    }}
+                                    value={languageOptions.find(opt => opt.value === editData.language)}
+                                    onChange={(selected) => setEditData({ ...editData, language: selected.value })}
                                 />
                             </Box>
                             <Box mb={1}>

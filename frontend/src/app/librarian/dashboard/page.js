@@ -2,13 +2,20 @@
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Avatar } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
     LibraryAddCheckOutlined, HelpOutlineOutlined,} 
     from '@mui/icons-material';
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
+import CategoryPieChart from "../categoryChart/page";
+import api from "@/lib/axios";
+import Inventory from "../inventory/page";
+
+
+
+
 export default function Dashboard() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
@@ -17,6 +24,43 @@ export default function Dashboard() {
         logout();
         router.push("/");
     };
+    
+    const [categoryData, setCategoryData] = useState(null);
+    const getCategoryData = async () => {
+        try {
+            const response = await api.get("/chart/getCategoryChartData")
+            const data = response.data.composition;
+            setCategoryData(data);
+        } catch (err) {
+            console.log("Tải dữ liệu phân loại thất bại", err);
+        }
+    } 
+    const [inventorySummary, setInventorySummary] = useState({
+        totalCopies: 0,
+        available: 0,
+        borrowed: 0,
+        overdue: 0,
+        reserved: 0
+    });
+    const [total, setTotal] = useState(1); 
+
+    const getAvailableBooks = async () => {
+        try {
+            const response = await api.get(`/books/availableBook?`);
+            const iS = response.data.inventorySum;
+            const t = response.data.totalBook;
+            setInventorySummary(iS);
+            setTotal(t);
+        } catch (err) {
+            console.error(err);
+        } 
+    }
+
+    useEffect(() => {
+        getCategoryData();
+        getAvailableBooks();
+    }, []);
+
   return (
     <>
     <div className="container">
@@ -73,8 +117,15 @@ export default function Dashboard() {
                     </div>
                     <div className={styles.grid}>
                         <div className={styles.cardHeight}>Thông báo & Yêu cầu mới</div>
-                        <div className={styles.card}>Cơ cấu thể loại sách</div>
-                        <div className={styles.card}>Thống kê nhanh</div>
+                        <div className={styles.card}>
+                            <CategoryPieChart data={categoryData}/>
+                        </div>
+                        <div className={styles.card}>
+                            <Inventory 
+                                data={inventorySummary} 
+                                total={total}
+                            />
+                        </div>
                         <div className={styles.card}>top5 sách được mượn nhiều nhất</div>
                         <div className={styles.card}>sách mượn theo tháng</div>
                         <div className={styles.card}>tỷ lệ trạng thái sách</div>

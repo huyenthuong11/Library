@@ -147,7 +147,7 @@ export default function Info() {
             setErrors(newErrors);
         }
     } 
-  return (
+    return (
         <>
             <div className="container">
                     <div className="main">
@@ -284,6 +284,18 @@ export default function Info() {
                                         >
                                             <Grid item xs={12} md={12} lg={12} xl={12} sx={{ width: '97%', m: 0 }}>
                                                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{ width: '100%', mt: 1 }}>
+                                                    <Box mb={1}>
+                                                        <Typography
+                                                            component="label"
+                                                            sx={{
+                                                                fontWeight: "500",
+                                                                fontSize: "14px",
+                                                                display: "block",
+                                                            }}
+                                                        >
+                                                            ID: {readerInfo._id}
+                                                        </Typography>
+                                                    </Box>
                                                     <Box mb={1}>
                                                         <Typography
                                                             component="label"

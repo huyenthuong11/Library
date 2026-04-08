@@ -12,6 +12,11 @@ import forgotPasswordRoutes from "./src/routes/forgotPasswordRoutes.js";
 import newsRoutes from "./src/routes/newsRoutes.js"
 import publisherRoutes from "./src/routes/publisherRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
+import borrowRecordRoutes from "./src/routes/borrowRecordRoutes.js";
+import chartRoutes from "./src/routes/chartRoutes.js";;
+
+
+
 //load env
 dotenv.config();
 
@@ -30,6 +35,9 @@ app.use("/api/forgotPassword", forgotPasswordRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/publisher", publisherRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/borrowRecord", borrowRecordRoutes);
+app.use("/api/chart", chartRoutes);
+
 
 //cron
 startCronJobs();

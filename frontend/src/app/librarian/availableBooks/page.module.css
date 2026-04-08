@@ -135,7 +135,7 @@
 
 
 .bookDetailTable {
-    width: 80%;
+    width: 90%;
     margin-left: 22%;
     margin-right: 20%;
     border-collapse: collapse;
@@ -180,7 +180,7 @@
 }
 
 .status.reserved {
-    background-color: #ffc107;
+    background-color: #f7ba04;
 }
 
 .status.borrowed {

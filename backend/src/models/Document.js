@@ -29,6 +29,10 @@ const documentSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
+        deleted: {
+            type: Boolean,
+            default: false
+        },
         coverPrice: {
             type: Number,
             min: 0,
@@ -69,13 +73,17 @@ const documentSchema = new mongoose.Schema(
                 position: { type: String }, 
                 status: { 
                     type: String, 
-                    enum: ["available", "reserved", "borrowed"], 
+                    enum: ["available", "reserved", "borrowed", "overdue"], 
                     default: "available" 
                 },
                 readerId: {
                     type: mongoose.Schema.Types.ObjectId,
                     ref: "Reader",
                     default: null
+                },
+                isDeleted: {
+                    type: Boolean,
+                    default: false
                 },
                 readerName: {type: String, default: null},
                 createdAt: { type: Date, default: null },
@@ -88,5 +96,26 @@ const documentSchema = new mongoose.Schema(
     }
 );
 
+const findHooks = ['find', 'findOne', 'countDocuments', 'findOneAndUpdate', 'updateMany'];
 
-export default mongoose.model("Document", documentSchema); ;
+findHooks.forEach(hook => {
+    documentSchema.pre(hook, function() {
+        this.where({ deleted: false });
+    });
+});
+
+documentSchema.pre('aggregate', async function() {
+    this.pipeline().unshift({
+        $addFields: {
+            locations: {
+                $filter: {
+                    input: "$locations",
+                    as: "location",
+                    cond: { $eq: ["$$location.isDeleted", false] }
+                }
+            }
+        }
+    });
+});
+
+export default mongoose.model("Document", documentSchema); 

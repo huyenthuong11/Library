@@ -7,8 +7,8 @@ import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
     LibraryAddCheckOutlined, HelpOutlineOutlined,
-    AddBoxOutlined, EditSquare, ListAltRounded,
-    SaveOutlined} 
+    AddBoxOutlined, EditSquare, CancelOutlined, ListAltRounded,
+    SaveOutlined, AddCircleOutlined} 
     from '@mui/icons-material';
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import useAvailableBooks from "@/hook/useAvailableBooks";
@@ -18,6 +18,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { ListRounded } from "@mui/icons-material";
 import api from "@/lib/axios";
 import EditBook from "./EditBook";
+import useReaderList from "@/hook/useGetReaderList";
+import Select from "react-select";  
+import BorrowRecord from "./BorrowRecord";
+import AddBook from "./AddBook";
+import useLocationList from "@/hook/useAvailableLocation";
+
 
 export default function AvailableBook() {
     const router = useRouter();
@@ -32,7 +38,23 @@ export default function AvailableBook() {
     const [openEditBar, setOpenEditBar] = useState(null);
     const [selectedBook, setSelectedBook] = useState(null);
     const [openEditCopyBar, setOpenCopyEditBar] = useState(null);
-    const [tempReaderName, setTempReaderName] = useState("");
+    const {readerList} = useReaderList();
+    const [openBorrowRecord, setOpenBorrowRecord] = useState(null);
+    const [openAddBookBar, setOpenAddBookBar] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
+    const {locationList} = useLocationList();
+
+    const availableLocationList = locationList
+        .filter((s) => s.usedStorage < 100)
+        .map(s => ({
+            value: s.position,
+            label: s.position
+        }));
+
+    const readerOptions = readerList.map(reader => ({
+        value: reader._id,
+        label: `${reader._id} - ${reader.fullName}`
+    }));
     const [editData, setEditData] = useState({
         position: "",
         status: "",
@@ -40,26 +62,15 @@ export default function AvailableBook() {
     });
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setEditData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    useEffect(() => {
-        if (editData.readerId) {
-            const fetchReaderName = async () => {
-                try {
-                    const response = await api.get(`/admin/readerProfile/${editData.readerId}`);
-                    setTempReaderName(response.data.fullName);
-                } catch (err) {
-                    console.error("Failed to fetch reader name - page.js:123", err);
-                    setTempReaderName("Không tìm thấy người dùng");
-                }
+        setEditData(prev => {
+            if (prev[name] === value) return prev;
+            setIsDirty(true)
+            return {
+                ...prev,
+                [name]: value
             };
-            fetchReaderName();
-        }
-    }, [editData.readerId]);
+        });
+    };
 
     const categoryList = [
         {value: [""], label: "Tất cả"},
@@ -79,6 +90,7 @@ export default function AvailableBook() {
         {value: ["geography"], label: "Địa lý"},
         {value: ["novel"], label: "Tiểu thuyết"},
     ];
+
 
     const statusList = [
         {value: null, label: "Tất cả"},
@@ -140,9 +152,7 @@ export default function AvailableBook() {
     const getImageUrl = (path) => {
         if (path.startsWith("http")) return path;
         return `http://localhost:5000/${path}`;
-    };
-
-    
+    }; 
 
     const handleSubmit = async () => {
         try {           
@@ -154,11 +164,34 @@ export default function AvailableBook() {
             alert("Cập nhật sách thành công!");
             refreshAvailableBooks();
             setOpenCopyEditBar(null);
+            setIsDirty(false)
         } catch (err) {
             console.error("Failed to updateCopy - page.js:72", err);
             alert(err.response?.data?.message || "Đã có lỗi xảy ra khi chỉnh sửa sách!");
         }
     }
+
+    const statusOptions = {
+        available: [
+            { value: "borrowed", label: "Đang mượn" },
+            { value: "reserved", label: "Đặt trước" },
+        ],
+        borrowed: [
+            { value: "available", label: "Có sẵn" },
+            { value: "reserved", label: "Đặt trước" },
+        ],
+        reserved: [
+            { value: "available", label: "Có sẵn" },
+            { value: "borrowed", label: "Đang mượn" },
+        ],
+        overdue: [
+            { value: "available", label: "Có sẵn" },
+            { value: "reserved", label: "Đặt trước" },
+            { value: "borrowed", label: "Đang mượn" },
+        ],
+    };
+
+
 
     return (
         <>
@@ -267,6 +300,7 @@ export default function AvailableBook() {
                                                 cursor: "pointer",
                                                 marginRight: "10px"
                                             }}
+                                            onClick={() => setOpenAddBookBar(true)}
                                         >
                                             <AddBoxOutlined/>
                                         </Button>
@@ -334,7 +368,6 @@ export default function AvailableBook() {
                                                             className={styles.bookCover}
                                                         />
                                                     </td>
-                                                    {console.log(getImageUrl(availableBook.image))}
                                                     <td>
                                                         <span className={styles.bookTitle}>{availableBook.title}</span>
                                                     </td>
@@ -366,6 +399,18 @@ export default function AvailableBook() {
                                                             justifyContent: "center",
                                                             
                                                         }}>
+                                                            
+                                                        <Button
+                                                            sx={{
+                                                                color: "#0b485e", 
+                                                                border: "none",
+                                                                borderRadius: "5px",
+                                                                cursor: "pointer",
+                                                            }}
+                                                            
+                                                        >
+                                                            <AddCircleOutlined/>
+                                                        </Button>
                                                         <Button
                                                             sx={{
                                                                 color: "#0b485e", 
@@ -424,17 +469,9 @@ export default function AvailableBook() {
                                                                         <tr>
                                                                             <th>ID</th>
                                                                             <th>
-                                                                                <div
-                                                                                    style={{
-                                                                                        display: "flex", 
-                                                                                        justifyContent: "center",
-                                                                                        width: "150px"
-                                                                                    }}
-                                                                                >
-                                                                                    Vị trí
-                                                                                </div>
+                                                                                Vị trí
                                                                             </th>
-                                                                            <th>Trạng thái</th>
+                                                                            <th width="150px">Trạng thái</th>
                                                                             <th>Thông tin</th>
                                                                             <th>
                                                                                 <div style={{
@@ -458,200 +495,257 @@ export default function AvailableBook() {
                                                                         {
                                                                             availableBook.locations
                                                                             .filter((l) => !activeFilter || l.status === activeFilter)
-                                                                            .map((l) => (
-                                                                                <tr key={l._id}>
-                                                                                    {openEditCopyBar === l._id ? (
-                                                                                        <>
-                                                                                            <td>
-                                                                                                {formatShortId(l._id)}
-                                                                                            </td>
-                                                                                            <td>
-                                                                                            <input
-                                                                                                type="text"
-                                                                                                name="position"
-                                                                                                className={styles.positionInput}
-                                                                                                value={editData.position ?? l.position}
-                                                                                                onChange={handleChange}
-                                                                                            />
-                                                                                            </td>
-                                                                                            <td>
-                                                                                                <select
-                                                                                                    style={{
-                                                                                                        width: "100%", 
-                                                                                                        padding: "5px", 
-                                                                                                        borderRadius: "5px", 
-                                                                                                        border: "1px solid #ccc"
+                                                                            .map((l) => {
+                                                                                const hasChanges = 
+                                                                                    editData.position !== l.position || 
+                                                                                    editData.status !== l.status || 
+                                                                                    String(editData.readerId || "") !== String(l.readerId?._id || l.readerId || "");
+                                                                                return (
+                                                                                    <tr key={l._id}>
+                                                                                        {openEditCopyBar === l._id ? (
+                                                                                            <>
+                                                                                                <td>
+                                                                                                    {formatShortId(l._id)}
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                <Select
+                                                                                                    options={availableLocationList}
+                                                                                                    isSearchable
+                                                                                                    fullwidth
+                                                                                                    size="small"
+                                                                                                    name="position"
+                                                                                                    type="text"
+                                                                                                    id="position"
+                                                                                                    className={styles.idInput}
+                                                                                                    onChange={(selected) => {
+                                                                                                        setEditData(prev => ({
+                                                                                                            ...prev,
+                                                                                                            position: selected.value
+                                                                                                        }))
+                                                                                                        setIsDirty(true)
                                                                                                     }}
-                                                                                                    name="status"
-                                                                                                    value={editData.status || l.status}
-                                                                                                    onChange={handleChange}   
-                                                                                                >
-                                                                                                    {statusList.slice(1).map((c) => (
-                                                                                                        <option key={c.value} value={c.value}>{c.label}</option>
-                                                                                                    ))}
-                                                                                                </select>
-                                                                                            </td>
-                                                                                            <td>
-                                                                                                {editData.status === "borrowed" || editData.status === "reserved" ? (
-                                                                                                    <>
-                                                                                                    <input
-                                                                                                        type="text"
-                                                                                                        name="readerId"
-                                                                                                        value={editData.readerId ?? (l.readerId?._id || l.readerId || "")}
-                                                                                                        onChange={handleChange}
-                                                                                                        className={styles.idInput}
-                                                                                                    /> - {editData.readerId ? (
-                                                                                                        <span>{tempReaderName}</span>
+                                                                                                    value={availableLocationList.find(opt => opt.value === editData.position) || null}
+                                                                                                /> 
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <select
+                                                                                                        style={{
+                                                                                                            width: "100%", 
+                                                                                                            padding: "5px", 
+                                                                                                            borderRadius: "5px", 
+                                                                                                            border: "1px solid #ccc"
+                                                                                                        }}
+                                                                                                        name="status"
+                                                                                                        value={editData.status || l.status}
+                                                                                                        onChange={handleChange}   
+                                                                                                    >
+                                                                                                        {
+                                                                                                            statusList.filter(s => s.value === l.status && s.value !== null)
+                                                                                                            .map(s => (
+                                                                                                                <option key={s.value} value={s.value} disabled>{s.label}</option>
+                                                                                                            ))
+                                                                                                        }
+
+                                                                                                        {statusOptions[l.status].map((option) => (
+                                                                                                            <option key={option.value} value={option.value}>
+                                                                                                                {option.label}
+                                                                                                            </option>
+                                                                                                        ))}
+                                                                                                    </select>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    {editData.status === "borrowed" || editData.status === "reserved" ? (
+                                                                                                        <>
+                                                                                                            <Select
+                                                                                                                options={readerOptions}
+                                                                                                                isSearchable
+                                                                                                                placeholder="Nhập ID người dùng..."
+                                                                                                                fullwidth
+                                                                                                                size="small"
+                                                                                                                name="readerId"
+                                                                                                                type="text"
+                                                                                                                id="readerId"
+                                                                                                                className={styles.idInput}
+                                                                                                                onChange={(selected) => {
+                                                                                                                    setEditData(prev => ({
+                                                                                                                        ...prev,
+                                                                                                                        readerId: selected.value
+                                                                                                                    }))
+                                                                                                                    setIsDirty(true)
+                                                                                                                }}
+                                                                                                                value={readerOptions.find(opt => opt.value === editData.readerId)}
+                                                                                                            /> 
+                                                                                                            {!editData.readerId && (
+                                                                                                                <span>{"Không có thông tin người dùng"}</span>
+                                                                                                            )}
+                                                                                                        </>
                                                                                                     ) : (
-                                                                                                        <span>{"Không có thông tin người dùng"}</span>
-                                                                                                    )}
-                                                                                                    </>
-                                                                                                ) : (
-                                                                                                    <span>Hiện sách đang ở trên kệ</span>
-                                                                                                )} 
-                                                                                            </td>
-                                                                                                    <td>
-                                                                                                        <div style={{
-                                                                                                            display: "flex", 
-                                                                                                            justifyContent: "center",
-                                                                                                            
-                                                                                                        }}>
+                                                                                                        <span>Hiện sách đang ở trên kệ</span>
+                                                                                                    )} 
+                                                                                                </td>
+                                                                                                        <td>
+                                                                                                            <div style={{
+                                                                                                                display: "flex", 
+                                                                                                                justifyContent: "center",
+                                                                                                                
+                                                                                                            }}>
+                                                                                                            <Button
+                                                                                                                sx={{
+                                                                                                                    color: "#0b485e", 
+                                                                                                                    border: "none",
+                                                                                                                    borderRadius: "5px",
+                                                                                                                    cursor: hasChanges ? "pointer" : "default",
+                                                                                                                    opacity: hasChanges ? 1 : 0.5,
+                                                                                                                }}
+                                                                                                                onClick={handleSubmit}
+                                                                                                                disabled={!hasChanges}
+                                                                                                            >
+                                                                                                                <SaveOutlined/>
+                                                                                                            </Button>
+                                                                                                            <Button 
+                                                                                                                onClick={() => {
+                                                                                                                    setOpenCopyEditBar(null)
+                                                                                                                    setIsDirty(false)
+                                                                                                                }}
+                                                                                                                sx={{color: "error.main"}}
+                                                                                                            >
+                                                                                                                <CancelOutlined/>
+                                                                                                            </Button>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                    
+                                                                                                <td>
+                                                                                                    <div style={{
+                                                                                                        display: "flex", 
+                                                                                                        justifyContent: "center",
+                                                                                                    }}>
                                                                                                         <Button
                                                                                                             sx={{
                                                                                                                 color: "#0b485e", 
                                                                                                                 border: "none",
                                                                                                                 borderRadius: "5px",
-                                                                                                                cursor: "pointer",
+                                                                                                                cursor: "default",
+                                                                                                                opacity: 0.5,
                                                                                                             }}
-                                                                                                            onClick={handleSubmit}
+                                                                                                            disabled
                                                                                                         >
-                                                                                                            <SaveOutlined/>
+                                                                                                            <ListRounded/>
                                                                                                         </Button>
-                                                                                                        </div>
-                                                                                                    </td>
-                                                                                                 
-                                                                                            <td>
-                                                                                                <div style={{
-                                                                                                    display: "flex", 
-                                                                                                    justifyContent: "center",
-                                                                                                }}>
-                                                                                                    <Button
-                                                                                                        sx={{
-                                                                                                            color: "#0b485e", 
-                                                                                                            border: "none",
-                                                                                                            borderRadius: "5px",
-                                                                                                            cursor: "pointer",
-                                                                                                        }}
-                                                                                                    >
-                                                                                                        <ListRounded/>
-                                                                                                    </Button>
-                                                                                                </div>
-                                                                                            </td>
-                                                                                        </>
-                                                                                    ) : (
-                                                                                        <>
-                                                                                            <td>
-                                                                                                {formatShortId(l._id)}
-                                                                                            </td>
-                                                                                            <td>
-                                                                                                {l.position}
-                                                                                            </td>
-                                                                                            <td>
-                                                                                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                                                                    <div className={`${styles['status']} ${styles[`${l.status}`]}`}></div>
-                                                                                                    {(() => {
-                                                                                                        const matchedStatus = statusList.find(
-                                                                                                            s => s.value === l.status
-                                                                                                        );
-                                                                                                        return matchedStatus ? matchedStatus.label : l.status;
-                                                                                                    })()}
-                                                                                                </div>
-                                                                                            </td>
-                                                                                            { 
-                                                                                                l.readerId ? (
-                                                                                                    <td>
-                                                                                                        <div>Người mượn: {l.readerId?.fullName || l.readerName}</div>
-                                                                                                        <div>
-                                                                                                            Vào lúc: {
-                                                                                                                l.createdAt
-                                                                                                                ? format(new Date(l.createdAt), 'dd-MM-yyyy HH:mm')
-                                                                                                                :""
-                                                                                                            }
-                                                                                                        </div>
-                                                                                                        <div>
-                                                                                                            Hạn trả: {
-                                                                                                                l.dueDate
-                                                                                                                ? format(new Date(l.dueDate), 'dd-MM-yyyy HH:mm')
-                                                                                                                :""
-                                                                                                            }
-                                                                                                        </div>
-                                                                                                        {l.status === "overdue" && (
-                                                                                                            <div>Đã muộn {Math.floor((Date.now() - new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày</div>
-                                                                                                        )}
-                                                                                                    </td>
-                                                                                                ) : (
-                                                                                                        <td>Hiện sách đang ở trên kệ</td>
-                                                                                                    )
-                                                                                                }
-                                                                                                    <td>
-                                                                                                        <div style={{
-                                                                                                            display: "flex", 
-                                                                                                            justifyContent: "center",
-                                                                                                            
-                                                                                                        }}>
-                                                                                                        <Button
-                                                                                                            sx={{
-                                                                                                                color: "#0b485e", 
-                                                                                                                border: "none",
-                                                                                                                borderRadius: "5px",
-                                                                                                                cursor: "pointer",
-                                                                                                            }}
-                                                                                                            onClick={() => {
-                                                                                                                setOpenCopyEditBar(prev => 
-                                                                                                                    prev === l._id ? null : l._id
-                                                                                                                );  
-                                                                                                                setEditData({
-                                                                                                                    position: l.position || "",
-                                                                                                                    status: l.status || "",
-                                                                                                                    readerId: l.readerId?._id || ""
-                                                                                                                });
-                                                                                                            }}
-                                                                                                        >
-                                                                                                            <EditSquare/>
-                                                                                                        </Button>
-                                                                                                        <Button 
-                                                                                                            onClick={() => {
-                                                                                                                if (confirm("Bạn có chắc muốn xoá bản copy này không?")) {
-                                                                                                                    handleDeleteCopy(l._id);
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </>
+                                                                                        ) : (
+                                                                                            <>
+                                                                                                <td>
+                                                                                                    {formatShortId(l._id)}
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    {l.position}
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                                                                                        <div className={`${styles['status']} ${styles[`${l.status}`]}`}></div>
+                                                                                                        {(() => {
+                                                                                                            const matchedStatus = statusList.find(
+                                                                                                                s => s.value === l.status
+                                                                                                            );
+                                                                                                            return matchedStatus ? matchedStatus.label : l.status;
+                                                                                                        })()}
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                { 
+                                                                                                    l.readerId ? (
+                                                                                                        <td>
+                                                                                                            <div>Người mượn: {l.readerId?.fullName || l.readerName}</div>
+                                                                                                            <div>
+                                                                                                                Vào lúc: {
+                                                                                                                    l.createdAt
+                                                                                                                    ? format(new Date(l.createdAt), 'dd-MM-yyyy HH:mm')
+                                                                                                                    :""
                                                                                                                 }
+                                                                                                            </div>
+                                                                                                            <div>
+                                                                                                                Hạn trả: {
+                                                                                                                    l.dueDate
+                                                                                                                    ? format(new Date(l.dueDate), 'dd-MM-yyyy HH:mm')
+                                                                                                                    :""
+                                                                                                                }
+                                                                                                            </div>
+                                                                                                            {l.status === "overdue" && (
+                                                                                                                <div>Đã muộn {Math.floor((Date.now() - new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày</div>
+                                                                                                            )}
+                                                                                                        </td>
+                                                                                                    ) : (
+                                                                                                            <td>Hiện sách đang ở trên kệ</td>
+                                                                                                        )
+                                                                                                    }
+                                                                                                        <td>
+                                                                                                            <div style={{
+                                                                                                                display: "flex", 
+                                                                                                                justifyContent: "center",
+                                                                                                                
+                                                                                                            }}>
+                                                                                                            <Button
+                                                                                                                sx={{
+                                                                                                                    color: "#0b485e", 
+                                                                                                                    border: "none",
+                                                                                                                    borderRadius: "5px",
+                                                                                                                    cursor: "pointer",
+                                                                                                                }}
+                                                                                                                onClick={() => {
+                                                                                                                    if (isDirty && openEditCopyBar !== l._id) {
+                                                                                                                        const confirmChange = window.confirm("Bạn chưa lưu thay đổi. Tiếp tục?");
+                                                                                                                        if (!confirmChange) return;
+                                                                                                                    }
+                                                                                                                    setOpenCopyEditBar(l._id);
+                                                                                                                    setEditData({
+                                                                                                                        position: l.position || "",
+                                                                                                                        status: l.status || "",
+                                                                                                                        readerId: l.readerId?._id || ""
+                                                                                                                    });
+                                                                                                                }}
+                                                                                                            >
+                                                                                                                <EditSquare/>
+                                                                                                            </Button>
+                                                                                                            <Button 
+                                                                                                                onClick={() => {
+                                                                                                                    if (confirm("Bạn có chắc muốn xoá bản copy này không?")) {
+                                                                                                                        handleDeleteCopy(l._id);
+                                                                                                                    }
+                                                                                                                }}
+                                                                                                                sx={{color: "error.main"}}
+                                                                                                            >
+                                                                                                                <DeleteIcon/>
+                                                                                                            </Button>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                <td>
+                                                                                                    <div style={{
+                                                                                                        display: "flex", 
+                                                                                                        justifyContent: "center",
+                                                                                                    }}>
+                                                                                                        <Button
+                                                                                                            sx={{
+                                                                                                                color: "#0b485e", 
+                                                                                                                border: "none",
+                                                                                                                borderRadius: "5px",
+                                                                                                                cursor: "pointer",
                                                                                                             }}
-                                                                                                            sx={{color: "error.main"}}
+                                                                                                            onClick={() => {
+                                                                                                                setOpenBorrowRecord(prev => 
+                                                                                                                    prev === l._id ? null : l._id
+                                                                                                                );
+                                                                                                            }}
                                                                                                         >
-                                                                                                            <DeleteIcon/>
+                                                                                                            <ListRounded/>
                                                                                                         </Button>
-                                                                                                        </div>
-                                                                                                    </td>
-                                                                                            <td>
-                                                                                                <div style={{
-                                                                                                    display: "flex", 
-                                                                                                    justifyContent: "center",
-                                                                                                }}>
-                                                                                                    <Button
-                                                                                                        sx={{
-                                                                                                            color: "#0b485e", 
-                                                                                                            border: "none",
-                                                                                                            borderRadius: "5px",
-                                                                                                            cursor: "pointer",
-                                                                                                        }}
-                                                                                                    >
-                                                                                                        <ListRounded/>
-                                                                                                    </Button>
-                                                                                                </div>
-                                                                                            </td>
-                                                                                        </>
-                                                                                    )}
-                                                                                </tr>        
-                                                                            ))
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </>
+                                                                                        )}
+                                                                                    </tr>     
+                                                                                )   
+                                                                            })
                                                                         }
                                                                     </tbody>
                                                                 </table>
@@ -702,6 +796,20 @@ export default function AvailableBook() {
                         refreshAvailableBooks={refreshAvailableBooks}
                     />
                 )}
+                {openBorrowRecord && (
+                    <BorrowRecord
+                        copyId={openBorrowRecord}
+                        handleClose={() => setOpenBorrowRecord(null)}
+                    />
+                )}
+                {
+                    openAddBookBar && (
+                        <AddBook
+                            handleClose={() => setOpenAddBookBar(null)}
+                            refreshAvailableBooks={refreshAvailableBooks}
+                        />
+                    )
+                }
             </div>
         </>
     )
