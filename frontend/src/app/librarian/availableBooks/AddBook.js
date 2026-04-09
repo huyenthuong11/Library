@@ -47,21 +47,32 @@ export default function AddBook({ refreshAvailableBooks, handleClose }) {
         }));
 
     const categoryList = [
-        {value: "history", label: "Lịch sử"},
-        {value: "children", label: "Trẻ em"},
-        {value: "business", label: "Kinh doanh"},
-        {value: "science", label: "Khoa học"},
-        {value: "technology", label: "Kỹ thuật"},
-        {value: "education", label: "Giáo dục"},
-        {value: "exam-prep", label: "Luyện thi"},
-        {value: "comics", label: "Truyện tranh"},
-        {value: "health", label: "Sức khỏe"},
-        {value: "travel", label: "Du lịch"},
-        {value: "cooking", label: "Ẩm thực"},
-        {value: "self-help", label: "Tâm lý"},
-        {value: "art", label: "Nghệ thuật"},
-        {value: "geography", label: "Địa lý"},
-        {value: "novel", label: "Tiểu thuyết"},
+        { value: "technology", label: "Công nghệ" },
+        { value: "science", label: "Khoa học" },
+        { value: "mathematics", label: "Toán học" },
+        { value: "history", label: "Lịch sử" },
+        { value: "geography", label: "Địa lý" },
+        { value: "politics", label: "Chính trị" },
+        { value: "philosophy", label: "Triết học" },
+        { value: "psychology", label: "Tâm lý học" },
+        { value: "religion", label: "Tôn giáo / Tâm linh" },
+        { value: "business", label: "Kinh doanh" },
+        { value: "finance", label: "Tài chính / Đầu tư" },
+        { value: "marketing", label: "Marketing / Bán hàng" },
+        { value: "economics", label: "Kinh tế học" },
+        { value: "education", label: "Giáo dục / Học tập" },
+        { value: "language", label: "Ngôn ngữ / Ngoại ngữ" },
+        { value: "exam_prep", label: "Luyện thi" },
+        { value: "literature", label: "Văn học" },
+        { value: "novel", label: "Tiểu thuyết" },
+        { value: "children", label: "Thiếu nhi" },
+        { value: "comics", label: "Truyện tranh / Manga" },
+        { value: "self_help", label: "Phát triển bản thân" },
+        { value: "health", label: "Sức khỏe / Y học" },
+        { value: "art", label: "Nghệ thuật / Thiết kế" },
+        { value: "cooking", label: "Ẩm thực / Nấu ăn" },
+        { value: "travel", label: "Du lịch / Khám phá" },
+        { value: "biography", label: "Tiểu sử / Hồi ký" }
     ];
 
     const finalizeData = () => {
@@ -126,9 +137,7 @@ export default function AddBook({ refreshAvailableBooks, handleClose }) {
                 }
             });
 
-            await api.post("/books/addBook", formData, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
+            await api.post("/books/addBook", formData);
 
             alert("Thêm sách mới thành công!");
             refreshAvailableBooks();

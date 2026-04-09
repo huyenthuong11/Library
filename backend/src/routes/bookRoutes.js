@@ -452,6 +452,7 @@ router.post("/addBook", authMiddleware, checkRole(["admin", "librarian"]), uploa
 router.post("/addCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
     try {
         const {position, addNum} = req.body;
+        //id is book's id not copy's id
         const book = await Document.findById(req.params.id);
         if (!book) {
             return res.status(404).json({ message: "Không tìm thấy sách" });
@@ -475,8 +476,6 @@ router.post("/addCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), a
             }
         }
 
-        const session = await mongoose.startSession();
-        session.startTransaction();
 
         await Promise.all(
             Object.entries(posCounts)
@@ -486,8 +485,7 @@ router.post("/addCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), a
                         position: posName,
                         usedStorage: { $lte: 100 - count }
                     }, 
-                    {$inc: {usedStorage: count}},
-                    {session}
+                    {$inc: {usedStorage: count}}
                 );
             })
         );
@@ -509,17 +507,13 @@ router.post("/addCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), a
             },
             {
                 new: true,
-                session
             }
         );
-        await session.commitTransaction();
-        session.endSession();
+        
         return res.status(201).json({ message: "Thêm bản copy thành công"});
 
     } catch (err) {
         console.error("Lỗi khi thêm bản sao:", err);
-        await session.abortTransaction();
-        session.endSession();
         res.status(500).json({ message: "Lỗi hệ thống khi thêm bản sao", error: err.message });
     }
 })
