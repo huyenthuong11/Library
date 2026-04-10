@@ -59,7 +59,7 @@ export default function Page() {
           </div>
         </div>
 
-        <div className={styles.footer}>
+        <div className="footer">
           <div className={styles.word}>THƯ VIỆN CẦU GIẤY</div>
           <div className={styles.word}>Address: Cầu Giấy, Hà Nội, Việt Nam</div>
           <div className={styles.word}>Contact: 0912 xxx xxx</div>

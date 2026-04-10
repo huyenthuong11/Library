@@ -22,31 +22,31 @@ export default function Dashboard() {
     <>
     <div className="container">
             <div className="main">
-                    <div className="header">
-                        <div className="webicon"></div>
-                        <div className="user">
-                            {avatar ? (
-                                <Avatar
-                                    alt="User Avatar"
-                                    src={`http://localhost:5000/${avatar}`}
-                                    sx={{
-                                    objectFit: 'cover',
-                                    border: '1px solid rgba(150, 149, 149, 0.65)'
-                                    }}
-                                />
-                            ) : (
-                                <Avatar></Avatar>
-                            )}
-                            {fullName ? (
-                                <span>{fullName}</span>
-                            ):(
-                                <span>{account?.email || "Email"}</span>
-                            )}
-                            <div className="sign">
-                                <a onClick={handleLogout}>Đăng xuất</a>
-                            </div>
+                <div className="header">
+                    <div className="webicon"></div>
+                    <div className="user">
+                        {avatar ? (
+                            <Avatar
+                                alt="User Avatar"
+                                src={`http://localhost:5000/${avatar}`}
+                                sx={{
+                                objectFit: 'cover',
+                                border: '1px solid rgba(150, 149, 149, 0.65)'
+                                }}
+                            />
+                        ) : (
+                            <Avatar></Avatar>
+                        )}
+                        {fullName ? (
+                            <span>{fullName}</span>
+                        ):(
+                            <span>{account?.email || "Email"}</span>
+                        )}
+                        <div className="sign">
+                            <a onClick={handleLogout}>Đăng xuất</a>
                         </div>
                     </div>
+                </div>
 
                 <aside className="sidebar">
                     <div style={{marginTop:10}}>
@@ -96,6 +96,12 @@ export default function Dashboard() {
                         <div className={styles.card}>Tóm tắt tài khoản</div>
                     </div>
                 </div>
+            </div>
+            <div className="footer">
+                <div className={styles.word}>THƯ VIỆN CẦU GIẤY</div>
+                <div className={styles.word}>Address: Cầu Giấy, Hà Nội, Việt Nam</div>
+                <div className={styles.word}>Contact: 0912 xxx xxx</div>
+                <div className={styles.word}>Copyright © Library System</div>
             </div>
         
     </div>

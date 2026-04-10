@@ -151,7 +151,7 @@ export default function Info() {
         <>
             <div className="container">
                     <div className="main">
-                            <div className="header">
+                        <div className="header">
                                 <div className="webicon">
                                     <div className={styles.h}>
                                         Hồ sơ cá nhân
@@ -187,7 +187,7 @@ export default function Info() {
                                         <a onClick={handleLogout}>Đăng xuất</a>
                                     </div>
                                 </div>
-                            </div>
+                        </div>
 
                         <aside className="sidebar">
                             <div style={{marginTop:10}}>
@@ -288,8 +288,8 @@ export default function Info() {
                                                         <Typography
                                                             component="label"
                                                             sx={{
-                                                                fontWeight: "500",
-                                                                fontSize: "14px",
+                                                                fontWeight: "bolder",
+                                                                fontSize: "20px",
                                                                 display: "block",
                                                             }}
                                                         >
@@ -535,6 +535,12 @@ export default function Info() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div className="footer">
+                        <div className={styles.word}>THƯ VIỆN CẦU GIẤY</div>
+                        <div className={styles.word}>Address: Cầu Giấy, Hà Nội, Việt Nam</div>
+                        <div className={styles.word}>Contact: 0912 xxx xxx</div>
+                        <div className={styles.word}>Copyright © Library System</div>
                     </div>
                 </div>
               

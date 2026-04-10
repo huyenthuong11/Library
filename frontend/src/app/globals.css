@@ -190,3 +190,14 @@ body {
   font-weight: 800;
   opacity: 1; 
 }
+
+
+.footer {
+  width: 100%;
+  height: 200px;
+  background-color: #323334;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 10px;
+  color: #dbe5ef;
+}

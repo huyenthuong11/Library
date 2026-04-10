@@ -37,7 +37,7 @@
     margin-bottom: 20px;
     margin-top: 10px;
     color: #ddd;
-    width: 850px;
+    width: 1000px;
 }
 
 .desBar {
@@ -55,14 +55,16 @@
     display: flex;
     align-items: center;
     width: 645px;
+    padding: 10px 15px,
 }
 
 .searchContainer input {
-    padding: 10px;
+    padding: 10px 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-right: 10px;
     width: 100%;
+    font-size: 1em;
 }
 
 .searchFilter {
@@ -105,6 +107,7 @@
     margin-right: 10px;
     cursor: pointer;
     width: 120px;
+    font-size: 17;
 }
 
 .tableFilters li.active {

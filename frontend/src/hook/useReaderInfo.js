@@ -28,9 +28,10 @@ export default function useReaderInfo(accountId) {
         getReaderInfo();
     }, [accountId]);
 
+    const readerId = readerInfo._id;
     const fullName = readerInfo.fullName;
     const dateOfBirth = readerInfo.dateOfBirth;
     const phoneNumber = readerInfo.phoneNumber;
     const avatar = readerInfo.avatar;
-    return {fullName, dateOfBirth, phoneNumber, avatar, refreshReaderInfo: getReaderInfo};
+    return {readerId, fullName, dateOfBirth, phoneNumber, avatar, refreshReaderInfo: getReaderInfo};
 }

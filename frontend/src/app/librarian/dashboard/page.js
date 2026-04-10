@@ -15,6 +15,7 @@ import Inventory from "../inventory/page";
 import BorrowChart from "../borrowChart/page";
 import Top5MostBorrowed from "../top5mostBorrowed/page";
 import TopCategoriesBarChart from "../topCategoriesBarChart/page";
+import LibraryChart from "../reports/page";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -65,7 +66,7 @@ export default function Dashboard() {
     <>
     <div className="container">
             <div className="main">
-                    <div className="header">
+                <div className="header">
                         <div className="webicon">
                         </div>
                         <div className="user">
@@ -90,7 +91,7 @@ export default function Dashboard() {
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
                         </div>
-                    </div>
+                </div>
 
                 <aside className="sidebar">
                     <div style={{marginTop:10}}>
@@ -187,8 +188,9 @@ export default function Dashboard() {
                                     marginBottom: "15px"
                                 }}
                             >
-                                Tỉ lệ trả sách đúng hạn vs Quá hạn
+                                Hiệu quả chuyển đổi đơn đặt
                             </div>
+                            <LibraryChart/>
                         </div>
                         <div className={styles.miniCard}>
                             <div 
@@ -205,8 +207,15 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </div>
+
             </div>
         
+                <div className="footer">
+                    <div className={styles.word}>THƯ VIỆN CẦU GIẤY</div>
+                    <div className={styles.word}>Address: Cầu Giấy, Hà Nội, Việt Nam</div>
+                    <div className={styles.word}>Contact: 0912 xxx xxx</div>
+                    <div className={styles.word}>Copyright © Library System</div>
+                </div>
     </div>
     </>
     )

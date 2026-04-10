@@ -12,16 +12,18 @@ import useReaderInfo from "@/hook/useReaderInfo";
 import useAvailableBooks from "@/hook/useAvailableBooks";
 import { useState } from "react";
 import BookDesModal from "./bookDesModal";
+import api from "@/lib/axios";
+
 
 export default function AvailableBook() {
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
-    const {fullName, avatar} = useReaderInfo(account?.id);
+    const {fullName, avatar, readerId} = useReaderInfo(account?.id);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedBook, setSelectedBook] = useState(null);
     const [search, setSearch] = useState("");
     const [choosenCategory, setChoosenCategory] = useState("");
-    const {availableBooks, totalPages, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory, search);
+    const {availableBooks, totalPages, loading, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory, search);
     const categoryList = [
         { value: [""], label: "Tất cả" },
         { value: ["technology"], label: "Công nghệ" },
@@ -49,17 +51,26 @@ export default function AvailableBook() {
         { value: ["art"], label: "Nghệ thuật / Thiết kế" },
         { value: ["cooking"], label: "Ẩm thực / Nấu ăn" },
         { value: ["travel"], label: "Du lịch / Khám phá" },
-        { value: ["biography"], label: "Tiểu sử / Hồi ký" }
+        { value: ["biography"], label: "Tiểu sử / Hồi ký" },
+        { value: ["general"], label: "Tổng hợp"}
     ];
     const handleLogout = () => {
         logout();
         router.push("/");
     };
-    console.log("RENDER AvailableBook - page.js:30");
-    useEffect(() => {
-        console.log("selectedBook:", selectedBook);
-    }, [selectedBook]);
-    
+
+    const handleSubmit = async(id) => {
+        try {
+            const response = await api.post(`reader/borrowBook/${id}`, {
+                readerId: readerId
+            });
+            refreshAvailableBooks();
+            if(response.status === 200) alert("Mượn sách thành công! Bạn có 3 ngày để đến nhận sách.");
+        } catch (err) {
+            alert(err.response?.data?.message || "Đã có lỗi xảy ra khi hệ thống xử lý yêu cầu thêm sách");
+        }
+    }
+
   return (
     <>
     <div className="container">
@@ -147,42 +158,58 @@ export default function AvailableBook() {
                         ))}
                     </select>
                 </div>
+                {loading && (
+                    <div 
+                        style={{
+                            color: "white",
+                            fontSize: "20px",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignContent: "center",
+                            width: "100%",
+                            height: "100%"
+                        }}
+                    >
+                        Đang tải trang...
+                    </div>
+                )} 
                 <div className={styles.grid}>
                     {availableBooks.length > 0 ? (
                         availableBooks.map((availableBook) => (
                             <div 
                                 className={styles.card} 
                                 key={availableBook._id}
-                                onClick={() =>  setSelectedBook(availableBook)}  
-                                style={{
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s ease',
-                                }}
                             >
-                                <img
-                                    src={availableBook.image}
-                                    className={styles.bookImage}
-                                />
-                                <div className={styles.bookDescription}>
-                                    <div>
-                                        Tên sách: {availableBook.title}
-                                    </div>
-                                    <div>
-                                        Tác giả: {availableBook.author}
-                                    </div>
-                                    
-                                    {console.log(availableBook.publisherId.name)}
-                                    <div>
-                                        Thể loại: {   
-                                            categoryList
-                                            .filter(c => Array.isArray(c.value) && c.value.some(v => availableBook.category.includes(v)))
-                                            .map(c => c.label)
-                                            .join(', ')
-                                        }
-                                    </div> 
+                                <div 
+                                    onClick={() =>  setSelectedBook(availableBook)}  
+                                    style={{
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        height: "650px"
+                                    }}
+                                >
+                                    <img
+                                        src={availableBook.image}
+                                        className={styles.bookImage}
+                                    />
+                                    <div className={styles.bookDescription}>
+                                        <div>
+                                            Tên sách: {availableBook.title}
+                                        </div>
+                                        
+                                        {console.log(availableBook.publisherId.name)}
+                                        <div>
+                                            Thể loại: {   
+                                                categoryList
+                                                .filter(c => Array.isArray(c.value) && c.value.some(v => availableBook.category.includes(v)))
+                                                .map(c => c.label)
+                                                .join(', ')
+                                            }
+                                        </div> 
 
-                                    <div style={{color: '#8a0d0d', fontWeight: "bolder"}}>
-                                        Còn: {availableBook.availableCopies} cuốn
+                                        <div style={{color: '#8a0d0d', fontWeight: "bolder"}}>
+                                            Còn: {availableBook.availableCopies} cuốn
+                                        </div>
                                     </div>
                                 </div>
                                 <div className={styles.pagination}>
@@ -196,21 +223,23 @@ export default function AvailableBook() {
                                                 width:"60%",
                                                 margin: "auto",
                                                 fontSize: "14px"
-                                            }}>
+                                            }}
+                                            onClick={() => handleSubmit(availableBook._id)}
+                                        >
                                             Mượn sách
                                         </Button>
                                     ) : (
                                         <Button 
                                             variant="contained"
                                             sx={{
-                                                background: '#5e0809',
+                                                background: '#525050',
                                                 color: '#f6f8f9',
                                                 height: "80%",
                                                 width:"60%",
                                                 margin: "auto",
                                                 fontSize: "14px"
                                             }}>
-                                            Đặt trước
+                                            Hết sách
                                         </Button>
                                     )
                                     }
@@ -239,6 +268,12 @@ export default function AvailableBook() {
                     </Button>
                 </div>
             </div>
+        </div>
+        <div className="footer">
+            <div className={styles.word}>THƯ VIỆN CẦU GIẤY</div>
+            <div className={styles.word}>Address: Cầu Giấy, Hà Nội, Việt Nam</div>
+            <div className={styles.word}>Contact: 0912 xxx xxx</div>
+            <div className={styles.word}>Copyright © Library System</div>
         </div>
         {
             selectedBook && (

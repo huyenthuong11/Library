@@ -33,8 +33,7 @@ export default function BorrowChart() {
     registered: item.registered,
     borrowed: item.borrowed,
     returned: item.returned
-  }))
-  .slice(-12);
+  }));
 
   console.log(chartData);
   return (
@@ -45,7 +44,8 @@ export default function BorrowChart() {
             <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="date"
-                tick={{ fontSize: 16 }}
+                textAnchor="end"
+                tick={{ fontSize: 15 }}
               />
               <YAxis/>
               <Tooltip />

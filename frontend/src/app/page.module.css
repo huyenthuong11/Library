@@ -11,10 +11,11 @@
 .grid {
   display: grid;
   margin-top: 50px;
-  grid-template-columns: repeat(3, 480px);
+  grid-template-columns: repeat(3, 600px);
   gap: clamp(15px, 2vw, 30px);
   grid-auto-rows: 250px;
-  
+  gap: 50px;
+  margin-bottom: 30px;
 }
 
 .card {
@@ -33,17 +34,6 @@
   margin-bottom: 10px;
 }
 
-.footer {
-  flex: 1;
-  width: 100%;
-  height: max-content;
-  margin-top: 30px;
-  background-color: #323334;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  padding: 10px;
-}
 
 .word {
   margin-right: 10px;

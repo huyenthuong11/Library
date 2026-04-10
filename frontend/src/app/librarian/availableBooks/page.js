@@ -285,6 +285,20 @@ export default function AvailableBook() {
                                             <option key={c.value.join(",")} value={c.value}>{c.label}</option>
                                         ))}
                                     </select>
+                                    <Button 
+                                        sx={{
+                                            backgroundColor: "#d2dfd5",
+                                            color: "#0b485e",
+                                            border: "none",
+                                            padding: "10px 15px",
+                                            borderRadius: "5px",
+                                            cursor: "pointer",
+                                            marginLeft: "10px"
+                                        }}
+                                        onClick={() => setOpenAddBookBar(true)}
+                                    >
+                                        <AddBoxOutlined/>
+                                    </Button>
                                 </div>
                                 <div className={styles.subHeader}>
                                     <div className={styles.tableFilters}>
@@ -301,22 +315,6 @@ export default function AvailableBook() {
                                                 ))
                                             }
                                         </ul>
-                                    </div>
-                                    <div className={styles.filterActions}>
-                                        <Button 
-                                            sx={{
-                                                backgroundColor: "#d2dfd5",
-                                                color: "#0b485e",
-                                                border: "none",
-                                                padding: "10px 15px",
-                                                borderRadius: "5px",
-                                                cursor: "pointer",
-                                                marginRight: "10px"
-                                            }}
-                                            onClick={() => setOpenAddBookBar(true)}
-                                        >
-                                            <AddBoxOutlined/>
-                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -801,6 +799,13 @@ export default function AvailableBook() {
                             </Button>
                         </div>
                     </div>
+                </div>
+                
+                <div className="footer">
+                    <div className={styles.word}>THƯ VIỆN CẦU GIẤY</div>
+                    <div className={styles.word}>Address: Cầu Giấy, Hà Nội, Việt Nam</div>
+                    <div className={styles.word}>Contact: 0912 xxx xxx</div>
+                    <div className={styles.word}>Copyright © Library System</div>
                 </div>
                 {openEditBar && (
                     <EditBook

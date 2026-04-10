@@ -133,21 +133,6 @@ export default function BookDesModal({
                                     </div>                     
                                 </div>
                             </div>
-                            <Button component="span"
-                                sx={{
-                                    background: '#083d5e',
-                                    color: '#f6f8f9',
-                                    fontSize: '10px',
-                                    textAlign: "center",
-                                    height: "20px",
-                                    width:"30%",
-                                    margin: "auto",
-                                    marginTop: "10px",
-                                    marginBottom: "10px"
-                                }}
-                            >
-                                Mượn sách
-                            </Button>
                         </div>
                     </div>
                 </div>
