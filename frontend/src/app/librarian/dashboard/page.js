@@ -12,9 +12,9 @@ import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import CategoryPieChart from "../categoryChart/page";
 import api from "@/lib/axios";
 import Inventory from "../inventory/page";
-
-
-
+import BorrowChart from "../borrowChart/page";
+import Top5MostBorrowed from "../top5mostBorrowed/page";
+import TopCategoriesBarChart from "../topCategoriesBarChart/page";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -116,9 +116,18 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className={styles.grid}>
-                        <div className={styles.cardHeight}>Thông báo & Yêu cầu mới</div>
-                        <div className={styles.card}>
-                            <CategoryPieChart data={categoryData}/>
+                        <div className={styles.cardHeight}>
+                            <div 
+                                style={{
+                                    borderRadius: "20px",
+                                    fontWeight: "bolder",
+                                    fontSize: "16px",
+                                    color: "#7e7d7d",
+                                    marginBottom: "15px"
+                                }}
+                            >
+                                Thông báo & Yêu cầu mới
+                            </div>
                         </div>
                         <div className={styles.card}>
                             <Inventory 
@@ -126,10 +135,74 @@ export default function Dashboard() {
                                 total={total}
                             />
                         </div>
-                        <div className={styles.card}>top5 sách được mượn nhiều nhất</div>
-                        <div className={styles.card}>sách mượn theo tháng</div>
-                        <div className={styles.card}>tỷ lệ trạng thái sách</div>
-                        <div className={styles.card}>duyệt yêu cầu nhanh</div>
+                        <div className={styles.card}>
+                            <div 
+                                style={{
+                                    borderRadius: "20px",
+                                    fontWeight: "bolder",
+                                    fontSize: "16px",
+                                    color: "#7e7d7d",
+                                    marginBottom: "15px"
+                                }}
+                            >
+                                Top 5 thể loại được yêu thích nhất
+                            </div>
+                            <TopCategoriesBarChart/>
+                        </div>
+                        <div className={styles.card}>
+                            <div 
+                                style={{
+                                    borderRadius: "20px",
+                                    fontWeight: "bolder",
+                                    fontSize: "16px",
+                                    color: "#7e7d7d",
+                                    marginBottom: "15px"
+                                }}
+                            >
+                                Top 5 sách được mượn nhiều nhất gần đây
+                            </div>
+                            <Top5MostBorrowed/>
+                        </div>
+                        <div className={styles.cardWidth}>
+                            <div 
+                                style={{
+                                    borderRadius: "20px",
+                                    fontWeight: "bolder",
+                                    fontSize: "16px",
+                                    color: "#7e7d7d",
+                                    marginBottom: "15px"
+                                }}
+                            >
+                                Hoạt động mượn trả sách theo tháng
+                            </div>
+                            <BorrowChart/>
+                        </div>
+                        <div className={styles.card}>
+                            <div 
+                                style={{
+                                    borderRadius: "20px",
+                                    fontWeight: "bolder",
+                                    fontSize: "16px",
+                                    color: "#7e7d7d",
+                                    marginBottom: "15px"
+                                }}
+                            >
+                                Tỉ lệ trả sách đúng hạn vs Quá hạn
+                            </div>
+                        </div>
+                        <div className={styles.miniCard}>
+                            <div 
+                                style={{
+                                    borderRadius: "20px",
+                                    fontWeight: "bolder",
+                                    fontSize: "16px",
+                                    color: "#7e7d7d",
+                                    marginBottom: "15px"
+                                }}
+                            >
+                            <CategoryPieChart data={categoryData}/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

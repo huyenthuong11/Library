@@ -89,15 +89,19 @@ export default function CategoryPieChart ({ data }) {
     const options = {
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+            padding: 0
+        },
         plugins: {
             legend: {
-                position: 'right',
-                labels: { usePointStyle: true, padding: 20 }
+                position: 'bottom',
+                labels: { usePointStyle: true}
             },
             title: {
                 display: true,
                 text: 'Cơ cấu thể loại sách',
-                font: { size: 16 }
+                font: { size: 16 },
+                color: "#7e7d7d"
             }
         }
     };

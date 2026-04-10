@@ -42,7 +42,8 @@ export default function BookDesModal({
         { value: ["art"], label: "Nghệ thuật / Thiết kế" },
         { value: ["cooking"], label: "Ẩm thực / Nấu ăn" },
         { value: ["travel"], label: "Du lịch / Khám phá" },
-        { value: ["biography"], label: "Tiểu sử / Hồi ký" }
+        { value: ["biography"], label: "Tiểu sử / Hồi ký" },
+        { value: ["general"], label: "Tổng hợp" }
     ];
     
     

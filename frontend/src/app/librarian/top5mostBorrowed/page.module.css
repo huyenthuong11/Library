@@ -1,0 +1,75 @@
+.container {
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  scroll-behavior: smooth;
+  min-width: 0; 
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.cardMain::-webkit-scrollbar {
+  display: none;
+}
+
+.bookList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bookItem {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #a6a6a63c;
+  box-shadow: 0 0 1px 1px #b2b2b247;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.bookItem:hover {
+  background: #f9f9f9;
+}
+
+.bookRank {
+  font-size: 18px;
+  font-weight: bold;
+  color: #555;
+  width: 25px;
+}
+
+.bookCover {
+  width: 45px;
+  height: 65px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin: 0 12px;
+  background-color: #eee;
+}
+
+.bookInfo {
+  flex: 1;
+}
+
+.bookName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 2px;
+}
+
+.bookAuthor {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.bookCount {
+  font-size: 12px;
+  color: #444;
+}
+
+.bookCount strong {
+  color: #2c3e50;
+}
