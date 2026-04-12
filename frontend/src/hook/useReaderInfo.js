@@ -33,5 +33,6 @@ export default function useReaderInfo(accountId) {
     const dateOfBirth = readerInfo.dateOfBirth;
     const phoneNumber = readerInfo.phoneNumber;
     const avatar = readerInfo.avatar;
-    return {readerId, fullName, dateOfBirth, phoneNumber, avatar, refreshReaderInfo: getReaderInfo};
+    const borrowTurn = readerInfo.borrowTurn;
+    return {readerId, fullName, dateOfBirth, phoneNumber, avatar, borrowTurn, refreshReaderInfo: getReaderInfo};
 }

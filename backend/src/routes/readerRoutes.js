@@ -81,9 +81,10 @@ router.post("/borrowBook/:id", authMiddleware, checkRole(["reader"]), async(req,
     session.startTransaction();
     try {
         const {readerId} = req.body;
-        const reader = await Reader.findById(readerId).session(session);;
-        const book = await Document.findById(req.params.id).session(session);;
+        const reader = await Reader.findById(readerId).session(session);
+        const book = await Document.findById(req.params.id).session(session);
         if (!reader) return res.status(404).json({ message: "Người dùng không tồn tại!" });
+        if(reader.borrowTurn <= 0) return res.status(400).json({ message: "Người dùng không đủ lượt mượn sách!" })
         if(!book) return res.status(404).json({ message: "Sách không tồn tại!" });
         if(book.availableCopies === 0) return res.status(404).json({ message: "Sách này hiện đã bị mượn hết!" });
         const doc = await Document.findOne(
@@ -132,7 +133,8 @@ router.post("/borrowBook/:id", authMiddleware, checkRole(["reader"]), async(req,
             reader._id,
             {
                 $inc: {
-                    "totalBorrow": 1
+                    "totalBorrow": 1,
+                    "borrowTurn": -1
                 }
             },
             {session}
@@ -298,9 +300,27 @@ router.patch("/cancelReserved/:readerId/:copyId", authMiddleware, checkRole(["re
     }
 })
 
-//POST api/reader/borrowedHistory/:id
-router.post("/borrowHistory/:id", authMiddleware, checkRole(["reader"]), async(req, res) => {
-    
+/*
+//POST api/reader/borrowedHistory/:readerId
+router.post("/borrowHistory/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const skip = (page - 1) * 20;
+        const borrowedHistory = BorrowRecord
+        .find(
+            {$elemMatch: {
+                readerId: req.params.readerId,
+                action: "borrowed"
+            }}
+        )
+        .populate("readerId")
+        .populate("documentId")
+        .skip(skip)
+        .limit(20);
+        res.status(200).json(borrowedHistory);
+    } catch (err) {
+        res.status(500).json({message: "Tải lịch sử mượn thất bại!"})
+    }
 })
-
+*/
 export default router;

@@ -18,7 +18,7 @@ import api from "@/lib/axios";
 export default function AvailableBook() {
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
-    const {fullName, avatar, readerId} = useReaderInfo(account?.id);
+    const {fullName, avatar, readerId, borrowTurn} = useReaderInfo(account?.id);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedBook, setSelectedBook] = useState(null);
     const [search, setSearch] = useState("");
@@ -157,6 +157,22 @@ export default function AvailableBook() {
                             <option key={c.value} value={c.value}>{c.label}</option>
                         ))}
                     </select>
+                </div>
+                <div
+                    style={{
+                        borderRadius: "8px",
+                        background: "white",
+                        color: "#580101",
+                        marginTop: "10px",
+                        marginLeft:"35px",
+                        padding: "5px",
+                        fontWeight: "bold",
+                        width: "fit-content",
+                        fontSize: "15px",
+                        fontFamily: "Quicksand, sans-serif"
+                    }}
+                >
+                    Còn: {borrowTurn} lượt mượn sách
                 </div>
                 {loading && (
                     <div 

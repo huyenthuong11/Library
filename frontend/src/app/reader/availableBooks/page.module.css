@@ -71,12 +71,12 @@
     font-size: clamp(10px, 1vw, 20px);
     display: flex;
     flex-direction: column;
-    height: 470p;
+    height: 550px;
 }
 
 .bookImage {
     width: 100%;
-    height: 400px;   
+    height: 300px;   
     background: rgb(62, 27, 27);
     object-fit: cover;
     flex-shrink: 0;
@@ -94,6 +94,7 @@
     flex-direction: column;
     padding: 5px;
     font-weight: bold;
+    font-size: 14px;
 }
 .pagination {
     display: flex;

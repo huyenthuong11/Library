@@ -90,6 +90,7 @@ export default function BookStore() {
     ];
 
     const statusList = [
+        {value: null, label: "Tất cả"},
         {value: "reserved", label: "Đặt trước"},
         {value: "borrowed", label: "Đang mượn"},
         {value: "overdue", label: "Quá hạn"}

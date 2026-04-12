@@ -273,6 +273,21 @@ router.patch("/updateCopy/:id", authMiddleware, checkRole(["admin", "librarian"]
                 message: "Chỉ có thể thay đổi độc giả khi sách ở trạng thái 'Có sẵn'"
             });
         }
+        if (
+            currentStatus === "available" &&
+            (status === "reserved" || status === "borrowed")
+        ) {
+            const reader = await Reader.findById(readerId);
+            if (!reader) {
+                return res.status(404).json({ message: "Không tìm thấy độc giả" });
+            }
+
+            if (reader.borrowTurn <= 0) {
+                return res.status(400).json({
+                    message: "Người đọc đã hết lượt mượn sách!"
+                });
+            }
+        }
         if (status === "reserved" || status === "borrowed") {
             if (!readerId) {
                 return res.status(400).json({ message: "ID độc giả là bắt buộc khi cập nhật trạng thái thành [Đặt trước] hoặc [Đang mượn]" });
@@ -308,7 +323,10 @@ router.patch("/updateCopy/:id", authMiddleware, checkRole(["admin", "librarian"]
                 }
             } else if (currentStatus === "available") {
                 updateFields.$inc.availableCopies = -1;
-                
+                await Reader.findByIdAndUpdate(
+                    readerId,
+                    {$inc: {"borrowTurn": -1}}
+                );
                 if (status === "borrowed") {
                     updateFields.$inc.borrowedCount = 1;
                     updateFields.$set["locations.$.dueDate"] = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
@@ -327,6 +345,10 @@ router.patch("/updateCopy/:id", authMiddleware, checkRole(["admin", "librarian"]
                 if (currentStatus === "borrowed") {
                     actionRecord = "returned";
                 }
+                await Reader.findByIdAndUpdate(
+                    currentReaderId,
+                    {$inc: {"borrowTurn": 1}}
+                );
             }
         }
 
