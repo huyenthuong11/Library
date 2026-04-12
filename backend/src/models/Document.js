@@ -87,7 +87,12 @@ const documentSchema = new mongoose.Schema(
                 },
                 readerName: {type: String, default: null},
                 createdAt: { type: Date, default: null },
-                dueDate: { type: Date, default: null }
+                dueDate: { type: Date, default: null },
+                remainingExtendCount: {
+                    type: Number,
+                    required: true,
+                    default: 3
+                }
             }
         ]
     },

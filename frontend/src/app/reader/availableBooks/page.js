@@ -238,7 +238,9 @@ export default function AvailableBook() {
                                                 width:"60%",
                                                 margin: "auto",
                                                 fontSize: "14px"
-                                            }}>
+                                            }}
+                                            disabled
+                                        >
                                             Hết sách
                                         </Button>
                                     )

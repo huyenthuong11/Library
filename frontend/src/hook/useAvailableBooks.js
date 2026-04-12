@@ -39,8 +39,11 @@ export default function useAvailableBooks(page, category, search) {
         }
     }
     useEffect(() => {
-        console.log("run effect - useAvailableBooks.js:24");
-        getAvailableBooks();
+        const delay = setTimeout(() => {
+            getAvailableBooks();
+        }, 400);
+
+        return () => clearTimeout(delay);
     }, [page, category, search]);
     return (
         {availableBooks, loading, totalPages, inventorySummary, total, refreshAvailableBooks: getAvailableBooks}

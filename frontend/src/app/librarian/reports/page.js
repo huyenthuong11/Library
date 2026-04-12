@@ -23,7 +23,8 @@ export default function LibraryChart() {
         name: "Thống kê mượn sách",
         "webConversion": data.webConversion,
         "walkIn": data.walkIn,
-        "expired": data.expired
+        "expired": data.expired,
+        "cancel": data.cancel
     }];
 
     console.log("report:", chartData);
@@ -57,6 +58,7 @@ export default function LibraryChart() {
                             fontSize: '14px'
                         }} 
                     />
+                    <Bar dataKey="cancel" name="Đăng ký mượn - Hủy" fill='#ff0606' radius={[4, 4, 0, 0]} barSize={60}/>
                     <Bar dataKey="webConversion" name = "Mượn qua Web - Đến lấy" fill="#22d3ee" radius={[4, 4, 0, 0]} barSize={60} />
                     <Bar dataKey="walkIn" name = "Mượn trực tiếp" fill="#818cf8" radius={[4, 4, 0, 0]} barSize={60} />
                     <Bar dataKey="expired" name="Đơn đặt hết hạn" fill="#f87171" radius={[4, 4, 0, 0]} barSize={60} />

@@ -8,7 +8,8 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import checkRole from "../middleware/authRoleMiddleware.js";
 import upload from "../middleware/imageMiddleware.js";
 import path from "path";
-import fs from "fs";
+import fs, { read } from "fs";
+import { create } from "domain";
 
 const router = express.Router();
 
@@ -43,7 +44,6 @@ router.get("/getCategoryChartData", authMiddleware, checkRole(["admin", "librari
                 percentage: ((othersCount / totalDocs) * 100).toFixed(2)
             });
         }
-        console.log(totalDocs, formattedData);
 
         res.status(200).json({
             total: totalDocs,
@@ -53,5 +53,99 @@ router.get("/getCategoryChartData", authMiddleware, checkRole(["admin", "librari
         res.status(500).json({ message: error.message });
     }
 });
+
+//GET /api/chart/getBorrowTrendData
+router.get("/getBorrowTrendData", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) =>{
+    try {
+        const borrowTrendData = await BorrowRecord.aggregate([
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: "%m-%Y",
+                            date: "$createdAt"
+                        }
+                    },
+                    registered: { $sum: { $cond: [{ $eq: ["$action", "registered"] }, 1, 0] } },
+                    borrowed: { $sum: { $cond: [{ $eq: ["$action", "borrowed"] }, 1, 0] } },
+                    returned: { $sum: { $cond: [{ $eq: ["$action", "returned"] }, 1, 0] } }
+                }
+            },
+            {$sort: {_id: 1}}
+        ])
+        res.status(200).json(borrowTrendData);
+    } catch (err) {
+        res.status(500).json({ message: "Failed to get borrow trend data" });
+    }
+})
+
+//GET /api/chart/topCategory
+router.get("/topCategory", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) =>{
+    try {
+        const topCategory = await Document.aggregate([
+            { $unwind: "$category" },
+            {
+                $group: {
+                    _id: "$category",
+                    borrowedCount: {$sum: "$borrowedCount"}
+                }
+            },
+            { $sort: {borrowedCount: -1} },
+            { $limit: 5 }
+        ]);
+        res.status(200).json(topCategory);
+    } catch (err) {
+        res.status(500).json({ message: "Failed to get top category" });
+    }
+})
+
+//lấy data để làm tỷ lệ đặt/lấy
+//GET /api/chart/conversionStats
+router.get("/conversionStats", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+    try {
+        const records = await BorrowRecord.find({
+            action: { $in: ["registered", "borrowed", "canceled"] }
+        }).sort({createdAt: 1});
+        const pendingReservations = {};
+        let stats = {
+            webConversion: 0,
+            walkIn: 0,
+            expired: 0,
+            cancel: 0
+        };
+        const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+        records.forEach(record => {
+            const key = `${record.readerId}-${record.copyId}`;
+            if (record.action === "registered") {
+                if (!pendingReservations[key])
+                pendingReservations[key] = record.createdAt;
+            } else if (record.action === "canceled") {
+                if(pendingReservations[key]) {
+                    stats.cancel++;
+                    delete pendingReservations[key];
+                }
+            } else if (record.action === "borrowed") {
+                const regTime = pendingReservations[key];
+                if (regTime && record.createdAt - regTime <= THREE_DAYS_MS) {
+                    stats.webConversion++;
+                    delete pendingReservations[key];
+                } else {
+                    stats.walkIn++;
+                }
+            }    
+        });
+
+        for (const key in pendingReservations) {
+            if (Date.now() - new Date(pendingReservations[key]).getTime() > THREE_DAYS_MS) {
+                stats.expired++;
+            }
+        }
+        console.log(stats);
+        res.status(200).json(stats);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Failed to get data" });
+    }    
+})
 
 export default router;

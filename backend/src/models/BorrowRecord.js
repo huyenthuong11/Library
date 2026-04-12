@@ -15,7 +15,7 @@ const borrowRecordSchema = new mongoose.Schema(
         },
         action: {
             type: String,
-            enum: ["registered", "borrowed", "returned"],
+            enum: ["registered", "borrowed", "returned", "canceled"],
             required: true,
         },
     },

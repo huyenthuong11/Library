@@ -44,7 +44,7 @@ export default function AvailableBook() {
     const [isDirty, setIsDirty] = useState(false);
     const {locationList} = useLocationList();
     const [openAddCopyModal, setOpenAddCopyModal] = useState(null);
-
+    const [now, setNow] = useState(Date.now());
     const availableLocationList = locationList
         .filter((s) => s.usedStorage < 100)
         .map(s => ({
@@ -56,11 +56,13 @@ export default function AvailableBook() {
         value: reader._id,
         label: `${reader._id} - ${reader.fullName}`
     }));
+
     const [editData, setEditData] = useState({
         position: "",
         status: "",
         readerId: "",
     });
+    
     const handleChange = (e) => {
         const { name, value } = e.target;
         setEditData(prev => {
@@ -204,7 +206,13 @@ export default function AvailableBook() {
         ],
     };
 
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setNow(Date.now()); 
+        }, 60000); 
 
+        return () => clearInterval(timer); 
+    }, []);
 
     return (
         <>
@@ -654,15 +662,23 @@ export default function AvailableBook() {
                                                                                                     {l.position}
                                                                                                 </td>
                                                                                                 <td>
-                                                                                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                                                                        <div className={`${styles['status']} ${styles[`${l.status}`]}`}></div>
-                                                                                                        {(() => {
-                                                                                                            const matchedStatus = statusList.find(
-                                                                                                                s => s.value === l.status
-                                                                                                            );
-                                                                                                            return matchedStatus ? matchedStatus.label : l.status;
-                                                                                                        })()}
-                                                                                                    </div>
+                                                                                                    {Math.floor((Date.now() - new Date(l.dueDate))) > 0 && l.dueDate ? (
+                                                                                                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                                                                                            <div className={`${styles['status']} ${styles[`${"overdue"}`]}`}>
+                                                                                                            </div>
+                                                                                                            Quá hạn
+                                                                                                        </div>
+                                                                                                    ) : (
+                                                                                                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                                                                                            <div className={`${styles['status']} ${styles[`${l.status}`]}`}></div>
+                                                                                                            {(() => {
+                                                                                                                const matchedStatus = statusList.find(
+                                                                                                                    s => s.value === l.status
+                                                                                                                );
+                                                                                                                return matchedStatus ? matchedStatus.label : l.status;
+                                                                                                            })()}
+                                                                                                        </div>
+                                                                                                    )}
                                                                                                 </td>
                                                                                                 { 
                                                                                                     l.readerId ? (
@@ -682,8 +698,13 @@ export default function AvailableBook() {
                                                                                                                     :""
                                                                                                                 }
                                                                                                             </div>
-                                                                                                            {l.status === "overdue" && (
-                                                                                                                <div>Đã muộn {Math.floor((Date.now() - new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày</div>
+                                                                                                            {Math.floor((Date.now() - new Date(l.dueDate))) > 0 && (
+                                                                                                                <div>
+                                                                                                                    Đã muộn {Math.floor((Date.now() - 
+                                                                                                                    new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((Date.now() - 
+                                                                                                                    new Date(l.dueDate)) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((Date.now() - 
+                                                                                                                    new Date(l.dueDate)) % (1000 * 60 * 60)) / (1000 * 60))} phút
+                                                                                                                </div>
                                                                                                             )}
                                                                                                         </td>
                                                                                                     ) : (

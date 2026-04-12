@@ -65,7 +65,7 @@ router.get("/availableBook", async(req, res) => {
     }
 })
 
-// GET /api/books/5newestBooks
+// GET /api/books/10newestBooks
 router.get("/10newestBooks", async(req, res) => {
     try {
         const books = await Document
@@ -323,6 +323,7 @@ router.patch("/updateCopy/:id", authMiddleware, checkRole(["admin", "librarian"]
                 updateFields.$set["locations.$.readerName"] = null;
                 updateFields.$set["locations.$.dueDate"] = null;
                 updateFields.$set["locations.$.createdAt"] = null;
+                updateFields.$set["locations.$.remainingExtendCount"] = 3;
                 if (currentStatus === "borrowed") {
                     actionRecord = "returned";
                 }

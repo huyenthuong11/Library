@@ -28,6 +28,7 @@ body {
   grid-template-columns: 200px 1fr;
   grid-template-rows: 60px 1fr;
   min-height: 100vh; 
+  
 }
 
 .header {
@@ -49,7 +50,7 @@ body {
 
 .websiteName {
   font-family: Be Vietnam Pro, sans-serif;
-  font-size: 24px;
+  font-size: 30px;
   font-weight: bold;
   color: #093149;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
@@ -115,7 +116,7 @@ body {
   flex-direction: column;
   gap: 12px;
   max-width: 100%;
-  font-size: 16px;
+  font-size: 17px;
   
 }
 
