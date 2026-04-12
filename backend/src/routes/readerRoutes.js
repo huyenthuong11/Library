@@ -289,6 +289,16 @@ router.patch("/cancelReserved/:readerId/:copyId", authMiddleware, checkRole(["re
             {session}
         );
 
+        await Reader.findByIdAndUpdate(
+            reader._id,
+            {
+                $inc: {
+                    "borrowTurn": 1
+                }
+            },
+            {session}
+        );
+
         await session.commitTransaction();
         res.status(200).json({ message: "Hủy mượn sách thành công!" });
     } catch (error) {

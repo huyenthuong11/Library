@@ -190,7 +190,7 @@ export default function AvailableBook() {
                     </div>
                 )} 
                 <div className={styles.grid}>
-                    {availableBooks.length > 0 ? (
+                    {availableBooks.length > 0 && (
                         availableBooks.map((availableBook) => (
                             <div 
                                 className={styles.card} 
@@ -264,11 +264,7 @@ export default function AvailableBook() {
                                 </div>
                             </div>
                             ))
-                        ) : (
-                            <div>
-                                Không còn cuốn sách nào trong kho!
-                            </div>
-                    )}
+                        )}
                 </div>
                 <div className={styles.pagination}>
                     <Button 
