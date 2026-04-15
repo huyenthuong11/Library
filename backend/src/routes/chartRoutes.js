@@ -91,7 +91,7 @@ router.get("/topCategory", authMiddleware, checkRole(["admin", "librarian"]), as
                 }
             },
             { $sort: {borrowedCount: -1} },
-            { $limit: 5 }
+            { $limit: 6 }
         ]);
         res.status(200).json(topCategory);
     } catch (err) {

@@ -70,7 +70,7 @@ router.get("/10newestBooks", async(req, res) => {
     try {
         const books = await Document
         .find()
-        .sort({createAt: -1})
+        .sort({createdAt: -1})
         .limit(10);
 
         res.json({

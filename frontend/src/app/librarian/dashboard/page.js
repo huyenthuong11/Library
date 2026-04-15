@@ -16,6 +16,7 @@ import BorrowChart from "../borrowChart/page";
 import Top5MostBorrowed from "../top5mostBorrowed/page";
 import TopCategoriesBarChart from "../topCategoriesBarChart/page";
 import LibraryChart from "../reports/page";
+import DashboardNotiCard from "../newsAndAnnouces/page";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -110,7 +111,7 @@ export default function Dashboard() {
                 </aside>
 
                 <div className={styles.main}>
-                    <div className="banner">
+                    <div className={styles.banner}>
                         <div className="bannerFill">
                             <div className="headerBanner">KHÁM PHÁ THẾ GIỚI TRI THỨC</div>
                             <div className="fullName">Hệ thống Quản lý thư viện</div>
@@ -129,6 +130,7 @@ export default function Dashboard() {
                             >
                                 Thông báo & Yêu cầu mới
                             </div>
+                            <DashboardNotiCard/>
                         </div>
                         <div className={styles.card}>
                             <Inventory 
@@ -146,7 +148,7 @@ export default function Dashboard() {
                                     marginBottom: "15px"
                                 }}
                             >
-                                Top 5 thể loại được yêu thích nhất
+                                Top 6 thể loại được yêu thích nhất
                             </div>
                             <TopCategoriesBarChart/>
                         </div>
@@ -160,7 +162,7 @@ export default function Dashboard() {
                                     marginBottom: "15px"
                                 }}
                             >
-                                Top 5 sách được mượn nhiều nhất gần đây
+                                Top 5 sách được yêu thích nhất
                             </div>
                             <Top5MostBorrowed/>
                         </div>

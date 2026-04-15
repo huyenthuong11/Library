@@ -310,27 +310,53 @@ router.patch("/cancelReserved/:readerId/:copyId", authMiddleware, checkRole(["re
     }
 })
 
-/*
+
+
+/**
 //POST api/reader/borrowedHistory/:readerId
 router.post("/borrowHistory/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const skip = (page - 1) * 20;
-        const borrowedHistory = BorrowRecord
-        .find(
-            {$elemMatch: {
-                readerId: req.params.readerId,
-                action: "borrowed"
-            }}
-        )
-        .populate("readerId")
-        .populate("documentId")
-        .skip(skip)
-        .limit(20);
-        res.status(200).json(borrowedHistory);
+        const records = await BorrowRecord.find().sort({createdAt: 1});
+        const pendingReservations = {};
+        let stats = {
+            webConversion: 0,
+            walkIn: 0,
+            expired: 0,
+            cancel: 0
+        };
+        const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+        records.forEach(record => {
+            const key = `${record.readerId}-${record.copyId}`;
+            if (record.action === "registered") {
+                if (!pendingReservations[key])
+                pendingReservations[key] = record.createdAt;
+            } else if (record.action === "canceled") {
+                if(pendingReservations[key]) {
+                    stats.cancel++;
+                    delete pendingReservations[key];
+                }
+            } else if (record.action === "borrowed") {
+                const regTime = pendingReservations[key];
+                if (regTime && record.createdAt - regTime <= THREE_DAYS_MS) {
+                    stats.webConversion++;
+                    delete pendingReservations[key];
+                } else {
+                    stats.walkIn++;
+                }
+            }    
+        });
+
+        for (const key in pendingReservations) {
+            if (Date.now() - new Date(pendingReservations[key]).getTime() > THREE_DAYS_MS) {
+                stats.expired++;
+            }
+        }
+        console.log(stats);
+        res.status(200).json(stats);
     } catch (err) {
-        res.status(500).json({message: "Tải lịch sử mượn thất bại!"})
+        console.log(err);
+        res.status(500).json({ message: "Failed to get data" });
     }
 })
-*/
+    */
 export default router;

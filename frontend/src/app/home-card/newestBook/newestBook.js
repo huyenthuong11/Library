@@ -38,6 +38,7 @@ export default function NewestBooks() {
                             >
                                 <img
                                     src={getImageUrl(newestBook.image)}
+                                    alt={newestBook.title}
                                 />
                                 <div>{newestBook.title}</div>
                             </div>

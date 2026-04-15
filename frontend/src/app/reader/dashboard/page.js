@@ -9,6 +9,8 @@ import { HomeOutlined, CollectionsBookmarkOutlined,
     LibraryAddCheckOutlined, HelpOutlineOutlined } 
     from '@mui/icons-material';
 import useReaderInfo from "@/hook/useReaderInfo";
+import Top5MostBorrowed from "../top5Books/page";
+
 
 export default function Dashboard() {
     const router = useRouter();
@@ -81,19 +83,11 @@ export default function Dashboard() {
                 </aside>
 
                 <div className={styles.main}>
-                    <div className="banner">
+                    <div className={styles.banner}>
                         <div className="bannerFill">
                             <div className="headerBanner">KHÁM PHÁ THẾ GIỚI TRI THỨC</div>
                             <div className="fullName">Hệ thống Quản lý thư viện</div>
                         </div>
-                    </div>
-                    <div className={styles.grid}>
-                        <div className={styles.cardWide}>Thông báo quan trọng</div>
-                        <div className={styles.cardWide}>Sách đang mượn</div>
-                        <div className={styles.card}>Yêu cầu của bạn</div>
-                        <div className={styles.card}>Sách gợi ý cho bạn</div>
-                        <div className={styles.card}>Sách được mượn nhiều nhất trong tuần</div>
-                        <div className={styles.card}>Tóm tắt tài khoản</div>
                     </div>
                 </div>
             </div>

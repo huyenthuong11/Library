@@ -90,6 +90,7 @@ body {
   padding: 8px 8px;
   transition: transform 0.3s ease;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .sign a:hover {
