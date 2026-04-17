@@ -298,9 +298,9 @@ export default function Dashboard() {
                             </div>
                         ))
                     )}
-                    {fullName && (
+                    {readerId && (
                     <Chatbot
-                        userName = {fullName}
+                        readerId = {readerId}
                     />
                     )}
                 </div>
