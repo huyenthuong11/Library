@@ -1,0 +1,106 @@
+import express from "express";
+import Document from "../models/Document.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import BorrowRecord from "../models/BorrowRecord.js";
+import checkRole from "../middleware/authRoleMiddleware.js";
+import mongoose from "mongoose";
+const router = express.Router();
+
+//GET recommend/recommendedBooks/:readerId
+router.get("/recommendedBooks/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+    
+    try {
+        const { readerId } = req.params;
+        const preferences = await BorrowRecord.aggregate([
+            {
+                $match: {
+                    readerId: new mongoose.Types.ObjectId(readerId),
+                    action: "registered"
+                }
+            },
+            {
+                $lookup: {
+                    from: "documents",
+                    localField: "documentId",
+                    foreignField: "_id",
+                    as: "document"
+                }
+            },
+            { $unwind: "$document" },
+            {
+                $facet: {
+                    categories: [
+                        {
+                            $group: {
+                                _id: "$document.category",
+                                count: {$sum: 1}
+                            }
+                        },
+                        { $sort: { count: -1 } },
+                        { $limit: 3 }
+                    ],
+                    authors: [
+                        {$match: {"document.author": {$ne: "Không rõ"}}},
+                        { 
+                            $group: {
+                                _id: "$document.author",
+                                count: {$sum: 1}
+                            }
+                        },
+                        { $sort: { count: -1 } },
+                        { $limit: 3 }
+                    ]
+                }
+            }
+        ]);
+
+        if (!preferences.length || 
+            (preferences[0].categories.length === 0 
+            && preferences[0].authors.length === 0)) {
+            const popularBooks = await BorrowRecord.aggregate([
+                { $match: { action: "borrowed" } },
+                {
+                    $group: {
+                    _id: "$documentId",
+                    count: { $sum: 1 }
+                    }
+                },
+                { $sort: { count: -1 } },
+                { $limit: 4 },
+                {
+                $lookup: {
+                    from: "documents",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "document"
+                }
+                },
+                { $unwind: "$document" },
+                { $replaceRoot: { newRoot: "$document" } }
+            ]);
+            return res.status(200).json(popularBooks);
+        } else {
+
+            const borrowedDocs = await BorrowRecord.distinct("documentId", {
+                readerId: new mongoose.Types.ObjectId(readerId)
+            });
+
+            const favoriteCategories = preferences[0].categories.map(c => c._id);
+            const favoriteAuthors = preferences[0].authors.map(a => a._id);
+
+            const recommendations = await Document.find({
+                _id: { $nin: borrowedDocs },
+                $or: [
+                    { category: { $in: favoriteCategories } },
+                    { author: { $in: favoriteAuthors } }
+                ]
+            }).limit(4);
+            return res.status(200).json(recommendations);
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: "Lỗi tải danh sách sách gợi ý", error: err.message});
+    }
+})
+
+export default router;
