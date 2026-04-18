@@ -21,7 +21,6 @@ import DashboardNotiCard from "../newsAndAnnouces/page";
 export default function Dashboard() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
-    const {fullName, avatar} = useLibrarianInfo(account?.id);
     const handleLogout = () => {
         logout();
         router.push("/");
@@ -71,23 +70,8 @@ export default function Dashboard() {
                         <div className="webicon">
                         </div>
                         <div className="user">
-                            {avatar ? (
-                                <Avatar
-                                    alt="User Avatar"
-                                    src={avatar}
-                                    sx={{
-                                        objectFit: 'cover',
-                                        border: '1px solid rgba(150, 149, 149, 0.65)'
-                                    }}
-                                />
-                            ) : (
-                                <Avatar></Avatar>
-                            )}
-                            {fullName ? (
-                                <span>{fullName}</span>
-                            ):(
-                                <span>{account?.email || "Email"}</span>
-                            )}
+                            <Avatar></Avatar>
+                            <span>{account?.email || "Email"}</span>
                             <div className="sign">
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
