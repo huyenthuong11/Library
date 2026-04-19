@@ -15,15 +15,18 @@ import newsRoutes from "./src/routes/newsRoutes.js"
 import publisherRoutes from "./src/routes/publisherRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import borrowRecordRoutes from "./src/routes/borrowRecordRoutes.js";
-import chartRoutes from "./src/routes/chartRoutes.js";;
-
+import chartRoutes from "./src/routes/chartRoutes.js";
+import recommendRoutes from "./src/routes/recommendRoutes.js"
 
 
 //load env
 dotenv.config();
 
 const app = express();
+<<<<<<< HEAD
 console.log("ENV TEST: - server.js:15", process.env.MONGO_URI);
+=======
+>>>>>>> 6abc99f8043faa77686fb7ce963004e6e920ebdb
 
 //middleware
 app.use(cors());
@@ -39,7 +42,7 @@ app.use("/api/publisher", publisherRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/borrowRecord", borrowRecordRoutes);
 app.use("/api/chart", chartRoutes);
-
+app.use("/api/recommend", recommendRoutes);
 
 //cron
 startCronJobs();

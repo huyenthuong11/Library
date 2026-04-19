@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import Document from "../models/Document.js";
+import Reader from "../models/user/Reader.js";
 
 const startCronJobs = () => {
 
@@ -23,37 +24,54 @@ const startCronJobs = () => {
             );
 
             if (!docs.length) return;
+            const docBulkOps = [];
+            const readerTurnMap = {};
 
-            const bulkOps = docs.map(doc => {
-
-                const expiredCount = doc.locations.filter(
+            docs.forEach(doc => {
+                const expiredItems = doc.locations.filter(
                     l => l.status === "reserved" && l.dueDate && l.dueDate < now
-                ).length;
+                );
 
-                return {
-                    updateOne: {
-                        filter: { _id: doc._id },
-                        update: {
-                            $set: {
-                                "locations.$[elem].status": "available",
-                                "locations.$[elem].readerId": null,
-                                "locations.$[elem].readerName": null,
-                                "locations.$[elem].createdAt": null,
-                                "locations.$[elem].dueDate": null
+                if(expiredItems.length > 0) {
+                    expiredItems.forEach(item => {
+                        if(item.readerId) {
+                            const readerId = item.readerId.toString();
+                            readerTurnMap[readerId] = (readerTurnMap[readerId] || 0) +1;
+                        }
+                    });
+
+                    docBulkOps.push({
+                        updateOne: {
+                            filter: {_id: doc._id},
+                            update: {
+                                $set: {
+                                    "locations.$[elem].status": "available",
+                                    "locations.$[elem].readerId": null,
+                                    "locations.$[elem].readerName": null,
+                                    "locations.$[elem].createdAt": null,
+                                    "locations.$[elem].dueDate": null
+                                },
+                                $inc: {availableCopies: expiredItems.length}
                             },
-                            $inc: { availableCopies: expiredCount }
-                        },
-                        arrayFilters: [
-                            { "elem.status": "reserved", "elem.dueDate": { $lt: now } }
-                        ]
-                    }
-                };
-
+                            arrayFilters: [{ "elem.status": "reserved", "elem.dueDate": { $lt: now } }]
+                        }
+                    });
+                } 
             });
 
-            if (!bulkOps.length) return;
+            if (!docBulkOps.length) return;
 
             const result = await Document.bulkWrite(bulkOps);
+            const readerIds = Object.keys(readerTurnMap);
+            if(readerIds.length > 0) {
+                const readerBulkOps = readerIds.map(id => ({
+                    updateOne: {
+                        filter: {_id: id},
+                        update: {$inc: {borrowTurn: readerTurnMap[id]}}
+                    }
+                }));
+                await Reader.bulkWrite(readerBulkOps);
+            }
 
             console.log(`[Cron] Reset ${result.modifiedCount} documents`);
 

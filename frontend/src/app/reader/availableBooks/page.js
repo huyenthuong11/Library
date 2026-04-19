@@ -18,7 +18,7 @@ import api from "@/lib/axios";
 export default function AvailableBook() {
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
-    const {fullName, avatar, readerId, borrowTurn} = useReaderInfo(account?.id);
+    const {fullName, avatar, readerId, borrowTurn, refreshReaderInfo} = useReaderInfo(account?.id);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedBook, setSelectedBook] = useState(null);
     const [search, setSearch] = useState("");
@@ -65,6 +65,7 @@ export default function AvailableBook() {
                 readerId: readerId
             });
             refreshAvailableBooks();
+            refreshReaderInfo();
             if(response.status === 200) alert("Mượn sách thành công! Bạn có 3 ngày để đến nhận sách.");
         } catch (err) {
             alert(err.response?.data?.message || "Đã có lỗi xảy ra khi hệ thống xử lý yêu cầu thêm sách");

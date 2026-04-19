@@ -10,6 +10,25 @@
     flex-direction: column;
     padding: 10px;
 }
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.iventoryDashboard {
+    background: #ccc;
+    font-size: 15px;
+    width: 300px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.iventoryDashboardHeader {
+    font-weight: bolder;
+    font-weight: 30px;
+}
 
 .mainHeader {
     display: flex;
@@ -18,10 +37,34 @@
     margin-bottom: 20px;
     margin-top: 10px;
     color: #ddd;
+    width: 1000px;
 }
 
 .desBar {
     background-color: #edeef1e3;
+}
+
+.actionBar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.searchContainer {
+    display: flex;
+    align-items: center;
+    width: 645px;
+    padding: 10px 15px,
+}
+
+.searchContainer input {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+    width: 100%;
+    font-size: 1em;
 }
 
 .searchFilter {
@@ -37,26 +80,6 @@
     border: 1px solid rgb(110, 109, 109);
 }
 
-.actionBar {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    width: 100%;
-}
-
-.searchContainer {
-    display: flex;
-    align-items: center;
-    width: 645px;
-}
-
-.searchContainer input {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-right: 10px;
-    width: 100%;
-}
 
 .filterActions {
     display: flex;
@@ -68,6 +91,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    width: 850;
 } 
 
 .tableFilters ul {
@@ -83,6 +107,7 @@
     margin-right: 10px;
     cursor: pointer;
     width: 120px;
+    font-size: 17;
 }
 
 .tableFilters li.active {
@@ -103,7 +128,7 @@
 .bookTable th,
 .bookTable td {
     padding: 10px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #9ab9c7;
     text-align: left;
 }
 
@@ -114,8 +139,8 @@
 
 .bookDetailTable {
     width: 90%;
-    margin-left: 5%;
-    margin-right: 5%;
+    margin-left: 22%;
+    margin-right: 20%;
     border-collapse: collapse;
 }
 
@@ -157,8 +182,16 @@
     background-color: #28a745;
 }
 
+.status.reserved {
+    background-color: #f7ba04;
+}
+
 .status.borrowed {
-    background-color: #ffc107;
+    background-color: #555;
+}
+
+.status.overdue {
+    background-color: rgb(172, 37, 37);
 }
 
 .actionIcon {
@@ -181,4 +214,22 @@
     justify-content: center;
     align-items: center;
     color: #ffffff;
+}
+
+.positionInput {
+    border-radius: 5px;
+    font-size: 1em;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px;
+    border: 1px solid rgb(110, 109, 109);
+    width: 150px;
+}
+
+.idInput {
+    border-radius: 5px;
+    font-size: 1em;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px;
+    border: 1px solid rgb(110, 109, 109);
+    width: 100%;
 }

@@ -311,6 +311,38 @@ router.patch("/cancelReserved/:readerId/:copyId", authMiddleware, checkRole(["re
 })
 
 
+//GET api/reader/borrowedBook/:readerId
+router.get("/borrowedBooks/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+    try {
+        const borrowedBookList = await Document.aggregate([
+            {$unwind: "$locations"},
+            {$match: {"locations.readerId": new mongoose.Types.ObjectId(req.params.readerId)}},
+            {$sort: {"locations.dueDate": 1}},
+            {$limit: 3}
+        ]);
+        const statusCount = await Document.aggregate([
+            {$unwind: "$locations"},
+            {$match: {"locations.readerId": new mongoose.Types.ObjectId(req.params.readerId)}},
+            {
+                $group: {
+                    _id: null,
+                    overdue: { $sum: { $cond: [{ $eq: ["$locations.status", "overdue"] }, 1, 0] } },
+                    reserved: { $sum: { $cond: [{ $eq: ["$locations.status", "reserved"] }, 1, 0] } }
+                }
+            }
+        ])
+    
+        console.log("test:", statusCount);
+        res.status(200).json({
+            data: borrowedBookList,
+            statusCount: statusCount[0]
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: "Lỗi tải danh sách sách đang mượn", error: err.message});
+    }
+})
+
 
 /**
 //POST api/reader/borrowedHistory/:readerId

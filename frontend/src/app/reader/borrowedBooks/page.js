@@ -137,6 +137,12 @@ export default function BookStore() {
         }
     }
 
+    const formatShortId = (id) => {
+        if (!id) return "N/A";
+        const strId = id.toString();
+        return `${strId.slice(-7).toUpperCase()}`;
+    };
+
     return(
         <div className="container">
             <div className="main">
@@ -245,6 +251,7 @@ export default function BookStore() {
                     <table className={styles.bookTable}>
                         <thead>
                             <tr>
+                                <th>Mã sách</th>
                                 <th>Ảnh bìa</th>
                                 <th>Tên sách</th>
                                 <th>Tác giả</th>
@@ -261,6 +268,7 @@ export default function BookStore() {
                                             key={book._id}
                                             className={styles.desBar}
                                         >
+                                            <td>{formatShortId(book.locations._id)}</td>
                                             <td>
                                                 <img
                                                     src={getImageUrl(book.image)}
