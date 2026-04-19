@@ -61,7 +61,7 @@ const startCronJobs = () => {
 
             if (!docBulkOps.length) return;
 
-            const result = await Document.bulkWrite(bulkOps);
+            const result = await Document.bulkWrite(docBulkOps);
             const readerIds = Object.keys(readerTurnMap);
             if(readerIds.length > 0) {
                 const readerBulkOps = readerIds.map(id => ({

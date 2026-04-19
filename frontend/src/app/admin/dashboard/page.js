@@ -138,34 +138,6 @@ export default function Dashboard() {
                                 total={total}
                             />
                         </div>
-                        <div className={styles.card}>
-                            <div 
-                                style={{
-                                    borderRadius: "20px",
-                                    fontWeight: "bolder",
-                                    fontSize: "16px",
-                                    color: "#7e7d7d",
-                                    marginBottom: "15px"
-                                }}
-                            >
-                                Top 6 thể loại được yêu thích nhất
-                            </div>
-                            <TopCategoriesBarChart/>
-                        </div>
-                        <div className={styles.card}>
-                            <div 
-                                style={{
-                                    borderRadius: "20px",
-                                    fontWeight: "bolder",
-                                    fontSize: "16px",
-                                    color: "#7e7d7d",
-                                    marginBottom: "15px"
-                                }}
-                            >
-                                Top 5 sách được yêu thích nhất
-                            </div>
-                            <Top5MostBorrowed/>
-                        </div>
                         <div className={styles.cardWidth}>
                             <div 
                                 style={{
@@ -190,11 +162,10 @@ export default function Dashboard() {
                                     marginBottom: "15px"
                                 }}
                             >
-                                Hiệu quả chuyển đổi đơn đặt
+                                Thống kê người dùng
                             </div>
-                            <LibraryChart/>
                         </div>
-                        <div className={styles.miniCard}>
+                        <div className={styles.cardWidth}>
                             <div 
                                 style={{
                                     borderRadius: "20px",
@@ -204,8 +175,9 @@ export default function Dashboard() {
                                     marginBottom: "15px"
                                 }}
                             >
-                            <CategoryPieChart data={categoryData}/>
+                                Người dùng mới hằng tháng
                             </div>
+                            <BorrowChart/>
                         </div>
                     </div>
                 </div>

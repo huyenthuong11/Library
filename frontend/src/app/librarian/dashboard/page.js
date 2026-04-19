@@ -21,6 +21,7 @@ import DashboardNotiCard from "../newsAndAnnouces/page";
 export default function Dashboard() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
+    const {fullName, avatar} = useLibrarianInfo(account?.id);
     const handleLogout = () => {
         logout();
         router.push("/");
@@ -70,8 +71,23 @@ export default function Dashboard() {
                         <div className="webicon">
                         </div>
                         <div className="user">
-                            <Avatar></Avatar>
-                            <span>{account?.email || "Email"}</span>
+                            {avatar ? (
+                                <Avatar
+                                    alt="User Avatar"
+                                    src={avatar}
+                                    sx={{
+                                        objectFit: 'cover',
+                                        border: '1px solid rgba(150, 149, 149, 0.65)'
+                                    }}
+                                />
+                            ) : (
+                                <Avatar></Avatar>
+                            )}
+                            {fullName ? (
+                                <span>{fullName}</span>
+                            ):(
+                                <span>{account?.email || "Email"}</span>
+                            )}
                             <div className="sign">
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
@@ -185,8 +201,17 @@ export default function Dashboard() {
                                     fontWeight: "bolder",
                                     fontSize: "16px",
                                     color: "#7e7d7d",
-                                    marginBottom: "15px"
+                                    marginBottom: "10px"
                                 }}
+                            >
+                            Cơ cấu thể loại sách
+                            </div>
+                            <div
+                             style={{
+                                height: "70%",
+                                display: "flex",
+                                padding: "1px"
+                             }}
                             >
                             <CategoryPieChart data={categoryData}/>
                             </div>

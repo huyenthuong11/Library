@@ -15,13 +15,15 @@ import adminRoutes from "./src/routes/adminRoutes.js";
 import borrowRecordRoutes from "./src/routes/borrowRecordRoutes.js";
 import chartRoutes from "./src/routes/chartRoutes.js";
 import recommendRoutes from "./src/routes/recommendRoutes.js"
+import dns from 'node:dns/promises';
+
+dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 
 //load env
 dotenv.config();
 
 const app = express();
-
 //middleware
 app.use(cors());
 app.use(express.json());
