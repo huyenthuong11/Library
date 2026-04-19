@@ -32,7 +32,7 @@ router.get("/availableBook", async(req, res) => {
             ];
         }
         const inventorySummary = await Document.aggregate([
-            { $unwind: "$locations" },
+            { $unwind: { path: "$locations", preserveNullAndEmptyArrays: true } },
             {
                 $group: {
                     _id: null,

@@ -1,3 +1,5 @@
+import dns from "node:dns/promises";
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv"; 
@@ -21,7 +23,7 @@ import chartRoutes from "./src/routes/chartRoutes.js";;
 dotenv.config();
 
 const app = express();
-console.log("ENV TEST: - server.js:15", process.env.GEMINI_API_KEY);
+console.log("ENV TEST: - server.js:15", process.env.MONGO_URI);
 
 //middleware
 app.use(cors());
@@ -43,7 +45,7 @@ app.use("/api/chart", chartRoutes);
 startCronJobs();
 
 //connect MongoDB
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, { family: 4 })
 .then(()=> console.log("MongoDB connected - server.js:29"))
 .catch((err) => console.log("MongoDB error - server.js:30", err));
 
