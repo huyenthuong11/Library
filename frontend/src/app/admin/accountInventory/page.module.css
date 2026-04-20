@@ -5,10 +5,10 @@
   --text-main: #2d3436;
   --text-label: #636e72;
 
-  --blue-bg: #cfe7fb; --blue-text: #2980b9;
+  --blue-bg: #cfe7fb; --blue-text: #3498db;
   --purple-bg: #d5cefc; --purple-text: #6c5ce7;
   --green-bg: #cbfbd3; --green-text: #27ae60;
-  --orange-bg: #fce4c5; --orange-text: #e67e22;
+  --navy-bg: #c4ddf7; --navy-text: #34495e;
   --red-bg: #fdd0d0; --red-text: #e74c3c;
 }
 
@@ -70,7 +70,7 @@
 .blue { background-color: var(--blue-bg); }
 .purple { background-color: var(--purple-bg); }
 .green { background-color: var(--green-bg); }
-.orange { background-color: var(--orange-bg); }
+.navy { background-color: var(--navy-bg); }
 .yellow { background-color: #fff9db; }
 .red { background-color: var(--red-bg); }
 

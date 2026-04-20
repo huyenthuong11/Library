@@ -51,7 +51,7 @@ export default function DashboardNotiCard() {
                                 </span>
                             </div>
                             {item.displayType === 'NEWS' && item._id && (
-                                <a href={`/librarian/newsDetails/${item._id}`} className={styles.detailLink}>
+                                <a href={`/admin/newsDetails/${item._id}`} className={styles.detailLink}>
                                     Chi tiết 
                                 </a>
                             )}

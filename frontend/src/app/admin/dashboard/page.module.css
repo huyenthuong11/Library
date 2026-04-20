@@ -18,7 +18,6 @@
     grid-auto-rows: 120px;
     gap: clamp(15px, 2vw, 30px);
     flex: 1;
-    overflow-y: auto; 
 }
 
 .card {

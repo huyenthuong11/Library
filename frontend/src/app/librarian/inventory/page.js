@@ -22,7 +22,7 @@ export default function Inventory({data, total}) {
                 <div className={`${styles['statItem']} ${styles['purple']}`}>
                     <div className={styles.statHeader}>
                         <div className={styles.icon}>📚</div>
-                        <div className={styles.number}>{data?.available}</div>
+                        <div className={styles.number}>{data?.totalCopies}</div>
                     </div>
                     <p className={styles.label}>Tổng số sách</p>
                 </div>
