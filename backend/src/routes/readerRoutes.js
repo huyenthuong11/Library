@@ -343,52 +343,68 @@ router.get("/borrowedBooks/:readerId", authMiddleware, checkRole(["reader"]), as
     }
 })
 
-
-/**
-//POST api/reader/borrowedHistory/:readerId
-router.post("/borrowHistory/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+//GET api/reader/borrowedHistory/:readerId
+router.get("/borrowedHistory/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
     try {
-        const records = await BorrowRecord.find().sort({createdAt: 1});
-        const pendingReservations = {};
-        let stats = {
-            webConversion: 0,
-            walkIn: 0,
-            expired: 0,
-            cancel: 0
-        };
-        const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
-        records.forEach(record => {
-            const key = `${record.readerId}-${record.copyId}`;
-            if (record.action === "registered") {
-                if (!pendingReservations[key])
-                pendingReservations[key] = record.createdAt;
-            } else if (record.action === "canceled") {
-                if(pendingReservations[key]) {
-                    stats.cancel++;
-                    delete pendingReservations[key];
-                }
-            } else if (record.action === "borrowed") {
-                const regTime = pendingReservations[key];
-                if (regTime && record.createdAt - regTime <= THREE_DAYS_MS) {
-                    stats.webConversion++;
-                    delete pendingReservations[key];
-                } else {
-                    stats.walkIn++;
-                }
-            }    
-        });
+        const page = parseInt(req.query.page) || 1;
+        const limit = 15;
+        const skip = (page - 1) * limit;
+        const { search } = req.query;
 
-        for (const key in pendingReservations) {
-            if (Date.now() - new Date(pendingReservations[key]).getTime() > THREE_DAYS_MS) {
-                stats.expired++;
-            }
+        let searchQuery = {};
+        if (search && search.trim()) {
+            const searchRegex = new RegExp(search.trim(), 'i');
+            searchQuery = {
+                $or: [
+                    { "bookInfo.title": { $regex: searchRegex } },
+                    { "bookInfo.author": { $regex: searchRegex } },
+                    { "bookInfo.isbn": { $regex: searchRegex } },
+                    { "copyIdString": { $regex: searchRegex } }
+                ]
+            };
         }
-        console.log(stats);
-        res.status(200).json(stats);
+
+        const result = await BorrowRecord.aggregate([
+            { $match: { readerId: new mongoose.Types.ObjectId(req.params.readerId) } },
+            { $sort: { createdAt: 1 } },
+            { $group: { 
+                _id: "$copyId",
+                documentId: { $first: "$documentId" },
+                timeline: {
+                    $push: {
+                        action: "$action",
+                        date: "$createdAt"
+                    }
+                },
+                latestActionDate: { $last: "$createdAt" }
+            }},
+            { $addFields: { copyIdString: { $toString: "$_id" } } },
+            { $lookup: {
+                from: "documents",
+                localField: "documentId",
+                foreignField: "_id",
+                as: "bookInfo"
+            }},
+            { $unwind: "$bookInfo" },
+            { $match: searchQuery },
+            { $sort: { latestActionDate: -1 } }, 
+            
+            { $facet: {
+                metadata: [{ $count: "total" }],
+                data: [{ $skip: skip }, { $limit: limit }]
+            }}
+        ]);
+
+        const data = result[0].data;
+        const total = result[0].metadata[0]?.total || 0;
+
+        res.status(200).json({
+            data: data,
+            totalPages: Math.ceil(total / limit)
+        });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Failed to get data" });
     }
-})
-    */
+});
 export default router;

@@ -51,11 +51,11 @@ router.get("/availableBook", async(req, res) => {
             .populate('publisherId')
             .populate("locations.readerId")
             .skip(skip)
-            .limit(20);
+            .limit(15);
         const totalBooks = await Document.countDocuments(query);
         res.json({
             data: books,
-            totalPages: Math.ceil(totalBooks / 20),
+            totalPages: Math.ceil(totalBooks / 15),
             totalBook: total,
             inventorySum: inventorySummary[0]
         });

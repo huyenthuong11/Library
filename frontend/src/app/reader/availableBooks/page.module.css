@@ -72,7 +72,7 @@
     font-size: clamp(10px, 1vw, 20px);
     display: flex;
     flex-direction: column;
-    height: 550px;
+    height: 500px;
 }
 
 .bookImage {
