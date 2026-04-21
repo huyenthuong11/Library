@@ -208,8 +208,7 @@ export default function Dashboard() {
                             </div>
                             <div
                              style={{
-                                height: "70%",
-                                display: "flex",
+                                height: "80%",
                                 padding: "1px"
                              }}
                             >

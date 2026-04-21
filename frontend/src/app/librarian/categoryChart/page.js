@@ -98,10 +98,8 @@ export default function CategoryPieChart ({ data }) {
                 labels: { 
                     usePointStyle: true,
                     font: {
-                        size: 10
+                        size: 9
                     },
-                    boxWidth: 10,
-
                 },
             },
         }

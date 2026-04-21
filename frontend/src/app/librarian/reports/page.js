@@ -32,7 +32,7 @@ export default function LibraryChart() {
     return (
         <>
             <ResponsiveContainer width="100%" height="90%">
-                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <BarChart data={chartData} margin={{ top: 8, right: 30, left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                     <XAxis dataKey="name" stroke="#94a3b8" axisLine={false} tickLine={false} />
                     <YAxis stroke="#94a3b8" axisLine={false} tickLine={false} />
@@ -52,10 +52,10 @@ export default function LibraryChart() {
                     <Legend 
                         verticalAlign="top" 
                         iconType="circle" 
-                        iconSize={10}  
+                        iconSize={6}  
                         wrapperStyle={{ 
-                            paddingBottom: '20px',
-                            fontSize: '14px'
+                            paddingBottom: '10px',
+                            fontSize: '12px'
                         }} 
                     />
                     <Bar dataKey="cancel" name="Đăng ký mượn - Hủy" fill='#ff0606' radius={[4, 4, 0, 0]} barSize={60}/>
