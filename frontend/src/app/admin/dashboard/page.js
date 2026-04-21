@@ -8,20 +8,16 @@ import { HomeOutlined, CollectionsBookmarkOutlined,
     HistoryOutlined, PermIdentityOutlined, 
     LibraryAddCheckOutlined, HelpOutlineOutlined,} 
     from '@mui/icons-material';
-import useLibrarianInfo from "@/hook/useLibrarianInfo";
-import CategoryPieChart from "../categoryChart/page";
 import api from "@/lib/axios";
 import Inventory from "../inventory/page";
 import BorrowChart from "../borrowChart/page";
-import Top5MostBorrowed from "../top5mostBorrowed/page";
-import TopCategoriesBarChart from "../topCategoriesBarChart/page";
-import LibraryChart from "../reports/page";
 import DashboardNotiCard from "../newsAndAnnouces/page";
+import NewAccountsChart from "../newAccountsTrend/page";
+import AccInventory from "../accountInventory/page";
 
 export default function Dashboard() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
-    const {fullName, avatar} = useLibrarianInfo(account?.id);
     const handleLogout = () => {
         logout();
         router.push("/");
@@ -71,23 +67,8 @@ export default function Dashboard() {
                         <div className="webicon">
                         </div>
                         <div className="user">
-                            {avatar ? (
-                                <Avatar
-                                    alt="User Avatar"
-                                    src={avatar}
-                                    sx={{
-                                        objectFit: 'cover',
-                                        border: '1px solid rgba(150, 149, 149, 0.65)'
-                                    }}
-                                />
-                            ) : (
-                                <Avatar></Avatar>
-                            )}
-                            {fullName ? (
-                                <span>{fullName}</span>
-                            ):(
-                                <span>{account?.email || "Email"}</span>
-                            )}
+                            <Avatar></Avatar>
+                            <span>{account?.email || "Email"}</span>
                             <div className="sign">
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
@@ -103,7 +84,7 @@ export default function Dashboard() {
                     </div>
                     <nav>
                         <a><HomeOutlined></HomeOutlined>Tổng quan</a>
-                        <p onClick={() => router.push("/librarian/availableBooks")}>
+                        <p onClick={() => router.push("/admin/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
                         </p>
@@ -138,34 +119,6 @@ export default function Dashboard() {
                                 total={total}
                             />
                         </div>
-                        <div className={styles.card}>
-                            <div 
-                                style={{
-                                    borderRadius: "20px",
-                                    fontWeight: "bolder",
-                                    fontSize: "16px",
-                                    color: "#7e7d7d",
-                                    marginBottom: "15px"
-                                }}
-                            >
-                                Top 6 thể loại được yêu thích nhất
-                            </div>
-                            <TopCategoriesBarChart/>
-                        </div>
-                        <div className={styles.card}>
-                            <div 
-                                style={{
-                                    borderRadius: "20px",
-                                    fontWeight: "bolder",
-                                    fontSize: "16px",
-                                    color: "#7e7d7d",
-                                    marginBottom: "15px"
-                                }}
-                            >
-                                Top 5 sách được yêu thích nhất
-                            </div>
-                            <Top5MostBorrowed/>
-                        </div>
                         <div className={styles.cardWidth}>
                             <div 
                                 style={{
@@ -190,11 +143,11 @@ export default function Dashboard() {
                                     marginBottom: "15px"
                                 }}
                             >
-                                Hiệu quả chuyển đổi đơn đặt
+                                Thống kê tài khoản
                             </div>
-                            <LibraryChart/>
+                            <AccInventory/>
                         </div>
-                        <div className={styles.miniCard}>
+                        <div className={styles.cardWidth}>
                             <div 
                                 style={{
                                     borderRadius: "20px",
@@ -204,8 +157,9 @@ export default function Dashboard() {
                                     marginBottom: "15px"
                                 }}
                             >
-                            <CategoryPieChart data={categoryData}/>
+                                Người dùng mới hằng tháng
                             </div>
+                            <NewAccountsChart/>
                         </div>
                     </div>
                 </div>

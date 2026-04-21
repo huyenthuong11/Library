@@ -1,8 +1,12 @@
 import express from "express";
+import Account from "../models/user/Account.js";
 import Reader from "../models/user/Reader.js";
 import LocationList from "../models/LocationList.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import checkRole from "../middleware/authRoleMiddleware.js";
+import { format } from "path";
+import BorrowRecord from "../models/BorrowRecord.js";
+import Document from "../models/Document.js";
 
 
 const router = express.Router();
@@ -44,5 +48,102 @@ router.get("/availableLocationList", authMiddleware, checkRole(["admin", "librar
         res.status(500).json({ message: "Failed to get reader profile", err });
     }
 });
+
+//GET api/admin/newAccountsTrend
+router.get("/newAccountsTrend", authMiddleware, checkRole(["admin"]), async(req, res) => {
+    try {
+        const newAccountsTrend = await Account.aggregate([
+            { $match: { role: "reader" }},
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: "%m-%Y",
+                            date: "$createdAt"
+                        }
+                    },
+                    readerSum: {$sum: 1}
+                }
+            },
+            {$sort: {_id: 1}}
+        ])
+        console.log(newAccountsTrend);
+        res.status(200).json(newAccountsTrend);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: "Tải danh sách người dùng thất bại"})
+    }
+})
+
+//GET api/admin/accountsInventory
+router.get("/accountsInventory", authMiddleware, checkRole(["admin"]), async(req, res) => {
+    try {
+        const staticField = {};
+
+        //Tổng người đọc và thủ thư
+        const totalUser = await Account.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    readerSum: {$sum: {$cond: [{$eq: ["$role", "reader"]}, 1, 0]}},
+                    librarianSum: {$sum: {$cond: [{$eq: ["$role", "librarian"]}, 1, 0]}},
+                }
+            }
+        ]);
+
+        staticField.totalReader = totalUser[0]?.readerSum;
+        staticField.totalLibrarian = totalUser[0]?.librarianSum;
+
+        const startOfMonth = new Date();
+        startOfMonth.setHours(0, 0, 0, 0);
+        startOfMonth.setDate(1);
+
+        //Người đọc mới
+        const newReaders = await Account.find({ createdAt: { $gte: startOfMonth }}); 
+        const totalNewReaders = newReaders.length;
+        staticField.totalNewReaders = totalNewReaders;
+
+        //Người dùng đang hoạt động
+
+        const last30Days = new Date();
+        last30Days.setDate(last30Days.getDate() - 30);
+
+        const activeUser = await BorrowRecord.distinct("readerId");
+
+        staticField.activeReaders = activeUser.length;
+
+        //Người dùng quá hạn
+        const overdueReader = await Document.aggregate([
+            { $unwind: "$locations" },
+            { $match: { "locations.status": "overdue" } },
+            {
+                $group: {
+                _id: "$locations.readerId"
+                }
+            },
+            {
+                $count: "overdueReaders"
+            }
+        ]);
+
+        staticField.overdueReaders = overdueReader[0]?.overdueReaders || 0;
+
+        //Trung bình mượn
+        const totalBorrow = await Reader.aggregate([
+            {$group: {
+                _id: null,
+                totalBorrow: {$sum: "$totalBorrow"}
+            }}
+        ]);
+
+        const averageBorrow = totalBorrow[0]?.totalBorrow / totalUser[0]?.readerSum;
+        staticField.averageBorrow = averageBorrow;
+
+        res.status(200).json(staticField);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: "Tải danh sách người dùng thất bại"})
+    }
+})
 
 export default router;

@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   width: 80%;
-  gap: 20px; 
+  gap: 10px; 
   justify-content: center;
 }
 
@@ -15,25 +15,25 @@
 .barLabel {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 8px; /* Khoảng cách label và thanh */
+  gap: 5px;
+  margin-bottom: 4px; 
 }
 
 .rankNum {
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 800;
-  color: #4a90e2; /* Màu nhấn cho thứ hạng */
+  color: #4a90e2; 
 }
 
 .catName {
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 600;
   color: #333;
 }
 
 .barWrapper {
   width: 100%;
-  height: 16px; 
+  height: 10px; 
   background-color: #f0f2f5;
   border-radius: 20px;
   overflow: hidden;

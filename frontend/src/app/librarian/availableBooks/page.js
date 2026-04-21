@@ -10,6 +10,7 @@ import { HomeOutlined, CollectionsBookmarkOutlined,
     AddBoxOutlined, EditSquare, CancelOutlined, ListAltRounded,
     SaveOutlined, AddCircleOutlined} 
     from '@mui/icons-material';
+import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import useAvailableBooks from "@/hook/useAvailableBooks";
 import { useState } from "react";
 import { format } from 'date-fns';
@@ -27,6 +28,7 @@ import AddCopy from "./AddCopy";
 export default function AvailableBook() {
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
+    const {fullName, avatar} = useLibrarianInfo(account?.id);
     const [currentPage, setCurrentPage] = useState(1);
     const [search, setSearch] = useState("");
     const [choosenCategory, setChoosenCategory] = useState("");
@@ -219,8 +221,23 @@ export default function AvailableBook() {
                     <div className="header">
                         <div className="webicon"></div>
                         <div className="user">
+                            {avatar ? (
+                                <Avatar
+                                    alt="User Avatar"
+                                    src={avatar}
+                                    sx={{
+                                        objectFit: 'cover',
+                                        border: '1px solid rgba(150, 149, 149, 0.65)'
+                                    }}
+                                />
+                            ) : (
                                 <Avatar></Avatar>
+                            )}
+                            {fullName ? (
+                                <span>{fullName}</span>
+                            ):(
                                 <span>{account?.email || "Email"}</span>
+                            )}
                             <div className="sign">
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
