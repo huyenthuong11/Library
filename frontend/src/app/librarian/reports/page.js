@@ -17,6 +17,8 @@ export default function LibraryChart() {
 
     useEffect(() => {
         getData();
+        const interval = setInterval(getData, 15000);
+        return () => clearInterval(interval);
     }, []);
 
     const chartData = [{

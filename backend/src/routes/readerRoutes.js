@@ -140,6 +140,7 @@ router.post("/borrowBook/:id", authMiddleware, checkRole(["reader"]), async(req,
             {session}
         );
 
+        
         await session.commitTransaction();
         res.status(200).json({ message: "Đăng ký mượn thành công!" });
     } catch (err) {

@@ -25,6 +25,8 @@ export default function BorrowChart() {
       }
     };
     getBorrowRecord();
+    const interval = setInterval(getBorrowRecord, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const chartData = borrowRecord

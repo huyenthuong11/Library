@@ -61,6 +61,12 @@ export default function Dashboard() {
     useEffect(() => {
         getCategoryData();
         getAvailableBooks();
+        const interval = setInterval(() => {
+            getAvailableBooks();
+            getCategoryData();
+        }, 15000);
+
+        return () => clearInterval(interval);
     }, []);
 
   return (
@@ -208,7 +214,7 @@ export default function Dashboard() {
                             </div>
                             <div
                              style={{
-                                height: "80%",
+                                height: "74%",
                                 padding: "1px"
                              }}
                             >

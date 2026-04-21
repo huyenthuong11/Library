@@ -17,6 +17,8 @@ export default function Top5MostBorrowed() {
     
     useEffect(() => {
         getTop5MostBorrowedtBooks();
+        const interval = setInterval(getTop5MostBorrowedtBooks, 15000);
+        return () => clearInterval(interval);
     }, []);
 
     const getImageUrl = (path) => {

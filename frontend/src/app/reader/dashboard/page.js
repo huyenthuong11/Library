@@ -212,8 +212,8 @@ export default function Dashboard() {
                                         alignContent: "center"
                                     }}
                                 >
-                                    <div>Tên sách: {book.title}</div>
-                                    <div>Tác giả: {book.author}</div>
+                                    <div className={styles.bookAuthor}>Tên sách: {book.title}</div>
+                                    <div className={styles.bookAuthor}>Tác giả: {book.author}</div>
                                     <div>Ngày mượn: {
                                         book.locations.createdAt
                                         ? format(new Date(book.locations.createdAt), 'dd-MM-yyyy')

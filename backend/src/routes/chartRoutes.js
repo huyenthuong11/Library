@@ -140,7 +140,6 @@ router.get("/conversionStats", authMiddleware, checkRole(["admin", "librarian"])
                 stats.expired++;
             }
         }
-        console.log(stats);
         res.status(200).json(stats);
     } catch (err) {
         console.log(err);

@@ -79,6 +79,8 @@ export default function TopCategoriesBarChart() {
 
     useEffect(() => {
         getTopCategoriesBarChart();
+        const interval = setInterval(getTopCategoriesBarChart, 15000);
+        return () => clearInterval(interval);
     }, []);
     console.log(topCategoriesBarChar);
     const maxCount = Math.max(...topCategoriesBarChar.map(cat => cat.borrowedCount));

@@ -92,13 +92,27 @@ router.get("/recommendedBooks/:readerId", authMiddleware, checkRole(["reader"]),
             const favoriteCategories = preferences[0].categories.map(c => c._id);
             const favoriteAuthors = preferences[0].authors.map(a => a._id);
 
-            const recommendations = await Document.find({
-                _id: { $nin: borrowedDocs },
-                $or: [
-                    { category: { $in: favoriteCategories } },
-                    { author: { $in: favoriteAuthors } }
-                ]
-            }).limit(4);
+            const recommendations = await Document.aggregate([
+                { 
+                    $match: {
+                        _id: { $nin: borrowedDocs },
+                        $or: [
+                            { category: { $in: favoriteCategories } },
+                            { author: { $in: favoriteAuthors } }
+                        ]
+                    }
+                },
+                { $sample: { size: 4 } }, 
+                {
+                    $lookup: { 
+                        from: "publishers", 
+                        localField: "publisherId",
+                        foreignField: "_id",
+                        as: "publisherId"
+                    }
+                },
+                { $unwind: "$publisherId" } 
+            ]);
             return res.status(200).json(recommendations);
         }
     } catch (err) {
