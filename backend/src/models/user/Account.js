@@ -18,6 +18,11 @@ const accountSchema = new mongoose.Schema(
             type: String,   
             enum: ["reader", "librarian", "admin"]   
         },
+        status: {
+            type: String,
+            enum: ["activate", "deactivate"],
+            default: "activate"
+        }
     },
     {
         timestamps: true,

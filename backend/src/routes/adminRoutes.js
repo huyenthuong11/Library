@@ -7,12 +7,17 @@ import checkRole from "../middleware/authRoleMiddleware.js";
 import { format } from "path";
 import BorrowRecord from "../models/BorrowRecord.js";
 import Document from "../models/Document.js";
-
+import Librarian from "../models/user/Librarian.js";
+import mongoose from "mongoose";
+import upload from "../middleware/imageMiddleware.js";
+import fs from "fs";
+import path from "path";
+import checkStatus from "../middleware/authStatusMiddleware.js";
 
 const router = express.Router();
 
 // GET /api/admin/readerProfile/:id
-router.get("/readerProfile/:id", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+router.get("/readerProfile/:id", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const {id} = req.params;
         const readerProfile = await Reader
@@ -26,7 +31,7 @@ router.get("/readerProfile/:id", authMiddleware, checkRole(["admin", "librarian"
 });
 
 // GET /api/admin/readerProfile
-router.get("/readerProfile", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+router.get("/readerProfile", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const readerProfile = await Reader
         .find()
@@ -39,7 +44,7 @@ router.get("/readerProfile", authMiddleware, checkRole(["admin", "librarian"]), 
 });
 
 //GET api/admin/availableLocationList
-router.get("/availableLocationList", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+router.get("/availableLocationList", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const availableLocationList = await LocationList.find();
         res.status(200).json(availableLocationList);
@@ -50,7 +55,7 @@ router.get("/availableLocationList", authMiddleware, checkRole(["admin", "librar
 });
 
 //GET api/admin/newAccountsTrend
-router.get("/newAccountsTrend", authMiddleware, checkRole(["admin"]), async(req, res) => {
+router.get("/newAccountsTrend", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const newAccountsTrend = await Account.aggregate([
             { $match: { role: "reader" }},
@@ -76,7 +81,7 @@ router.get("/newAccountsTrend", authMiddleware, checkRole(["admin"]), async(req,
 })
 
 //GET api/admin/accountsInventory
-router.get("/accountsInventory", authMiddleware, checkRole(["admin"]), async(req, res) => {
+router.get("/accountsInventory", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const staticField = {};
 
@@ -143,6 +148,48 @@ router.get("/accountsInventory", authMiddleware, checkRole(["admin"]), async(req
     } catch (error) {
         console.error(error);
         res.status(500).json({message: "Tải danh sách người dùng thất bại"})
+    }
+})
+
+//GET api/admin/librarianList
+router.get("librarianList", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), async(req, res) => {
+    try {
+        const librarianList = await Librarian.find().populate('accountId');
+        res.status(200).json(librarianList);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: "Lỗi khi lấy danh sách thủ thư"});
+    }
+});
+
+//PUT api/admin/addLibrarian
+router.put("addLibrarian", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), upload.single("avatar"), async(req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const {email, password, fullName} = req.body;
+
+        const newAccount = new Account({
+            email,
+            password,
+            role: "librarian"
+        });
+
+        await newAccount.save();
+
+        const libData = {
+            accountId: newAccount._id,
+            fullName,
+            avatar: req.file ? req.file.path : null
+        }
+
+        const newLibrarian = new Librarian(libData);
+        await newLibrarian.save();
+
+        res.status(200).json("Thêm thủ thư thành công!")
+    } catch (error) {
+        console.error(error);
+        res.status(500).json("Thêm thủ thư thất bại!")
     }
 })
 

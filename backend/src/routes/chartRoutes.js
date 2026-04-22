@@ -10,11 +10,12 @@ import upload from "../middleware/imageMiddleware.js";
 import path from "path";
 import fs, { read } from "fs";
 import { create } from "domain";
+import checkStatus from "../middleware/authStatusMiddleware.js";
 
 const router = express.Router();
 
 // GET /api/chart/getCategoryChartData
-router.get("/getCategoryChartData", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) =>{
+router.get("/getCategoryChartData", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) =>{
     try {
         const totalDocs = await Document.countDocuments({ deleted: false });
         const stats = await Document.aggregate([
@@ -55,7 +56,7 @@ router.get("/getCategoryChartData", authMiddleware, checkRole(["admin", "librari
 });
 
 //GET /api/chart/getBorrowTrendData
-router.get("/getBorrowTrendData", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) =>{
+router.get("/getBorrowTrendData", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) =>{
     try {
         const borrowTrendData = await BorrowRecord.aggregate([
             {
@@ -80,7 +81,7 @@ router.get("/getBorrowTrendData", authMiddleware, checkRole(["admin", "librarian
 })
 
 //GET /api/chart/topCategory
-router.get("/topCategory", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) =>{
+router.get("/topCategory", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) =>{
     try {
         const topCategory = await Document.aggregate([
             { $unwind: "$category" },
@@ -101,7 +102,7 @@ router.get("/topCategory", authMiddleware, checkRole(["admin", "librarian"]), as
 
 //lấy data để làm tỷ lệ đặt/lấy
 //GET /api/chart/conversionStats
-router.get("/conversionStats", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+router.get("/conversionStats", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const records = await BorrowRecord.find({
             action: { $in: ["registered", "borrowed", "canceled"] }

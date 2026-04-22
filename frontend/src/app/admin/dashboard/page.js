@@ -5,8 +5,9 @@ import { AuthContext } from "../../../context/AuthContext";
 import { useContext, useEffect, useState } from "react";
 import { Avatar } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
-    HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,} 
+    PermIdentityOutlined, AssignmentIndOutlined, 
+    AddHomeWorkOutlined
+} 
     from '@mui/icons-material';
 import api from "@/lib/axios";
 import Inventory from "../inventory/page";
@@ -87,6 +88,18 @@ export default function Dashboard() {
                         <p onClick={() => router.push("/admin/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        <p onClick={() => router.push("/admin/readerManagement")}>
+                            <PermIdentityOutlined/>
+                            Quản lý người đọc
+                        </p>
+                        <p onClick={() => router.push("/admin/librarianManagement")}>
+                            <AssignmentIndOutlined/>
+                            Quản lý thủ thư
+                        </p>
+                        <p onClick={() => router.push("/admin/publisherManagement")}>
+                            <AddHomeWorkOutlined/>
+                            Nhà xuất bản
                         </p>
                     </nav>
                 </aside>

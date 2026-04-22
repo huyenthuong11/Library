@@ -5,9 +5,8 @@ import { AuthContext } from "../../../context/AuthContext";
 import { use, useContext, useEffect } from "react";
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
-    HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,
-    AddBoxOutlined, EditSquare, CancelOutlined, ListAltRounded,
+    PermIdentityOutlined, AssignmentIndOutlined, 
+    AddHomeWorkOutlined, AddBoxOutlined, EditSquare, CancelOutlined,
     SaveOutlined, AddCircleOutlined} 
     from '@mui/icons-material';
 import useAvailableBooks from "@/hook/useAvailableBooks";
@@ -242,6 +241,18 @@ export default function AvailableBook() {
                                 <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                                 Kho sách thư viện
                             </a>
+                            <p onClick={() => router.push("/admin/readerManagement")}>
+                                <PermIdentityOutlined/>
+                                Quản lý người đọc
+                            </p>
+                            <p onClick={() => router.push("/admin/librarianManagement")}>
+                                <AssignmentIndOutlined/>
+                                Quản lý thủ thư
+                            </p>
+                            <p onClick={() => router.push("/admin/publisherManagement")}>
+                                <AddHomeWorkOutlined/>
+                                Nhà xuất bản
+                            </p>
                         </nav>
                     </aside>
                     <div className={styles.main}>

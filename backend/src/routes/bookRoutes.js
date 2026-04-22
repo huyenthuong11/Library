@@ -9,6 +9,7 @@ import checkRole from "../middleware/authRoleMiddleware.js";
 import upload from "../middleware/imageMiddleware.js";
 import path from "path";
 import fs from "fs";
+import checkStatus from "../middleware/authStatusMiddleware.js";
 
 const router = express.Router();
 
@@ -101,7 +102,7 @@ router.get("/mostBorrowedBooks", async(req, res) => {
 })
 
 // DELETE /api/books/deleteBook/:id
-router.delete("/deleteBook/:id", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+router.delete("/deleteBook/:id", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const rawBook = await Document.findOne(
             { _id: req.params.id },
@@ -145,7 +146,7 @@ router.delete("/deleteBook/:id", authMiddleware, checkRole(["admin", "librarian"
 })
 
 // DELETE /api/books/deleteCopy/:id
-router.delete("/deleteCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+router.delete("/deleteCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const { id } = req.params;
 
@@ -181,7 +182,7 @@ router.delete("/deleteCopy/:id", authMiddleware, checkRole(["admin", "librarian"
 })
 
 //PATCH /api/books/updateBook/:id
-router.patch("/updateBook/:id", authMiddleware, checkRole(["admin", "librarian"]), upload.single("image"), async(req, res) => {
+router.patch("/updateBook/:id", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), upload.single("image"), async(req, res) => {
     try {
         const { category, style, publisherId, 
             title, coverPrice, publishDate, author, 
@@ -231,7 +232,7 @@ router.patch("/updateBook/:id", authMiddleware, checkRole(["admin", "librarian"]
 })
 
 //PATCH /api/books/updateCopy/:id
-router.patch("/updateCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+router.patch("/updateCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const { position, status, readerId } = req.body;
         const updateFields = {
@@ -394,7 +395,7 @@ router.patch("/updateCopy/:id", authMiddleware, checkRole(["admin", "librarian"]
 })
 
 //POST /api/books/addBook
-router.post("/addBook", authMiddleware, checkRole(["admin", "librarian"]), upload.single("image"), async(req, res) => {
+router.post("/addBook", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), upload.single("image"), async(req, res) => {
     try {
         const { 
             category, publisherId, title, coverPrice, publishDate, 
@@ -472,7 +473,7 @@ router.post("/addBook", authMiddleware, checkRole(["admin", "librarian"]), uploa
 })
 
 //POST /api/books/addCopy/:id
-router.post("/addCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), async(req, res) => {
+router.post("/addCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const {position, addNum} = req.body;
         //id is book's id not copy's id

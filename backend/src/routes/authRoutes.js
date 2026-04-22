@@ -77,7 +77,8 @@ router.post("/register", async(req, res) => {
         const newAccount = new Account({
             email,
             password,
-            role: "reader"
+            role: "reader",
+            status: "activate"
         });
         
         await newAccount.save();
@@ -134,7 +135,8 @@ router.post("/login", async(req, res) => {
         const token = jwt.sign(
             { 
                 accountId: account._id,
-                role: account.role
+                role: account.role,
+                status: account.status
             },
             process.env.JWT_SECRET,
             { expiresIn: "7d"}
@@ -147,6 +149,7 @@ router.post("/login", async(req, res) => {
                 id: account._id,
                 email: account.email,
                 role: account.role,
+                status: account.status
             },
         });
     } catch (err) {

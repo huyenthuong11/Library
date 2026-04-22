@@ -72,7 +72,7 @@ export default function AccInventory() {
                 <div className={`${styles['statItem']} ${styles['navy']}`}>
                     <div className={styles.statHeader}>
                         <div className={styles.icon}><BookIcon size={17} color="#1064b9" /></div>
-                        <div className={styles.number}>{accountsInventory.averageBorrow}</div>
+                        <div className={styles.number}>{Math.floor(accountsInventory.averageBorrow * 100) / 100}</div>
                     </div>
                     <p className={styles.label}>Trung bình lượt mượn / người đọc</p>
                 </div>

@@ -3,13 +3,16 @@ import Account from "../models/user/Account.js";
 import client from "../services/redis.service.js";
 import sgMail from '@sendgrid/mail';
 import jwt from "jsonwebtoken";
+import authMiddleware from "../middleware/authMiddleware.js";
+import checkRole from "../middleware/authRoleMiddleware.js";
+import checkStatus from "../middleware/authStatusMiddleware.js";
+
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 const router = express.Router();
 
 //POST /api/forgotPassword/sendOtp
-router.post("/sendOtp", async(req, res) => {
+router.post("/sendOtp", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     const {email} = req.body;
     const user = await Account.findOne({ email });
     if(!user) {
@@ -42,7 +45,7 @@ router.post("/sendOtp", async(req, res) => {
 });
 
 //POST /api/forgotPassword/receiveOtp
-router.post("/receiveOtp", async(req, res) => {
+router.post("/receiveOtp", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     const {email, otp} = req.body;
     const account = await Account.findOne({ email });
     if(!account) {
@@ -70,7 +73,7 @@ router.post("/receiveOtp", async(req, res) => {
 
 
 //PUT /api/forgotPassword/changePassword
-router.put("/changePassword", async(req, res) => {
+router.put("/changePassword", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const {newPassword, token} = req.body;
         let decoded;

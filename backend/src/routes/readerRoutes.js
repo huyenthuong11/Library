@@ -9,11 +9,12 @@ import BorrowRecord from "../models/BorrowRecord.js";
 import Document from "../models/Document.js";
 import mongoose from "mongoose";
 import { error } from "console";
+import checkStatus from "../middleware/authStatusMiddleware.js";
 
 const router = express.Router();
 
 // GET /api/reader/readerProfile
-router.get("/readerProfile", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.get("/readerProfile", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const {accountId} = req.query;
         const readerProfile = await Reader
@@ -25,7 +26,7 @@ router.get("/readerProfile", authMiddleware, checkRole(["reader"]), async(req, r
 });
 
 //PUT api/reader/:id
-router.put("/:id", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.put("/:id", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const { fullName, dateOfBirth, phoneNumber } = req.body;
         const updateFields = {};
@@ -49,7 +50,7 @@ router.put("/:id", authMiddleware, checkRole(["reader"]), async(req, res) => {
 });
 
 //PUT api/reader/:id/avatar
-router.put("/:id/avatar", authMiddleware, checkRole(["reader"]), upload.single("avatar"), async(req, res) => {
+router.put("/:id/avatar", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), upload.single("avatar"), async(req, res) => {
     try {
         const updateFields = {};
         if (req.file) {updateFields.avatar = req.file.path;}
@@ -76,7 +77,7 @@ router.put("/:id/avatar", authMiddleware, checkRole(["reader"]), upload.single("
 });
 
 //POST api/reader/borrowBook/:id
-router.post("/borrowBook/:id", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.post("/borrowBook/:id", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -153,7 +154,7 @@ router.post("/borrowBook/:id", authMiddleware, checkRole(["reader"]), async(req,
 })
 
 //GET api/reader/bookStore/:readerId
-router.get("/bookStore/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.get("/bookStore/:readerId", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     try {
         
         const page = parseInt(req.query.page) || 1;
@@ -188,7 +189,7 @@ router.get("/bookStore/:readerId", authMiddleware, checkRole(["reader"]), async(
 })
 
 //PATCH api/reader/extendBorrowedDueDate/:readerId/:copyId
-router.patch("/extendBorrowedDueDate/:readerId/:copyId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.patch("/extendBorrowedDueDate/:readerId/:copyId", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -241,7 +242,7 @@ router.patch("/extendBorrowedDueDate/:readerId/:copyId", authMiddleware, checkRo
     }
 })
 //PATCH api/reader/cancelReserved/:readerId/:copyId
-router.patch("/cancelReserved/:readerId/:copyId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.patch("/cancelReserved/:readerId/:copyId", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -313,7 +314,7 @@ router.patch("/cancelReserved/:readerId/:copyId", authMiddleware, checkRole(["re
 
 
 //GET api/reader/borrowedBook/:readerId
-router.get("/borrowedBooks/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.get("/borrowedBooks/:readerId", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const borrowedBookList = await Document.aggregate([
             {$unwind: "$locations"},
@@ -345,7 +346,7 @@ router.get("/borrowedBooks/:readerId", authMiddleware, checkRole(["reader"]), as
 })
 
 //GET api/reader/borrowedHistory/:readerId
-router.get("/borrowedHistory/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.get("/borrowedHistory/:readerId", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 15;

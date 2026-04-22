@@ -7,11 +7,11 @@ import mongoose from "mongoose";
 import ChatHistory from "../models/ChatHistory.js";
 import { recommendBook } from "../services/ai.service.js";
 import Reader from "../models/user/Reader.js";
-
+import checkStatus from "../middleware/authStatusMiddleware.js";
 const router = express.Router();
 
 //GET /recommend/recommendedBooks/:readerId
-router.get("/recommendedBooks/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.get("/recommendedBooks/:readerId", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     
     try {
         const { readerId } = req.params;
@@ -122,7 +122,7 @@ router.get("/recommendedBooks/:readerId", authMiddleware, checkRole(["reader"]),
 });
 
 //POST /recommend/chatbot/:readerId
-router.post("/chatbot/:readerId", authMiddleware, checkRole(["reader"]), async(req, res) => {
+router.post("/chatbot/:readerId", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const {userMessage} = req.body;
 
