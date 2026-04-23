@@ -90,8 +90,18 @@ router.get("/accountsInventory", authMiddleware, checkRole(["admin"]), checkStat
             {
                 $group: {
                     _id: null,
-                    readerSum: {$sum: {$cond: [{$eq: ["$role", "reader"]}, 1, 0]}},
-                    librarianSum: {$sum: {$cond: [{$eq: ["$role", "librarian"]}, 1, 0]}},
+                    readerSum: {$sum: {$cond: [
+                        {$and:[
+                            {$eq: ["$role", "reader"]},
+                            {$eq: ["$status", "activate"]}
+                        ]}, 1, 0
+                    ]}},
+                    librarianSum: {$sum: {$cond: [
+                        {$and:[
+                            {$eq: ["$role", "librarian"]},
+                            {$eq: ["$status", "activate"]}
+                        ]}, 1, 0
+                    ]}},
                 }
             }
         ]);
@@ -151,10 +161,43 @@ router.get("/accountsInventory", authMiddleware, checkRole(["admin"]), checkStat
     }
 })
 
+//GET api/admin/libInventory
+router.get("/libInventory", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), async(req, res) => {
+    try{
+        const libInven = await Account.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalLibrarian: {$sum: {$cond:[{$eq: ["$role", "librarian"]}, 1, 0]}},
+                    actiLibrarianSum: {$sum: {$cond: [
+                        {$and:[
+                            {$eq: ["$role", "librarian"]},
+                            {$eq: ["$status", "activate"]}
+                        ]}, 1, 0
+                    ]}},
+                    deactiLibrarianSum: {$sum: {$cond: [
+                        {$and:[
+                            {$eq: ["$role", "librarian"]},
+                            {$eq: ["$status", "deactivate"]}
+                        ]}, 1, 0
+                    ]}},
+                }
+            }
+        ]);
+        console.log(libInven);
+        res.status(200).json(libInven[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: "Lỗi server"})
+    }
+})
+
+
 //GET api/admin/librarianList
-router.get("librarianList", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), async(req, res) => {
+router.get("/librarianList", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), async(req, res) => {
     try {
-        const librarianList = await Librarian.find().populate('accountId');
+        const librarianList = await Librarian.find().populate('accountId', '_id email status');
+        console.log(librarianList);
         res.status(200).json(librarianList);
     } catch (error) {
         console.error(error);
@@ -162,13 +205,33 @@ router.get("librarianList", authMiddleware, checkRole(["admin"]), checkStatus(["
     }
 });
 
-//PUT api/admin/addLibrarian
-router.put("addLibrarian", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), upload.single("avatar"), async(req, res) => {
+//POST api/admin/addLibrarian
+router.post("/addLibrarian", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), upload.single("avatar"), async(req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
         const {email, password, fullName} = req.body;
 
+        if (!email) {
+            return res.status(400).json({
+                message: "Email là bắt buộc",
+            });
+        }
+
+        if(!password) {
+            return res.status(400).json({
+                message: "Password là bắt buộc",
+            });
+        }
+
+        const account = await Account.findOne({ email });
+        
+        if(account) {
+            return res.status(400).json({
+                message: "Email đã tồn tại",
+            });
+        }
+        
         const newAccount = new Account({
             email,
             password,
@@ -186,10 +249,26 @@ router.put("addLibrarian", authMiddleware, checkRole(["admin"]), checkStatus(["a
         const newLibrarian = new Librarian(libData);
         await newLibrarian.save();
 
-        res.status(200).json("Thêm thủ thư thành công!")
+        res.status(200).json({message: "Thêm thủ thư thành công!"})
     } catch (error) {
         console.error(error);
-        res.status(500).json("Thêm thủ thư thất bại!")
+        res.status(500).json({message: "Thêm thủ thư thất bại!"})
+    }
+});
+
+//PATCH api/admin/deactivateAccount/:accountId
+router.patch("/deactivateAccount/:accountId", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), async(req, res) => {
+    try {
+        const acc = await Account.findByIdAndUpdate(
+            req.params.accountId,
+            {$set: {"status": "deactivate"}},
+            {new: true}
+        );
+        if (!acc) res.status(400).json({message: 'Tài khoản không tồn tại'});
+        res.status(200).json({message: "Vô hiệu hóa tài khoản thành công!"})
+    } catch (error) {
+        console.error(err);
+        res.status(500).json({message: "Vô hiệu hóa tài khoản thất bại!"})
     }
 })
 

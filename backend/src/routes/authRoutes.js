@@ -125,6 +125,12 @@ router.post("/login", async(req, res) => {
             });
         }
 
+        if(account.status === "deactivate") {
+            return res.status(400).json({
+                message: "Tài khoản này đã bị vô hiệu hóa"
+            });
+        }
+
         const isMatch = await bcrypt.compare(password, account.password);
         if(!isMatch) {
             return res.status(400).json({
