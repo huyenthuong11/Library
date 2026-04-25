@@ -33,7 +33,7 @@ const readerSchema = new mongoose.Schema(
         borrowTurn: {
             type: Number,
             required: true,
-            default: 0,
+            default: 10,
         }
     }
 );
