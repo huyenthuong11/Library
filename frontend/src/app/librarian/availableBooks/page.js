@@ -2,16 +2,17 @@
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
-import { use, useContext, useEffect } from "react";
+// ĐÃ SỬA: Bổ sung import Fragment từ react
+import { useContext, useEffect, useState, Fragment } from "react"; 
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
     LibraryAddCheckOutlined, HelpOutlineOutlined,
     AddBoxOutlined, EditSquare, CancelOutlined, ListAltRounded,
-    SaveOutlined, AddCircleOutlined} 
+    SaveOutlined, AddCircleOutlined, ReceiptLongOutlined} 
     from '@mui/icons-material';
+import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import useAvailableBooks from "@/hook/useAvailableBooks";
-import { useState } from "react";
 import { format } from 'date-fns';
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ListRounded } from "@mui/icons-material";
@@ -23,10 +24,12 @@ import BorrowRecord from "./BorrowRecord";
 import AddBook from "./AddBook";
 import useLocationList from "@/hook/useAvailableLocation";
 import AddCopy from "./AddCopy";
+import CreateViolationModal from "../violationManagement/CreateViolationModal";
 
 export default function AvailableBook() {
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
+    const {fullName, avatar} = useLibrarianInfo(account?.id);
     const [currentPage, setCurrentPage] = useState(1);
     const [search, setSearch] = useState("");
     const [choosenCategory, setChoosenCategory] = useState("");
@@ -43,6 +46,11 @@ export default function AvailableBook() {
     const {locationList} = useLocationList();
     const [openAddCopyModal, setOpenAddCopyModal] = useState(null);
     const [now, setNow] = useState(Date.now());
+    
+    // STATE QUẢN LÝ MODAL PHẠT 
+    const [isViolationOpen, setIsViolationOpen] = useState(false);
+    const [violationData, setViolationData] = useState({ readerId: null, documentId: null, copyId: null, coverPrice: 0 });
+
     const availableLocationList = locationList
         .filter((s) => s.usedStorage < 100)
         .map(s => ({
@@ -104,25 +112,21 @@ export default function AvailableBook() {
         { value: ["general"], label: "Tổng hợp" }
     ];
 
-
     const statusList = [
         {value: null, label: "Tất cả"},
         {value: "available", label: "Có sẵn"},
         {value: "reserved", label: "Đặt trước"},
         {value: "borrowed", label: "Đang mượn"},
         {value: "overdue", label: "Quá hạn"},
-        
     ];
 
     const handleDeleteBook = async (id) => {
         try {
-            const response = await api.delete(`/books/deleteBook/${id}`)
-            console.log(id);
+            const response = await api.delete(`/documents/deleteBook/${id}`)
             if (response.status === 200 || response.status === 201) {
                 refreshAvailableBooks();
                 alert(response?.data?.message);
             }
-            
         } catch (error) {
             alert(error.response?.data?.message);
             console.error("fail deleted - page.js:159", error);
@@ -131,13 +135,11 @@ export default function AvailableBook() {
 
     const handleDeleteCopy = async (id) => {
         try {
-            const response = await api.delete(`/books/deleteCopy/${id}`)
-            console.log(id);
+            const response = await api.delete(`/documents/deleteCopy/${id}`);
             if (response.status === 200 || response.status === 201) {
                 refreshAvailableBooks();
                 alert(response?.data?.message);
             }
-            
         } catch (error) {
             alert(error.response?.data?.message);
             console.error("fail deleted - page.js:159", error);
@@ -169,7 +171,7 @@ export default function AvailableBook() {
 
     const handleSubmit = async () => {
         try {           
-            await api.patch(`/books/updateCopy/${openEditCopyBar}`, {
+            await api.patch(`/documents/updateCopy/${openEditCopyBar}`, {
                 position: editData.position,
                 status: editData.status,
                 readerId: editData.readerId,
@@ -219,8 +221,23 @@ export default function AvailableBook() {
                     <div className="header">
                         <div className="webicon"></div>
                         <div className="user">
+                            {avatar ? (
+                                <Avatar
+                                    alt="User Avatar"
+                                    src={avatar}
+                                    sx={{
+                                        objectFit: 'cover',
+                                        border: '1px solid rgba(150, 149, 149, 0.65)'
+                                    }}
+                                />
+                            ) : (
                                 <Avatar></Avatar>
+                            )}
+                            {fullName ? (
+                                <span>{fullName}</span>
+                            ):(
                                 <span>{account?.email || "Email"}</span>
+                            )}
                             <div className="sign">
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
@@ -242,6 +259,10 @@ export default function AvailableBook() {
                                 <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                                 Kho sách thư viện
                             </a>
+                            <p onClick={() => router.push("/librarian/violationManagement")}>
+                                <ReceiptLongOutlined></ReceiptLongOutlined>
+                                Quản lý vi phạm
+                            </p>
                         </nav>
                     </aside>
                     <div className={styles.main}>
@@ -345,10 +366,7 @@ export default function AvailableBook() {
                                     <th>Tổng Copies</th>
                                     <th>Sẵn có</th>
                                     <th>
-                                        <div style={{
-                                            display: "flex", 
-                                            justifyContent: "center"
-                                        }}>
+                                        <div style={{ display: "flex", justifyContent: "center" }}>
                                             Hành Động
                                         </div>
                                     </th>
@@ -358,16 +376,15 @@ export default function AvailableBook() {
                             <tbody>
                                 { (!loading && filteredBook.length > 0) ? (
                                         filteredBook.map((availableBook) => (
-                                            <>
-                                                <tr 
-                                                    key={availableBook._id}
-                                                    className={styles.desBar}
-                                                >
+                                            /* ĐÃ SỬA LỖI KEY BẰNG CÁCH DÙNG FRAGMENT */
+                                            <Fragment key={availableBook._id}>
+                                                <tr className={styles.desBar}>
                                                     <td>{availableBook.isbn}</td>
                                                     <td>
                                                         <img 
                                                             src={getImageUrl(availableBook.image)} 
                                                             className={styles.bookCover}
+                                                            alt="cover"
                                                         />
                                                     </td>
                                                     <td>
@@ -396,38 +413,20 @@ export default function AvailableBook() {
                                                     <td>{availableBook.numberOfCopy}</td>
                                                     <td>{availableBook.availableCopies}</td>
                                                     <td style={{width: "250px"}}>
-                                                        <div style={{
-                                                            display: "flex", 
-                                                            justifyContent: "center",
-                                                            
-                                                        }}>
+                                                        <div style={{ display: "flex", justifyContent: "center" }}>
                                                             
                                                         <Button
-                                                            sx={{
-                                                                color: "#0b485e", 
-                                                                border: "none",
-                                                                borderRadius: "5px",
-                                                                cursor: "pointer",
-                                                            }}
-                                                            onClick={() => {
-                                                                setOpenAddCopyModal(availableBook._id);
-                                                            }}
+                                                            sx={{ color: "#0b485e", border: "none", borderRadius: "5px", cursor: "pointer" }}
+                                                            onClick={() => setOpenAddCopyModal(availableBook._id)}
                                                         >
                                                             <AddCircleOutlined/>
                                                         </Button>
                                                         <Button
-                                                            sx={{
-                                                                color: "#0b485e", 
-                                                                border: "none",
-                                                                borderRadius: "5px",
-                                                                cursor: "pointer",
+                                                            sx={{ color: "#0b485e", border: "none", borderRadius: "5px", cursor: "pointer" }}
+                                                            onClick={() => {
+                                                                setOpenEditBar(availableBook._id);
+                                                                setSelectedBook(availableBook);
                                                             }}
-                                                            onClick={
-                                                                () => {
-                                                                    setOpenEditBar(availableBook._id);
-                                                                    setSelectedBook(availableBook);
-                                                                }
-                                                            }
                                                         >
                                                             <EditSquare/>
                                                         </Button>
@@ -437,22 +436,12 @@ export default function AvailableBook() {
                                                                     handleDeleteBook(availableBook._id);
                                                                 }
                                                             }}
-                                                            sx={{
-                                                                color: "error.main", 
-                                                                border: "none",
-                                                                borderRadius: "5px",
-                                                                cursor: "pointer",
-                                                            }}
+                                                            sx={{ color: "error.main", border: "none", borderRadius: "5px", cursor: "pointer" }}
                                                         >
                                                             <DeleteIcon/>
                                                         </Button>
                                                         <Button
-                                                            sx={{
-                                                                color: "#0b485e", 
-                                                                border: "none",
-                                                                borderRadius: "5px",
-                                                                cursor: "pointer",
-                                                            }}
+                                                            sx={{ color: "#0b485e", border: "none", borderRadius: "5px", cursor: "pointer" }}
                                                             onClick={() => setOpenDetailsBar(prev => 
                                                                 prev === availableBook._id ? null : availableBook._id
                                                             )}
@@ -462,35 +451,18 @@ export default function AvailableBook() {
                                                         </div>
                                                     </td>
                                                 </tr>
-                                                {
-                                                    openDetailsBar === availableBook._id && (
+                                                {openDetailsBar === availableBook._id && (
                                                         <tr>
-                                                            <td colSpan="10">
-                                                                <table className={styles.bookDetailTable}>
-                                                                    <thead>
+                                                            <td colSpan="11" style={{ padding: "10px", backgroundColor: "#f0f4f8" }}>
+                                                                <table style={{ width: "100%", background: "white", borderRadius: "8px", borderCollapse: "collapse", border: "1px solid #ddd" }}>
+                                                                    <thead style={{ backgroundColor: "#e0e7ff" }}>
                                                                         <tr>
-                                                                            <th>ID</th>
-                                                                            <th>
-                                                                                Vị trí
-                                                                            </th>
-                                                                            <th width="150px">Trạng thái</th>
-                                                                            <th>Thông tin</th>
-                                                                            <th>
-                                                                                <div style={{
-                                                                                    display: "flex", 
-                                                                                    justifyContent: "center",
-                                                                                }}>            
-                                                                                    Hành động
-                                                                                </div>
-                                                                            </th>
-                                                                            <th>
-                                                                                <div style={{
-                                                                                    display: "flex", 
-                                                                                    justifyContent: "center",
-                                                                                }}> 
-                                                                                    Lịch sử mượn
-                                                                                </div>
-                                                                            </th>
+                                                                            <th style={{ padding: "12px", textAlign: "center", borderBottom: "2px solid #ccc" }}>ID</th>
+                                                                            <th style={{ padding: "12px", textAlign: "center", borderBottom: "2px solid #ccc" }}>Vị trí</th>
+                                                                            <th style={{ padding: "12px", textAlign: "center", borderBottom: "2px solid #ccc" }}>Trạng thái</th>
+                                                                            <th style={{ padding: "12px", textAlign: "left", borderBottom: "2px solid #ccc" }}>Thông tin</th>
+                                                                            <th style={{ padding: "12px", textAlign: "center", borderBottom: "2px solid #ccc" }}>Hành động</th>
+                                                                            <th style={{ padding: "12px", textAlign: "center", borderBottom: "2px solid #ccc" }}>Lịch sử mượn</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -503,262 +475,188 @@ export default function AvailableBook() {
                                                                                     editData.status !== l.status || 
                                                                                     String(editData.readerId || "") !== String(l.readerId?._id || l.readerId || "");
                                                                                 return (
-                                                                                    <tr key={l._id}>
-                                                                                        {openEditCopyBar === l._id ? (
-                                                                                            <>
-                                                                                                <td>
-                                                                                                    {formatShortId(l._id)}
-                                                                                                </td>
-                                                                                                <td>
+                                                                                <tr key={l._id}>
+                                                                                    {openEditCopyBar === l._id ? (
+                                                                                        // CHẾ ĐỘ EDIT BẢN COPY
+                                                                                        <>
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>{formatShortId(l._id)}</td>
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>
                                                                                                 <Select
                                                                                                     options={availableLocationList}
-                                                                                                    isSearchable
-                                                                                                    fullwidth
-                                                                                                    size="small"
-                                                                                                    name="position"
-                                                                                                    type="text"
-                                                                                                    id="position"
+                                                                                                    isSearchable fullwidth size="small" name="position" type="text" id="position"
                                                                                                     className={styles.idInput}
                                                                                                     onChange={(selected) => {
-                                                                                                        setEditData(prev => ({
-                                                                                                            ...prev,
-                                                                                                            position: selected.value
-                                                                                                        }))
+                                                                                                        setEditData(prev => ({...prev, position: selected.value}))
                                                                                                         setIsDirty(true)
                                                                                                     }}
                                                                                                     value={availableLocationList.find(opt => opt.value === editData.position) || null}
                                                                                                 /> 
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    <select
-                                                                                                        style={{
-                                                                                                            width: "100%", 
-                                                                                                            padding: "5px", 
-                                                                                                            borderRadius: "5px", 
-                                                                                                            border: "1px solid #ccc"
-                                                                                                        }}
-                                                                                                        name="status"
-                                                                                                        value={editData.status || l.status}
-                                                                                                        onChange={handleChange}   
-                                                                                                    >
-                                                                                                        {
-                                                                                                            statusList.filter(s => s.value === l.status && s.value !== null)
-                                                                                                            .map(s => (
-                                                                                                                <option key={s.value} value={s.value} disabled>{s.label}</option>
-                                                                                                            ))
-                                                                                                        }
-
-                                                                                                        {statusOptions[l.status].map((option) => (
-                                                                                                            <option key={option.value} value={option.value}>
-                                                                                                                {option.label}
-                                                                                                            </option>
-                                                                                                        ))}
-                                                                                                    </select>
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    {editData.status === "borrowed" || editData.status === "reserved" ? (
-                                                                                                        <>
-                                                                                                            <Select
-                                                                                                                options={readerOptions}
-                                                                                                                isSearchable
-                                                                                                                placeholder="Nhập ID người dùng..."
-                                                                                                                fullwidth
-                                                                                                                size="small"
-                                                                                                                name="readerId"
-                                                                                                                type="text"
-                                                                                                                id="readerId"
-                                                                                                                className={styles.idInput}
-                                                                                                                onChange={(selected) => {
-                                                                                                                    setEditData(prev => ({
-                                                                                                                        ...prev,
-                                                                                                                        readerId: selected.value
-                                                                                                                    }))
-                                                                                                                    setIsDirty(true)
-                                                                                                                }}
-                                                                                                                value={readerOptions.find(opt => opt.value === editData.readerId)}
-                                                                                                            /> 
-                                                                                                            {!editData.readerId && (
-                                                                                                                <span>{"Không có thông tin người dùng"}</span>
-                                                                                                            )}
-                                                                                                        </>
-                                                                                                    ) : (
-                                                                                                        <span>Hiện sách đang ở trên kệ</span>
-                                                                                                    )} 
-                                                                                                </td>
-                                                                                                        <td>
-                                                                                                            <div style={{
-                                                                                                                display: "flex", 
-                                                                                                                justifyContent: "center",
-                                                                                                                
-                                                                                                            }}>
-                                                                                                            <Button
-                                                                                                                sx={{
-                                                                                                                    color: "#0b485e", 
-                                                                                                                    border: "none",
-                                                                                                                    borderRadius: "5px",
-                                                                                                                    cursor: hasChanges ? "pointer" : "default",
-                                                                                                                    opacity: hasChanges ? 1 : 0.5,
-                                                                                                                }}
-                                                                                                                onClick={handleSubmit}
-                                                                                                                disabled={!hasChanges}
-                                                                                                            >
-                                                                                                                <SaveOutlined/>
-                                                                                                            </Button>
-                                                                                                            <Button 
-                                                                                                                onClick={() => {
-                                                                                                                    setOpenCopyEditBar(null)
-                                                                                                                    setIsDirty(false)
-                                                                                                                }}
-                                                                                                                sx={{color: "error.main"}}
-                                                                                                            >
-                                                                                                                <CancelOutlined/>
-                                                                                                            </Button>
-                                                                                                            </div>
-                                                                                                        </td>
-                                                                                                    
-                                                                                                <td>
-                                                                                                    <div style={{
-                                                                                                        display: "flex", 
-                                                                                                        justifyContent: "center",
-                                                                                                    }}>
-                                                                                                        <Button
-                                                                                                            sx={{
-                                                                                                                color: "#0b485e", 
-                                                                                                                border: "none",
-                                                                                                                borderRadius: "5px",
-                                                                                                                cursor: "default",
-                                                                                                                opacity: 0.5,
+                                                                                            </td>
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>
+                                                                                                <select
+                                                                                                    style={{ width: "100%", padding: "5px", borderRadius: "5px", border: "1px solid #ccc" }}
+                                                                                                    name="status"
+                                                                                                    value={editData.status || l.status}
+                                                                                                    onChange={handleChange}   
+                                                                                                >
+                                                                                                    {statusList.filter(s => s.value === l.status && s.value !== null).map(s => (
+                                                                                                        <option key={s.value} value={s.value} disabled>{s.label}</option>
+                                                                                                    ))}
+                                                                                                    {statusOptions[l.status].map((option) => (
+                                                                                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                                                                                    ))}
+                                                                                                </select>
+                                                                                            </td>
+                                                                                            <td style={{ padding: "10px", textAlign: "left", borderBottom: "1px solid #eee" }}>
+                                                                                                {editData.status === "borrowed" || editData.status === "reserved" ? (
+                                                                                                    <>
+                                                                                                        <Select
+                                                                                                            options={readerOptions} isSearchable placeholder="Nhập ID người dùng..." fullwidth size="small" name="readerId" type="text" id="readerId" className={styles.idInput}
+                                                                                                            onChange={(selected) => {
+                                                                                                                setEditData(prev => ({...prev, readerId: selected.value}))
+                                                                                                                setIsDirty(true)
                                                                                                             }}
-                                                                                                            disabled
-                                                                                                        >
-                                                                                                            <ListRounded/>
-                                                                                                        </Button>
+                                                                                                            value={readerOptions.find(opt => opt.value === editData.readerId)}
+                                                                                                            // FIX DROPDOWN BỊ ĐÈ
+                                                                                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                                                                                            menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+                                                                                                        /> 
+                                                                                                        {!editData.readerId && ( <span style={{ color: "#d32f2f", fontSize: "12px", fontStyle: "italic" }}>* Cần chọn người mượn</span> )}
+                                                                                                    </>
+                                                                                                ) : ( <span>Hiện sách đang ở trên kệ</span> )} 
+                                                                                            </td>
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>
+                                                                                                <div style={{ display: "flex", justifyContent: "center", gap: "5px" }}>
+                                                                                                    <Button
+                                                                                                        sx={{ color: "white", backgroundColor: "#0b485e", minWidth: "40px", padding: "4px" }}
+                                                                                                        onClick={handleSubmit} disabled={!hasChanges}
+                                                                                                    >
+                                                                                                        <SaveOutlined fontSize="small"/>
+                                                                                                    </Button>
+                                                                                                    <Button 
+                                                                                                        sx={{ color: "white", backgroundColor: "#d32f2f", minWidth: "40px", padding: "4px" }}
+                                                                                                        onClick={() => { setOpenCopyEditBar(null); setIsDirty(false); }}
+                                                                                                    >
+                                                                                                        <CancelOutlined fontSize="small"/>
+                                                                                                    </Button>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>
+                                                                                                <div style={{ display: "flex", justifyContent: "center" }}>
+                                                                                                    <Button sx={{ color: "#999", minWidth: "40px" }} disabled>
+                                                                                                        <ListRounded/>
+                                                                                                    </Button>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        // CHẾ ĐỘ XEM THÔNG TIN BẢN COPY VÀ CÁC NÚT HÀNH ĐỘNG
+                                                                                        <>
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>{formatShortId(l._id)}</td>
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>{l.position}</td>
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>
+                                                                                                {Math.floor((Date.now() - new Date(l.dueDate))) > 0 && l.dueDate ? (
+                                                                                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                                                                                                        <div className={`${styles['status']} ${styles[`${"overdue"}`]}`}></div>
+                                                                                                        Quá hạn
                                                                                                     </div>
-                                                                                                </td>
-                                                                                            </>
-                                                                                        ) : (
-                                                                                            <>
-                                                                                                <td>
-                                                                                                    {formatShortId(l._id)}
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    {l.position}
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    {Math.floor((Date.now() - new Date(l.dueDate))) > 0 && l.dueDate ? (
-                                                                                                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                                                                            <div className={`${styles['status']} ${styles[`${"overdue"}`]}`}>
-                                                                                                            </div>
-                                                                                                            Quá hạn
-                                                                                                        </div>
-                                                                                                    ) : (
-                                                                                                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                                                                            <div className={`${styles['status']} ${styles[`${l.status}`]}`}></div>
-                                                                                                            {(() => {
-                                                                                                                const matchedStatus = statusList.find(
-                                                                                                                    s => s.value === l.status
-                                                                                                                );
-                                                                                                                return matchedStatus ? matchedStatus.label : l.status;
-                                                                                                            })()}
+                                                                                                ) : (
+                                                                                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                                                                                                        <div className={`${styles['status']} ${styles[`${l.status}`]}`}></div>
+                                                                                                        {(() => {
+                                                                                                            const matchedStatus = statusList.find(s => s.value === l.status);
+                                                                                                            return matchedStatus ? matchedStatus.label : l.status;
+                                                                                                        })()}
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </td>
+                                                                                            {l.readerId ? (
+                                                                                                <td style={{ padding: "10px", textAlign: "left", borderBottom: "1px solid #eee" }}>
+                                                                                                    <div style={{ marginBottom: "2px" }}><strong>Người mượn:</strong> {l.readerId?.fullName || l.readerName}</div>
+                                                                                                    <div style={{ marginBottom: "2px" }}><strong>Vào lúc:</strong> {l.createdAt ? format(new Date(l.createdAt), 'dd-MM-yyyy HH:mm') : ""}</div>
+                                                                                                    <div style={{ marginBottom: "2px" }}><strong>Hạn trả:</strong> {l.dueDate ? format(new Date(l.dueDate), 'dd-MM-yyyy HH:mm') : ""}</div>
+                                                                                                    {Math.floor((Date.now() - new Date(l.dueDate))) > 0 && (
+                                                                                                        <div style={{ color: "#d32f2f", fontWeight: "bold", marginTop: "4px" }}>
+                                                                                                            Đã muộn {Math.floor((Date.now() - new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((Date.now() - new Date(l.dueDate)) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((Date.now() - new Date(l.dueDate)) % (1000 * 60 * 60)) / (1000 * 60))} phút
                                                                                                         </div>
                                                                                                     )}
                                                                                                 </td>
-                                                                                                { 
-                                                                                                    l.readerId ? (
-                                                                                                        <td>
-                                                                                                            <div>Người mượn: {l.readerId?.fullName || l.readerName}</div>
-                                                                                                            <div>
-                                                                                                                Vào lúc: {
-                                                                                                                    l.createdAt
-                                                                                                                    ? format(new Date(l.createdAt), 'dd-MM-yyyy HH:mm')
-                                                                                                                    :""
-                                                                                                                }
-                                                                                                            </div>
-                                                                                                            <div>
-                                                                                                                Hạn trả: {
-                                                                                                                    l.dueDate
-                                                                                                                    ? format(new Date(l.dueDate), 'dd-MM-yyyy HH:mm')
-                                                                                                                    :""
-                                                                                                                }
-                                                                                                            </div>
-                                                                                                            {Math.floor((Date.now() - new Date(l.dueDate))) > 0 && (
-                                                                                                                <div>
-                                                                                                                    Đã muộn {Math.floor((Date.now() - 
-                                                                                                                    new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((Date.now() - 
-                                                                                                                    new Date(l.dueDate)) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((Date.now() - 
-                                                                                                                    new Date(l.dueDate)) % (1000 * 60 * 60)) / (1000 * 60))} phút
-                                                                                                                </div>
-                                                                                                            )}
-                                                                                                        </td>
-                                                                                                    ) : (
-                                                                                                            <td>Hiện sách đang ở trên kệ</td>
-                                                                                                        )
-                                                                                                    }
-                                                                                                        <td>
-                                                                                                            <div style={{
-                                                                                                                display: "flex", 
-                                                                                                                justifyContent: "center",
-                                                                                                                
-                                                                                                            }}>
-                                                                                                            <Button
-                                                                                                                sx={{
-                                                                                                                    color: "#0b485e", 
-                                                                                                                    border: "none",
-                                                                                                                    borderRadius: "5px",
-                                                                                                                    cursor: "pointer",
-                                                                                                                }}
-                                                                                                                onClick={() => {
-                                                                                                                    if (isDirty && openEditCopyBar !== l._id) {
-                                                                                                                        const confirmChange = window.confirm("Bạn chưa lưu thay đổi. Tiếp tục?");
-                                                                                                                        if (!confirmChange) return;
-                                                                                                                    }
-                                                                                                                    setOpenCopyEditBar(l._id);
-                                                                                                                    setEditData({
-                                                                                                                        position: l.position || "",
-                                                                                                                        status: l.status || "",
-                                                                                                                        readerId: l.readerId?._id || ""
-                                                                                                                    });
-                                                                                                                }}
-                                                                                                            >
-                                                                                                                <EditSquare/>
-                                                                                                            </Button>
-                                                                                                            <Button 
-                                                                                                                onClick={() => {
-                                                                                                                    if (confirm("Bạn có chắc muốn xoá bản copy này không?")) {
-                                                                                                                        handleDeleteCopy(l._id);
-                                                                                                                    }
-                                                                                                                }}
-                                                                                                                sx={{color: "error.main"}}
-                                                                                                            >
-                                                                                                                <DeleteIcon/>
-                                                                                                            </Button>
-                                                                                                            </div>
-                                                                                                        </td>
-                                                                                                <td>
-                                                                                                    <div style={{
-                                                                                                        display: "flex", 
-                                                                                                        justifyContent: "center",
-                                                                                                    }}>
+                                                                                            ) : (
+                                                                                                <td style={{ padding: "10px", textAlign: "left", borderBottom: "1px solid #eee", color: "#666" }}>Hiện sách đang ở trên kệ</td>
+                                                                                            )}
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>
+                                                                                                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
+                                                                                                    
+                                                                                                    {/* NÚT PHẠT */}
+                                                                                                    {(l.status === 'borrowed' || l.status === 'overdue') && l.readerId && (
                                                                                                         <Button
-                                                                                                            sx={{
-                                                                                                                color: "#0b485e", 
-                                                                                                                border: "none",
-                                                                                                                borderRadius: "5px",
-                                                                                                                cursor: "pointer",
+                                                                                                            variant="outlined"
+                                                                                                            size="small"
+                                                                                                            color="error"
+                                                                                                            sx={{ 
+                                                                                                                fontWeight: "bold", 
+                                                                                                                fontFamily: "Quicksand", 
+                                                                                                                minWidth: "50px",
+                                                                                                                padding: "2px 8px"
                                                                                                             }}
                                                                                                             onClick={() => {
-                                                                                                                setOpenBorrowRecord(prev => 
-                                                                                                                    prev === l._id ? null : l._id
-                                                                                                                );
+                                                                                                                setViolationData({
+                                                                                                                    readerId: l.readerId._id || l.readerId,
+                                                                                                                    documentId: availableBook._id,
+                                                                                                                    copyId: l._id,
+                                                                                                                    coverPrice: availableBook.coverPrice // Truyền trực tiếp giá bìa
+                                                                                                                });
+                                                                                                                setIsViolationOpen(true);
                                                                                                             }}
                                                                                                         >
-                                                                                                            <ListRounded/>
+                                                                                                            PHẠT
                                                                                                         </Button>
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                            </>
-                                                                                        )}
-                                                                                    </tr>     
+                                                                                                    )}
+                                                                                                    
+                                                                                                    <Button
+                                                                                                        sx={{ color: "#0b485e", minWidth: "40px", padding: "4px" }}
+                                                                                                        onClick={() => {
+                                                                                                            if (isDirty && openEditCopyBar !== l._id) {
+                                                                                                                const confirmChange = window.confirm("Bạn chưa lưu thay đổi. Tiếp tục?");
+                                                                                                                if (!confirmChange) return;
+                                                                                                            }
+                                                                                                            setOpenCopyEditBar(l._id);
+                                                                                                            setEditData({
+                                                                                                                position: l.position || "",
+                                                                                                                status: l.status || "",
+                                                                                                                readerId: l.readerId?._id || ""
+                                                                                                            });
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <EditSquare/>
+                                                                                                    </Button>
+                                                                                                    <Button 
+                                                                                                        onClick={() => {
+                                                                                                            if (confirm("Bạn có chắc muốn xoá bản copy này không?")) {
+                                                                                                                handleDeleteCopy(l._id);
+                                                                                                            }
+                                                                                                        }}
+                                                                                                        sx={{color: "error.main", minWidth: "40px", padding: "4px"}}
+                                                                                                    >
+                                                                                                        <DeleteIcon/>
+                                                                                                    </Button>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                            <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>
+                                                                                                <div style={{ display: "flex", justifyContent: "center" }}>
+                                                                                                    <Button
+                                                                                                        sx={{ color: "#0b485e", minWidth: "40px" }}
+                                                                                                        onClick={() => {
+                                                                                                            setOpenBorrowRecord(prev => prev === l._id ? null : l._id);
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <ListRounded/>
+                                                                                                    </Button>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        </>
+                                                                                    )}
+                                                                                </tr>    
                                                                                 )   
                                                                             })
                                                                         }
@@ -768,11 +666,11 @@ export default function AvailableBook() {
                                                         </tr>
                                                     )
                                                 }
-                                            </>
+                                            </Fragment>
                                         )
                                     )) : (
                                         <tr>
-                                        <td colSpan="12" style={{ textAlign: "center", color: "white" }}>
+                                        <td colSpan="11" style={{ textAlign: "center", padding: "20px", color: "#666" }}>
                                             Hiện đang không có cuốn sách nào.
                                         </td>
                                     </tr>
@@ -780,7 +678,7 @@ export default function AvailableBook() {
                                 }
                                 {loading && (
                                     <tr>
-                                        <td colSpan="12" style={{ textAlign: "center", color: "white" }}>
+                                        <td colSpan="11" style={{ textAlign: "center", padding: "20px", color: "#666" }}>
                                             Đang tải...
                                         </td>
                                     </tr>
@@ -811,6 +709,8 @@ export default function AvailableBook() {
                     <div className={styles.word}>Contact: 0912 xxx xxx</div>
                     <div className={styles.word}>Copyright © Library System</div>
                 </div>
+                
+                {/* CÁC MODAL ĐƯỢC RENDER Ở ĐÂY */}
                 {openEditBar && (
                     <EditBook
                         book={selectedBook}
@@ -824,23 +724,34 @@ export default function AvailableBook() {
                         handleClose={() => setOpenBorrowRecord(null)}
                     />
                 )}
-                {
-                    openAddBookBar && (
-                        <AddBook
-                            handleClose={() => setOpenAddBookBar(null)}
-                            refreshAvailableBooks={refreshAvailableBooks}
-                        />
-                    )
-                }
+                {openAddBookBar && (
+                    <AddBook
+                        handleClose={() => setOpenAddBookBar(null)}
+                        refreshAvailableBooks={refreshAvailableBooks}
+                    />
+                )}
                 {openAddCopyModal && (
                     <AddCopy
                         bookId={openAddCopyModal}
                         handleClose={() => setOpenAddCopyModal(null)}
                         refreshAvailableBooks={refreshAvailableBooks}
-
+                    />
+                )}
+                
+                {/* MODAL LẬP BIÊN BẢN PHẠT */}
+                {isViolationOpen && (
+                    <CreateViolationModal
+                        readerId={violationData.readerId}
+                        documentId={violationData.documentId}
+                        copyId={violationData.copyId}
+                        coverPrice={violationData.coverPrice}
+                        handleClose={() => setIsViolationOpen(false)}
+                        onSuccess={() => {
+                            refreshAvailableBooks(); 
+                        }}
                     />
                 )}
             </div>
         </>
     )
-}   
+}

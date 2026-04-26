@@ -4,11 +4,16 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import checkRole from "../middleware/authRoleMiddleware.js";
 import News from "../models/News.js";
 import Document from "../models/Document.js";
+import { create } from "node:domain";
+import BorrowRecord from "../models/BorrowRecord.js";
+import checkStatus from "../middleware/authStatusMiddleware.js";
+
+
 const router = express.Router();
 
 
 // GET /api/librarian/librarianProfile
-router.get("/librarianProfile", authMiddleware, checkRole(["librarian"]), async(req, res) => {
+router.get("/librarianProfile", authMiddleware, checkRole(["librarian"]), checkStatus(["activate"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const {accountId} = req.query;
         const libraryProfile = await Librarian
@@ -20,7 +25,7 @@ router.get("/librarianProfile", authMiddleware, checkRole(["librarian"]), async(
 });
 
 // GET /api/librarian/getNewsAndAnnounce
-router.get("/getNewsAndAnnounce", authMiddleware, checkRole(["librarian"]), async(req, res) => {
+router.get("/getNewsAndAnnounce", authMiddleware, checkRole(["librarian"]), checkStatus(["activate"]), async(req, res) => {
     try {
         const threeDaysAgo = new Date();
         threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
@@ -65,10 +70,52 @@ router.get("/getNewsAndAnnounce", authMiddleware, checkRole(["librarian"]), asyn
             });
         });
 
-        const combined = [...newsFormatted, ...announcesFormatted]
+        const cancelledOrders = await BorrowRecord.aggregate([
+            {
+                $match: { 
+                    action: "canceled",
+                    createdAt: { $gte: threeDaysAgo }
+                }
+            },
+            { $sort: { createdAt: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "readers",
+                    localField: "readerId",
+                    foreignField: "_id",
+                    as: "reader"
+                }
+            },
+            { $unwind: "$reader" },
+            {
+                $lookup: {
+                    from: "documents",
+                    localField: "documentId",
+                    foreignField: "_id",
+                    as: "document"
+                }
+            },
+            { $unwind: "$document" }
+        ]);
+
+        const cancelledOrdersFormatted = [];
+        cancelledOrders.map(co => {
+            cancelledOrdersFormatted.push({
+                _id: co._id,
+                title: co.document.title,
+                copyId: co.copyId,
+                status: "cancelled",
+                displayType: "ANNOUNCE",
+                compareDate: co.createdAt
+            })
+        })
+
+        const combined = [...newsFormatted, ...announcesFormatted, ...cancelledOrdersFormatted]
         .sort((a, b) => b.compareDate - a.compareDate);
         res.status(200).json(combined);
     } catch (error) {
+        console.error(error);
         res.status(500).json({message: "Get news and annouces failed!"})
     }
 })

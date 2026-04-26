@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { Avatar } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,} 
+    LibraryAddCheckOutlined, HelpOutlineOutlined, ReceiptLongOutlined} 
     from '@mui/icons-material';
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import CategoryPieChart from "../categoryChart/page";
@@ -21,6 +21,7 @@ import DashboardNotiCard from "../newsAndAnnouces/page";
 export default function Dashboard() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
+    const {fullName, avatar} = useLibrarianInfo(account?.id);
     const handleLogout = () => {
         logout();
         router.push("/");
@@ -60,6 +61,12 @@ export default function Dashboard() {
     useEffect(() => {
         getCategoryData();
         getAvailableBooks();
+        const interval = setInterval(() => {
+            getAvailableBooks();
+            getCategoryData();
+        }, 15000);
+
+        return () => clearInterval(interval);
     }, []);
 
   return (
@@ -70,8 +77,23 @@ export default function Dashboard() {
                         <div className="webicon">
                         </div>
                         <div className="user">
-                            <Avatar></Avatar>
-                            <span>{account?.email || "Email"}</span>
+                            {avatar ? (
+                                <Avatar
+                                    alt="User Avatar"
+                                    src={avatar}
+                                    sx={{
+                                        objectFit: 'cover',
+                                        border: '1px solid rgba(150, 149, 149, 0.65)'
+                                    }}
+                                />
+                            ) : (
+                                <Avatar></Avatar>
+                            )}
+                            {fullName ? (
+                                <span>{fullName}</span>
+                            ):(
+                                <span>{account?.email || "Email"}</span>
+                            )}
                             <div className="sign">
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
@@ -90,6 +112,10 @@ export default function Dashboard() {
                         <p onClick={() => router.push("/librarian/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        <p onClick={() => router.push("/librarian/violationManagement")}>
+                            <ReceiptLongOutlined></ReceiptLongOutlined>
+                            Quản lý vi phạm
                         </p>
                     </nav>
                 </aside>
@@ -185,8 +211,16 @@ export default function Dashboard() {
                                     fontWeight: "bolder",
                                     fontSize: "16px",
                                     color: "#7e7d7d",
-                                    marginBottom: "15px"
+                                    marginBottom: "10px"
                                 }}
+                            >
+                            Cơ cấu thể loại sách
+                            </div>
+                            <div
+                             style={{
+                                height: "74%",
+                                padding: "1px"
+                             }}
                             >
                             <CategoryPieChart data={categoryData}/>
                             </div>

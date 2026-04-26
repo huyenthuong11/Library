@@ -13,6 +13,7 @@ import useAvailableBooks from "@/hook/useAvailableBooks";
 import { useState } from "react";
 import BookDesModal from "./bookDesModal";
 import api from "@/lib/axios";
+import Chatbot from "@/app/chatbot/page";
 
 
 export default function AvailableBook() {
@@ -58,6 +59,11 @@ export default function AvailableBook() {
         logout();
         router.push("/");
     };
+
+    const getImageUrl = (path) => {
+        if (path.startsWith("http")) return path;
+        return `http://localhost:5000/${path}`;
+    }; 
 
     const handleSubmit = async(id) => {
         try {
@@ -206,15 +212,13 @@ export default function AvailableBook() {
                                     }}
                                 >
                                     <img
-                                        src={availableBook.image}
+                                        src={getImageUrl(availableBook.image)}
                                         className={styles.bookImage}
                                     />
                                     <div className={styles.bookDescription}>
                                         <div>
                                             Tên sách: {availableBook.title}
                                         </div>
-                                        
-                                        {console.log(availableBook.publisherId.name)}
                                         <div>
                                             Thể loại: {   
                                                 categoryList
@@ -266,6 +270,11 @@ export default function AvailableBook() {
                             </div>
                             ))
                         )}
+                    {readerId && (
+                        <Chatbot
+                            readerId = {readerId}
+                        />
+                    )}
                 </div>
                 <div className={styles.pagination}>
                     <Button 

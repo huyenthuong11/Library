@@ -94,15 +94,14 @@ export default function CategoryPieChart ({ data }) {
         },
         plugins: {
             legend: {
-                position: 'bottom',
-                labels: { usePointStyle: true}
+                position: 'right',
+                labels: { 
+                    usePointStyle: true,
+                    font: {
+                        size: 9
+                    },
+                },
             },
-            title: {
-                display: true,
-                text: 'Cơ cấu thể loại sách',
-                font: { size: 16 },
-                color: "#7e7d7d"
-            }
         }
     };
     return (

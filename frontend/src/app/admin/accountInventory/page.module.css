@@ -1,0 +1,89 @@
+
+
+:root {
+  --bg-card: #ffffff;
+  --text-main: #2d3436;
+  --text-label: #636e72;
+
+  --blue-bg: #cfe7fb; --blue-text: #3498db;
+  --purple-bg: #d5cefc; --purple-text: #6c5ce7;
+  --green-bg: #cbfbd3; --green-text: #27ae60;
+  --navy-bg: #c4ddf7; --navy-text: #34495e;
+  --red-bg: #fdd0d0; --red-text: #e74c3c;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.header {
+    font-size: 16px;
+    font-weight: bolder;
+    color: rgb(100, 100, 99);
+    margin-bottom: 16px;
+    margin-top: 5px;
+    font-family: Quicksand, sans-serif;
+}
+
+.statItem {
+  padding: 5px;
+  border-radius: 16px;
+  transition: transform 0.2s;
+}
+
+.statItem:hover {
+  transform: translateY(-2px);
+}
+
+.fullWidth {
+  grid-column: span 1;
+}
+
+.statHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.icon {
+  font-size: 0.7rem;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.433);
+  border-radius: 8px;
+}
+
+.number {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2d3436;
+}
+
+.label {
+  font-size: 10px;
+  color: var(--text-label);
+  margin: 0;
+}
+
+.blue { background-color: var(--blue-bg); }
+.purple { background-color: var(--purple-bg); }
+.green { background-color: var(--green-bg); }
+.navy { background-color: var(--navy-bg); }
+.yellow { background-color: #fff9db; }
+.red { background-color: var(--red-bg); }
+
+.progressBar {
+  height: 6px;
+  background: #dfe6e9;
+  border-radius: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #27ae60;
+  border-radius: 10px;
+}

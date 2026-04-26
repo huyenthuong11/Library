@@ -33,7 +33,9 @@
 .news { border-left-color: #c084fc; }    
 .overdue { border-left-color: #f87171; } 
 .reserved { border-left-color: #fb923c; }
-
+.cancelled {
+    border-left: 4px solid #ef4444;
+}
 .content {
   font-size: 14px;
   line-height: 1.5;

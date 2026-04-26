@@ -2,17 +2,16 @@
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Avatar, Button } from "@mui/material";
-import { HomeOutlined, CollectionsBookmarkOutlined, 
+import { 
+    HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,} 
-    from '@mui/icons-material';
+    LibraryAddCheckOutlined, HelpOutlineOutlined 
+} from '@mui/icons-material';
 import useReaderInfo from "@/hook/useReaderInfo";
-import { useState } from "react";
 import api from "@/lib/axios";
 import { format } from "date-fns";
-
 
 export default function BookStore() {
     const router = useRouter();
@@ -58,6 +57,7 @@ export default function BookStore() {
 
         return () => clearInterval(timer); 
     }, []);
+
     const categoryList = [
         { value: [""], label: "Tất cả" },
         { value: ["technology"], label: "Công nghệ" },
@@ -215,7 +215,6 @@ export default function BookStore() {
                                 onChange={(e) => {
                                     setSearch(e.target.value);
                                     setCurrentPage(1);
-                                    setOpenDetailsBar(null);
                                 }}
                             />
                         </div>
@@ -225,7 +224,6 @@ export default function BookStore() {
                             onChange={(e) => {
                                 setChoosenCategory(e.target.value);
                                 setCurrentPage(1);
-                                setOpenDetailsBar(null);
                             }}
                         >
                             {categoryList.map((c) => (
@@ -263,135 +261,128 @@ export default function BookStore() {
                         <tbody>
                             { (!loading && filteredBook?.length > 0) ? (
                                 filteredBook?.map((book) => (
-                                    <>
-                                        <tr
-                                            key={book._id}
-                                            className={styles.desBar}
-                                        >
-                                            <td>{formatShortId(book.locations._id)}</td>
-                                            <td>
-                                                <img
-                                                    src={getImageUrl(book.image)}
-                                                    className={styles.bookCover}
-                                                />
-                                            </td>
-                                            <td>
-                                                <span className={styles.bookTitle}>
-                                                    {book.title}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span className={styles.bookAuthor}>
-                                                    {book.author}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                {Math.floor((Date.now() - new Date(book.locations.dueDate))) > 0 && book.locations.dueDate ? (
-                                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                        <div className={`${styles['status']} ${styles[`${"overdue"}`]}`}>
-                                                        </div>
-                                                        Quá hạn
+                                    <tr key={book.locations._id} className={styles.desBar}>
+                                        <td>{formatShortId(book.locations._id)}</td>
+                                        <td>
+                                            <img
+                                                src={getImageUrl(book.image)}
+                                                className={styles.bookCover}
+                                            />
+                                        </td>
+                                        <td>
+                                            <span className={styles.bookTitle}>
+                                                {book.title}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span className={styles.bookAuthor}>
+                                                {book.author}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {Math.floor((Date.now() - new Date(book.locations.dueDate))) > 0 && book.locations.dueDate ? (
+                                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                                    <div className={`${styles['status']} ${styles[`${"overdue"}`]}`}>
                                                     </div>
-                                                ) : (
-                                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                        <div className={`${styles['status']} ${styles[`${book.locations.status}`]}`}></div>
-                                                        {(() => {
-                                                            const matchedStatus = statusList.find(
-                                                                s => s.value === book.locations.status
-                                                            );
-                                                            return matchedStatus ? matchedStatus.label : book.locations.status;
-                                                        })()}
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    Vào lúc: {
-                                                        book.locations.createdAt
-                                                        ? format(new Date(book.locations.createdAt), 'dd-MM-yyyy HH:mm')
-                                                        :""
-                                                    }
+                                                    Quá hạn
                                                 </div>
-                                                <div>
-                                                    Hạn trả: {
-                                                        book.locations.dueDate
-                                                        ? format(new Date(book.locations.dueDate), 'dd-MM-yyyy HH:mm')
-                                                        :""
-                                                    }
+                                            ) : (
+                                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                                    <div className={`${styles['status']} ${styles[`${book.locations.status}`]}`}></div>
+                                                    {(() => {
+                                                        const matchedStatus = statusList.find(
+                                                            s => s.value === book.locations.status
+                                                        );
+                                                        return matchedStatus ? matchedStatus.label : book.locations.status;
+                                                    })()}
                                                 </div>
-                                                {Math.floor((Date.now() - new Date(book.locations.dueDate))) > 0 ? (
-                                                    <div>
-                                                        Đã muộn {Math.floor((Date.now() - 
-                                                        new Date(book.locations.dueDate)) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((Date.now() - 
-                                                        new Date(book.locations.dueDate)) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((Date.now() - 
-                                                        new Date(book.locations.dueDate)) % (1000 * 60 * 60)) / (1000 * 60))} phút
-                                                    </div>
-                                                ) : Math.floor((Date.now() - new Date(book.locations.dueDate))) < 0 && book.locations.status === "reserved" ? (
-                                                    <div>
-                                                        Còn {Math.floor((new Date(book.locations.dueDate) - 
-                                                        Date.now()) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((new Date(book.locations.dueDate) - 
-                                                        Date.now()) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((new Date(book.locations.dueDate) - 
-                                                        Date.now()) % (1000 * 60 * 60)) / (1000 * 60))} phút để nhận
-                                                    </div>
-                                                ) : Math.floor((Date.now() - new Date(book.locations.dueDate))) < 0 && book.locations.status === "borrowed" && (
-                                                    <div>
-                                                        Đang mượn - còn {Math.floor((new Date(book.locations.dueDate) - 
-                                                        Date.now()) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((new Date(book.locations.dueDate) - 
-                                                        Date.now()) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((new Date(book.locations.dueDate) - 
-                                                        Date.now()) % (1000 * 60 * 60)) / (1000 * 60))} phút 
-                                                    </div>
-                                                )}
-                                            </td>
-                                            {
-                                                book.locations.status === "borrowed" ? (
-                                                    <td>
-                                                        <Button
-                                                            sx={{
-                                                                color: "white",
-                                                                backgroundColor: "#0b485e", 
-                                                                border: "none",
-                                                                borderRadius: "5px",
-                                                                cursor: "pointer",
-                                                            }}
-                                                            disabled={loadingId === book.locations._id}
-                                                            onClick={() => {
-                                                                handleExtendBorrowedDueDate(book.locations._id)
-                                                            }}   
-                                                        >
-                                                            {loadingId === book.locations._id ? "Đang xử lý..." : "Gia hạn"}
-                                                        </Button>
-                                                    </td>
-                                                ) : book.locations.status === "reserved" ? (
-                                                    <td>
-                                                        <Button
-                                                            sx={{
-                                                                color: "white",
-                                                                backgroundColor: "#0b485e", 
-                                                                border: "none",
-                                                                borderRadius: "5px",
-                                                                cursor: "pointer",
-                                                            }}
-                                                            disabled={loadingId === book.locations._id}
-                                                            onClick={() => {
-                                                                handleCancelReserved(book.locations._id)
-                                                            }}   
-                                                        >
-                                                            Hủy
-                                                        </Button>
-                                                    </td>
-                                                ) : (
-                                                    <td>
-                                                        Đã muộn {Math.floor((Date.now() - new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày
-                                                    </td>
-                                                )
-                                            }
-                                        </tr>
-                                    </>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <div>
+                                                Vào lúc: {
+                                                    book.locations.createdAt
+                                                    ? format(new Date(book.locations.createdAt), 'dd-MM-yyyy HH:mm')
+                                                    :""
+                                                }
+                                            </div>
+                                            <div>
+                                                Hạn trả: {
+                                                    book.locations.dueDate
+                                                    ? format(new Date(book.locations.dueDate), 'dd-MM-yyyy HH:mm')
+                                                    :""
+                                                }
+                                            </div>
+                                            {Math.floor((Date.now() - new Date(book.locations.dueDate))) > 0 ? (
+                                                <div>
+                                                    Đã muộn {Math.floor((Date.now() - 
+                                                    new Date(book.locations.dueDate)) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((Date.now() - 
+                                                    new Date(book.locations.dueDate)) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((Date.now() - 
+                                                    new Date(book.locations.dueDate)) % (1000 * 60 * 60)) / (1000 * 60))} phút
+                                                </div>
+                                            ) : Math.floor((Date.now() - new Date(book.locations.dueDate))) < 0 && book.locations.status === "reserved" ? (
+                                                <div>
+                                                    Còn {Math.floor((new Date(book.locations.dueDate) - 
+                                                    Date.now()) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((new Date(book.locations.dueDate) - 
+                                                    Date.now()) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((new Date(book.locations.dueDate) - 
+                                                    Date.now()) % (1000 * 60 * 60)) / (1000 * 60))} phút để nhận
+                                                </div>
+                                            ) : Math.floor((Date.now() - new Date(book.locations.dueDate))) < 0 && book.locations.status === "borrowed" && (
+                                                <div>
+                                                    Đang mượn - còn {Math.floor((new Date(book.locations.dueDate) - 
+                                                    Date.now()) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((new Date(book.locations.dueDate) - 
+                                                    Date.now()) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((new Date(book.locations.dueDate) - 
+                                                    Date.now()) % (1000 * 60 * 60)) / (1000 * 60))} phút 
+                                                </div>
+                                            )}
+                                        </td>
+                                        {
+                                            book.locations.status === "borrowed" ? (
+                                                <td>
+                                                    <Button
+                                                        sx={{
+                                                            color: "white",
+                                                            backgroundColor: "#0b485e", 
+                                                            border: "none",
+                                                            borderRadius: "5px",
+                                                            cursor: "pointer",
+                                                        }}
+                                                        disabled={loadingId === book.locations._id}
+                                                        onClick={() => {
+                                                            handleExtendBorrowedDueDate(book.locations._id)
+                                                        }}   
+                                                    >
+                                                        {loadingId === book.locations._id ? "Đang xử lý..." : "Gia hạn"}
+                                                    </Button>
+                                                </td>
+                                            ) : book.locations.status === "reserved" ? (
+                                                <td>
+                                                    <Button
+                                                        sx={{
+                                                            color: "white",
+                                                            backgroundColor: "#0b485e", 
+                                                            border: "none",
+                                                            borderRadius: "5px",
+                                                            cursor: "pointer",
+                                                        }}
+                                                        disabled={loadingId === book.locations._id}
+                                                        onClick={() => {
+                                                            handleCancelReserved(book.locations._id)
+                                                        }}   
+                                                    >
+                                                        Hủy
+                                                    </Button>
+                                                </td>
+                                            ) : (
+                                                <td>
+                                                    {/* ĐÂY LÀ DÒNG FIX LỖI: Sửa l.dueDate thành book.locations.dueDate */}
+                                                    Đã muộn {Math.floor((Date.now() - new Date(book.locations.dueDate)) / (1000 * 60 * 60 * 24))} ngày
+                                                </td>
+                                            )
+                                        }
+                                    </tr>
                                 ))
-                            ) : (
-                                <>
-                                </>
-                            )}
+                            ) : null }
                         </tbody>
                     </table>
                 </div>

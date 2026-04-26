@@ -1,10 +1,11 @@
 import cron from "node-cron";
 import Document from "../models/Document.js";
 import Reader from "../models/user/Reader.js";
+import Violation from "../models/Violation.js";
 
 const startCronJobs = () => {
 
-    // reset reserved expired
+    // 1. RESET SÁCH ĐẶT TRƯỚC HẾT HẠN (Giữ nguyên logic cũ)
     cron.schedule("0 * * * *", async () => {
 
         const now = new Date();
@@ -61,7 +62,7 @@ const startCronJobs = () => {
 
             if (!docBulkOps.length) return;
 
-            const result = await Document.bulkWrite(bulkOps);
+            const result = await Document.bulkWrite(docBulkOps);
             const readerIds = Object.keys(readerTurnMap);
             if(readerIds.length > 0) {
                 const readerBulkOps = readerIds.map(id => ({
@@ -82,13 +83,67 @@ const startCronJobs = () => {
     }, { timezone: "Asia/Ho_Chi_Minh" });
 
 
-    // scan overdue
+    // 2. QUÉT SÁCH QUÁ HẠN VÀ TỰ ĐỘNG TẠO/CẬP NHẬT BIÊN BẢN PHẠT
     cron.schedule("0 0 * * *", async () => {
 
         const now = new Date();
 
         try {
+            // Bước 2.1: Quét tìm tất cả các sách Đang Mượn hoặc Đã Quá Hạn mà dueDate < now
+            const docs = await Document.find(
+                {
+                    locations: {
+                        $elemMatch: {
+                            status: { $in: ["borrowed", "overdue"] },
+                            dueDate: { $lt: now }
+                        }
+                    }
+                },
+                { locations: 1 }
+            );
 
+            const violationOps = [];
+
+            docs.forEach(doc => {
+                doc.locations.forEach(item => {
+                    if ((item.status === "borrowed" || item.status === "overdue") && item.dueDate && item.dueDate < now) {
+                        
+                        // Tính toán số ngày trễ (Làm tròn lên)
+                        const diffTime = now.getTime() - new Date(item.dueDate).getTime();
+                        const daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                        
+                        // Tiền phạt = Số ngày trễ x 2.000 VNĐ
+                        const fine = daysLate * 2000;
+
+                        // Lệnh Upsert: Cập nhật biên bản (nếu đã tạo hôm qua) hoặc Tạo mới (nếu hôm nay mới trễ)
+                        violationOps.push({
+                            updateOne: {
+                                filter: { 
+                                    copyId: item._id, 
+                                    status: "unpaid" // Chỉ cập nhật liên tục nếu độc giả chưa đóng tiền
+                                },
+                                update: {
+                                    $set: {
+                                        readerId: item.readerId,
+                                        documentId: doc._id,
+                                        copyId: item._id,
+                                        reason: `Nộp muộn sách ${daysLate} ngày.`,
+                                        fineAmount: fine
+                                    }
+                                },
+                                upsert: true // Tạo mới nếu không tìm thấy filter
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Bước 2.2: Chạy lệnh ghi hàng loạt Biên Bản vào CSDL
+            if (violationOps.length > 0) {
+                await Violation.bulkWrite(violationOps);
+            }
+
+            // Bước 2.3: Đổi status của sách từ borrowed -> overdue
             const result = await Document.updateMany(
                 {
                     "locations.status": "borrowed",
@@ -107,6 +162,7 @@ const startCronJobs = () => {
             );
 
             console.log(`[Cron] ${result.modifiedCount} items moved to overdue`);
+            console.log(`[Cron] Auto-generated/Updated ${violationOps.length} overdue violation records`);
 
         } catch (err) {
             console.error("Cron overdue error:", err);

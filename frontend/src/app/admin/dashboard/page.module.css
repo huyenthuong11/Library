@@ -18,13 +18,12 @@
     grid-auto-rows: 120px;
     gap: clamp(15px, 2vw, 30px);
     flex: 1;
-    overflow-y: auto; 
 }
 
 .card {
     font-family: Quicksand, sans-serif;
     grid-column: span 1;
-    grid-row: span 3;
+    grid-row: span 2;
     border-radius: 16px;
     font-weight: 500;
     background: rgb(255, 255, 255);
@@ -59,7 +58,7 @@
 .cardWidth {
     font-family: Quicksand, sans-serif;
     grid-column: span 2;
-    grid-row: span 3;
+    grid-row: span 2;
     border-radius: 16px;
     font-weight: 500;
     background: rgb(255, 255, 255);
@@ -71,7 +70,7 @@
 .miniCard {
     font-family: Quicksand, sans-serif;
     grid-column: span 1;
-    grid-row: span 2;
+    grid-row: span 1;
     border-radius: 16px;
     font-weight: 500;
     background: rgb(255, 255, 255);
