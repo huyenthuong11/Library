@@ -4,30 +4,28 @@ import useReaderList from "@/hook/useGetReaderList";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
-import { use, useContext, useEffect } from "react";
+import { useContext, useState } from "react";
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     PermIdentityOutlined, AssignmentIndOutlined, 
-    AddHomeWorkOutlined} 
+    AddHomeWorkOutlined, ReceiptLongOutlined} 
     from '@mui/icons-material';
-import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ListRounded } from "@mui/icons-material";
-import api from "@/lib/axios";
 
 export default function ReaderManagement() {
     const {readerList} = useReaderList();
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
-    const {search, setSearch} = useState("");
-    const {currentPage, setCurrentPage} = useState(1);
+    const [search, setSearch] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
 
     const handleLogout = () => {
         logout();
         router.push("/");
     };
+
     return (
-        <>
         <div className="container">
             <div className="main">
                 <div className="header">
@@ -40,6 +38,7 @@ export default function ReaderManagement() {
                         </div>
                     </div>
                 </div>
+                
                 <aside className="sidebar">
                     <div style={{marginTop:10}}>
                         <div className="webicon">
@@ -56,10 +55,14 @@ export default function ReaderManagement() {
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
                         </p>
-                        <p onClick={() => router.push("/admin/readerManagement")}>
+                        <p onClick={() => router.push("/admin/violationManagement")}>
+                            <ReceiptLongOutlined />
+                            Quản lý vi phạm
+                        </p>
+                        <a className="active">
                             <PermIdentityOutlined/>
                             Quản lý người đọc
-                        </p>
+                        </a>
                         <p onClick={() => router.push("/admin/librarianManagement")}>
                             <AssignmentIndOutlined/>
                             Quản lý thủ thư
@@ -70,17 +73,18 @@ export default function ReaderManagement() {
                         </p>
                     </nav>
                 </aside>
+
                 <div className={styles.main}>
                     <div className={styles.header}>
                         <div>
                             <div className={styles.mainHeader}>
-                                <h2>QUẢN LÝ KHO SÁCH</h2>
+                                <h2>QUẢN LÝ ĐỘC GIẢ</h2>
                             </div>
                             <div className={styles.actionBar}>
                                 <div className={styles.searchContainer}>
                                     <input 
                                         type="text" 
-                                        placeholder="Tìm kiếm sách (Tên, Tác giả, ISBN...)"
+                                        placeholder="Tìm kiếm độc giả..."
                                         value={search}
                                         onChange={(e) => {
                                             setSearch(e.target.value);
@@ -91,9 +95,49 @@ export default function ReaderManagement() {
                             </div>
                         </div>
                     </div>
+
+                    {/* PHẦN BẢNG DANH SÁCH ĐỘC GIẢ (ĐÃ GẮN KEY CHUẨN) */}
+                    <table className={styles.bookTable}>
+                        <thead>
+                            <tr>
+                                <th>Mã Độc Giả</th>
+                                <th>Họ và Tên</th>
+                                <th>Email</th>
+                                <th>Số Điện Thoại</th>
+                                <th>Trạng Thái</th>
+                                <th>Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {readerList && readerList.length > 0 ? (
+                                readerList.map((reader, index) => (
+                                    <tr key={reader._id || index} className={styles.desBar}>
+                                        <td>{reader._id ? reader._id.slice(-7).toUpperCase() : "N/A"}</td>
+                                        <td style={{ fontWeight: "bold" }}>{reader.fullName}</td>
+                                        <td>{reader.email}</td>
+                                        <td>{reader.phoneNumber || "Chưa cập nhật"}</td>
+                                        <td style={{ color: "green" }}>Đang hoạt động</td>
+                                        <td>
+                                            <Button sx={{ color: "#0b485e" }}>
+                                                <ListRounded />
+                                            </Button>
+                                            <Button sx={{ color: "error.main" }}>
+                                                <DeleteIcon />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" style={{ textAlign: "center", padding: "20px", color: "#666" }}>
+                                        Không tìm thấy độc giả nào.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-        </>
     )
 }

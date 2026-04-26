@@ -20,14 +20,8 @@ import publisherRoutes from "./src/routes/publisherRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import borrowRecordRoutes from "./src/routes/borrowRecordRoutes.js";
 import chartRoutes from "./src/routes/chartRoutes.js";
-<<<<<<< HEAD
 import recommendRoutes from "./src/routes/recommendRoutes.js"; // Đã thêm lại dòng này
 import violationRoutes from "./src/routes/violationRoutes.js";
-=======
-import recommendRoutes from "./src/routes/recommendRoutes.js"
-
-
->>>>>>> 0a73f8f4a568f59f6990551d335b4cf5fcacaf65
 
 //load env
 dotenv.config();
