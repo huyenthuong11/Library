@@ -21,7 +21,7 @@ export default function Top3MostBorrowed() {
     }, []);
 
     const getImageUrl = (path) => {
-        if(!path) return "http://localhost:5000/default-book-cover.jpg";
+        if(!path) return "";
         if (path.startsWith("http") || path.startsWith("https")) return path;
         return `http://localhost:5000/${path}`;
     };
@@ -29,24 +29,30 @@ export default function Top3MostBorrowed() {
     return (
         <>
             <div className={styles.cardMain}>
-                <div className={styles.bookCard1}>
-                    <img
-                        src={getImageUrl(top3MostBorrowedBooks[1]?.image)}
-                    />
-                    <div>{top3MostBorrowedBooks[1]?.title}</div>
-                </div>
-                <div className={styles.bookCard2}>
-                    <img
-                        src={getImageUrl(top3MostBorrowedBooks[0]?.image)}
-                    />
-                    <div>{top3MostBorrowedBooks[0]?.title}</div>
-                </div>
-                <div className={styles.bookCard1}>
-                    <img
-                        src={getImageUrl(top3MostBorrowedBooks[2]?.image)}
-                    />
-                    <div>{top3MostBorrowedBooks[2]?.title}</div>
-                </div>
+                {top3MostBorrowedBooks?.length > 0 &&  (
+                <>
+                    <div className={styles.bookCard1}>
+                        <img
+                            src={getImageUrl(top3MostBorrowedBooks[1]?.image)}
+                            referrerPolicy="no-referrer"
+                            key={top3MostBorrowedBooks[1]?.image}
+                        />
+                        <div>{top3MostBorrowedBooks[1]?.title}</div>
+                    </div>
+                    <div className={styles.bookCard2}>
+                        <img
+                            src={getImageUrl(top3MostBorrowedBooks[0]?.image)}
+                        />
+                        <div>{top3MostBorrowedBooks[0]?.title}</div>
+                    </div>
+                    <div className={styles.bookCard1}>
+                        <img
+                            src={getImageUrl(top3MostBorrowedBooks[2]?.image)}
+                        />
+                        <div>{top3MostBorrowedBooks[2]?.title}</div>
+                    </div>
+                </>
+                )}
             </div>
         </>
     )
