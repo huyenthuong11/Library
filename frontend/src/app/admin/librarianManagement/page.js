@@ -8,7 +8,7 @@ import { useContext, useEffect } from "react";
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     PermIdentityOutlined, AssignmentIndOutlined, 
-    AddHomeWorkOutlined, EditSquare, AddBoxOutlined} 
+    AddHomeWorkOutlined, EditSquare, AddBoxOutlined, ReceiptLongOutlined} 
     from '@mui/icons-material';
 import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -127,6 +127,10 @@ export default function ReaderManagement() {
                         <p onClick={() => router.push("/admin/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        <p onClick={() => router.push("/admin/violationManagement")}>
+                            <ReceiptLongOutlined />
+                            Quản lý vi phạm
                         </p>
                         <p onClick={() => router.push("/admin/readerManagement")}>
                             <PermIdentityOutlined/>

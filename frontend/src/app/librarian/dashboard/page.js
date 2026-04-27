@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { Avatar } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,} 
+    LibraryAddCheckOutlined, HelpOutlineOutlined, ReceiptLongOutlined} 
     from '@mui/icons-material';
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import CategoryPieChart from "../categoryChart/page";
@@ -112,6 +112,10 @@ export default function Dashboard() {
                         <p onClick={() => router.push("/librarian/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        <p onClick={() => router.push("/librarian/violationManagement")}>
+                            <ReceiptLongOutlined></ReceiptLongOutlined>
+                            Quản lý vi phạm
                         </p>
                     </nav>
                 </aside>

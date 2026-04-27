@@ -2,15 +2,14 @@
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
-import { useContext, useEffect } from "react";
 import { Avatar, Button, IconButton} from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
     LibraryAddCheckOutlined, HelpOutlineOutlined,
     LibraryBooksOutlined, MenuBookOutlined, Delete} 
     from '@mui/icons-material';
+import { useContext, useEffect, useState } from "react";
 import useReaderInfo from "@/hook/useReaderInfo";
-import { useState } from "react";
 import api from "@/lib/axios";
 import { format } from "date-fns";
 
@@ -250,7 +249,6 @@ export default function BookStore() {
                                 onChange={(e) => {
                                     setSearch(e.target.value);
                                     setCurrentPage(1);
-                                    setOpenDetailsBar(null);
                                 }}
                             />
                         </div>
@@ -260,7 +258,6 @@ export default function BookStore() {
                             onChange={(e) => {
                                 setChoosenCategory(e.target.value);
                                 setCurrentPage(1);
-                                setOpenDetailsBar(null);
                             }}
                         >
                             {categoryList.map((c) => (
@@ -296,216 +293,142 @@ export default function BookStore() {
                             </tr>
                         </thead>
                         <tbody>
-                            { (!loading && filteredBook?.length > 0) ? (
-                                filteredBook?.map((book) => (
+                          {!loading && filteredBook?.length > 0 ? (
+                            filteredBook.map((book) => (
+                              <tr key={book.locations?._id || book._id} className={styles.desBar}>
+                                {/* ID */}
+                                <td>{formatShortId(book.type === "physical" ? book.locations._id : book._id)}</td>
+
+                                {/* Ảnh bìa */}
+                                <td>
+                                  {book.type === "physical" ? (
+                                    <img
+                                      src={getImageUrl(book.image)}
+                                      className={styles.bookCover}
+                                      alt={book.title}
+                                    />
+                                  ) : (
+                                    (() => {
+                                      const eStyle = getEbookStyle(book.title);
+                                      return (
+                                        <div
+                                          className={styles.bookCoverBox}
+                                          style={{
+                                            backgroundColor: eStyle.backgroundColor,
+                                            borderColor: eStyle.borderColor,
+                                            color: eStyle.color,
+                                          }}
+                                        >
+                                          <div className={styles.bookTitleOnCover}>{book.title}</div>
+                                          <div className={styles.ebookAuthorOnCover}>{book.author}</div>
+                                        </div>
+                                      );
+                                    })()
+                                  )}
+                                </td>
+
+                                {/* Tiêu đề */}
+                                <td>
+                                  <span className={styles.bookTitle}>{book.title}</span>
+                                </td>
+
+                                {/* Tác giả */}
+                                <td>
+                                  <span className={styles.bookAuthor}>{book.author}</span>
+                                </td>
+
+                                {/* Trạng thái & Thời gian */}
+                                <td>
+                                  {book.type === "physical" ? (
                                     <>
-                                    {book.type === "physical" ? (
-                                        <tr
-                                            key={book._id}
-                                            className={styles.desBar}
-                                        >
-                                            <td>{formatShortId(book.locations._id)}</td>
-                                            <td>
-                                                <img
-                                                    src={getImageUrl(book.image)}
-                                                    className={styles.bookCover}
-                                                />
-                                            </td>
-                                            <td>
-                                                <span className={styles.bookTitle}>
-                                                    {book.title}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span className={styles.bookAuthor}>
-                                                    {book.author}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                {Math.floor((Date.now() - new Date(book.locations.dueDate))) > 0 && book.locations.dueDate ? (
-                                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                        <div className={`${styles['status']} ${styles[`${"overdue"}`]}`}>
-                                                        </div>
-                                                        Quá hạn
-                                                    </div>
-                                                ) : (
-                                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                        <div className={`${styles['status']} ${styles[`${book.locations.status}`]}`}></div>
-                                                        {(() => {
-                                                            const matchedStatus = statusList.find(
-                                                                s => s.value === book.locations.status
-                                                            );
-                                                            return matchedStatus ? matchedStatus.label : book.locations.status;
-                                                        })()}
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    Vào lúc: {
-                                                        book.locations.createdAt
-                                                        ? format(new Date(book.locations.createdAt), 'dd-MM-yyyy HH:mm')
-                                                        :""
-                                                    }
-                                                </div>
-                                                <div>
-                                                    Hạn trả: {
-                                                        book.locations.dueDate
-                                                        ? format(new Date(book.locations.dueDate), 'dd-MM-yyyy HH:mm')
-                                                        :""
-                                                    }
-                                                </div>
-                                                {Math.floor((Date.now() - new Date(book.locations.dueDate))) > 0 ? (
-                                                    <div>
-                                                        Đã muộn {Math.floor((Date.now() - 
-                                                        new Date(book.locations.dueDate)) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((Date.now() - 
-                                                        new Date(book.locations.dueDate)) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((Date.now() - 
-                                                        new Date(book.locations.dueDate)) % (1000 * 60 * 60)) / (1000 * 60))} phút
-                                                    </div>
-                                                ) : Math.floor((Date.now() - new Date(book.locations.dueDate))) < 0 && book.locations.status === "reserved" ? (
-                                                    <div>
-                                                        Còn {Math.floor((new Date(book.locations.dueDate) - 
-                                                        Date.now()) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((new Date(book.locations.dueDate) - 
-                                                        Date.now()) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((new Date(book.locations.dueDate) - 
-                                                        Date.now()) % (1000 * 60 * 60)) / (1000 * 60))} phút để nhận
-                                                    </div>
-                                                ) : Math.floor((Date.now() - new Date(book.locations.dueDate))) < 0 && book.locations.status === "borrowed" && (
-                                                    <div>
-                                                        Đang mượn - còn {Math.floor((new Date(book.locations.dueDate) - 
-                                                        Date.now()) / (1000 * 60 * 60 * 24))} ngày {Math.floor(((new Date(book.locations.dueDate) - 
-                                                        Date.now()) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} giờ {Math.floor(((new Date(book.locations.dueDate) - 
-                                                        Date.now()) % (1000 * 60 * 60)) / (1000 * 60))} phút 
-                                                    </div>
-                                                )}
-                                            </td>
-                                            {
-                                                book.locations.status === "borrowed" ? (
-                                                    <td>
-                                                        <Button
-                                                            sx={{
-                                                                color: "white",
-                                                                backgroundColor: "#0b485e", 
-                                                                border: "none",
-                                                                borderRadius: "5px",
-                                                                cursor: "pointer",
-                                                                width: "100px"
-                                                            }}
-                                                            disabled={loadingId === book.locations._id}
-                                                            onClick={() => {
-                                                                handleExtendBorrowedDueDate(book.locations._id)
-                                                            }}   
-                                                        >
-                                                            {loadingId === book.locations._id ? "Đang xử lý..." : "Gia hạn"}
-                                                        </Button>
-                                                    </td>
-                                                ) : book.locations.status === "reserved" ? (
-                                                    <td>
-                                                        <Button
-                                                            sx={{
-                                                                color: "white",
-                                                                backgroundColor: "#0b485e", 
-                                                                border: "none",
-                                                                borderRadius: "5px",
-                                                                cursor: "pointer",
-                                                                width: "100px"
-                                                            }}
-                                                            disabled={loadingId === book.locations._id}
-                                                            onClick={() => {
-                                                                handleCancelReserved(book.locations._id)
-                                                            }}   
-                                                        >
-                                                            Hủy
-                                                        </Button>
-                                                    </td>
-                                                ) : (
-                                                    <td>
-                                                        Đã muộn {Math.floor((Date.now() - new Date(l.dueDate)) / (1000 * 60 * 60 * 24))} ngày
-                                                    </td>
-                                                )
-                                            }
-                                        </tr>
-                                    ) : (
-                                        <tr
-                                            key={book._id}
-                                            className={styles.desBar}
-                                        >
-                                            <td>{formatShortId(book._id)}</td>
-                                            <td>
-                                                {(() => {
-                                                    const eStyle = getEbookStyle(book.title);
-                                                    return (
-                                                        <div
-                                                            className={styles.bookCoverBox}
-                                                            style={{
-                                                                backgroundColor: eStyle.backgroundColor,
-                                                                borderColor: eStyle.borderColor,
-                                                                color: eStyle.color
-                                                            }}
-                                                        >
-                                                            <div className={styles.bookTitleOnCover}>
-                                                                {book.title}
-                                                            </div>
-                                                            <div className={styles.ebookAuthorOnCover}>
-                                                                {book.author}
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })()}
-                                            </td>   
-                                            <td>
-                                                <span className={styles.bookTitle}>
-                                                    {book.title}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span className={styles.bookAuthor}>
-                                                    {book.author}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div className={`${styles['status']} ${styles[`${"borrowed"}`]}`}>
-                                                </div>
-                                                Đang mượn (Ebook)
-                                            </td>     
-                                            <td>Vĩnh viễn</td>    
-                                            <td>
-                                                <div style={{
-                                                    gap: "30px",
-                                                    display: "flex",
-                                                }}>
-                                                <IconButton
-                                                    sx={{
-                                                        color: "#0b485e",
-                                                        border: "none",
-                                                        borderRadius: "5px",
-                                                        cursor: "pointer",
-                                                    }}
-                                                    onClick={() => router.push(`/reader/eBookDetails/${book._id}`)}
-                                                >
-                                                    <MenuBookOutlined/>
-                                                </IconButton>
-                                                <IconButton
-                                                    sx={{
-                                                        color: "#9d0303",
-                                                        border: "none",
-                                                        borderRadius: "5px",
-                                                        cursor: "pointer",
-                                                    }}
-                                                    onClick={() => handleDelete(book._id)}
-                                                >
-                                                    <Delete/>
-                                                </IconButton>
-                                                </div>
-                                            </td>     
-                                        </tr>
-                                        )
-                                    }
+                                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                        <div
+                                          className={`${styles["status"]} ${
+                                            styles[
+                                              Math.floor(Date.now() - new Date(book.locations.dueDate)) > 0
+                                                ? "overdue"
+                                                : book.locations.status
+                                            ]
+                                          }`}
+                                        ></div>
+                                        {Math.floor(Date.now() - new Date(book.locations.dueDate)) > 0
+                                          ? "Quá hạn"
+                                          : statusList.find((s) => s.value === book.locations.status)?.label ||
+                                            book.locations.status}
+                                      </div>
+                                      <div style={{ fontSize: "0.85rem", marginTop: "4px" }}>
+                                        <div>Vào lúc: {book.locations.createdAt ? format(new Date(book.locations.createdAt), "dd-MM-yyyy HH:mm") : ""}</div>
+                                        <div>Hạn trả: {book.locations.dueDate ? format(new Date(book.locations.dueDate), "dd-MM-yyyy HH:mm") : ""}</div>
+
+                                        {/* Logic tính thời gian chi tiết */}
+                                        {(() => {
+                                          const diff = Date.now() - new Date(book.locations.dueDate);
+                                          const days = Math.floor(Math.abs(diff) / (1000 * 60 * 60 * 24));
+                                          const hours = Math.floor((Math.abs(diff) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                          const mins = Math.floor((Math.abs(diff) % (1000 * 60 * 60)) / (1000 * 60));
+
+                                          if (diff > 0) {
+                                            return <div>Đã muộn {days} ngày {hours} giờ {mins} phút</div>;
+                                          } else if (book.locations.status === "reserved") {
+                                            return <div>Còn {days} ngày {hours} giờ {mins} phút để nhận</div>;
+                                          } else if (book.locations.status === "borrowed") {
+                                            return <div>Đang mượn - còn {days} ngày {hours} giờ {mins} phút</div>;
+                                          }
+                                          return null;
+                                        })()}
+                                      </div>
                                     </>
-                                ))
-                            ) : (
-                                <>
-                                </>
-                            )}
+                                  ) : (
+                                    <>
+                                      <div className={`${styles["status"]} ${styles["borrowed"]}`}></div>
+                                      Đang mượn (Ebook)
+                                      <div style={{ fontSize: "0.85rem", marginTop: "4px" }}>Vĩnh viễn</div>
+                                    </>
+                                  )}
+                                </td>
+
+                                {/* Hành động (Actions) */}
+                                <td>
+                                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                    {book.type === "physical" ? (
+                                      book.locations.status === "borrowed" ? (
+                                        <Button
+                                          sx={{ color: "white", backgroundColor: "#0b485e", width: "100px" }}
+                                          disabled={loadingId === book.locations._id}
+                                          onClick={() => handleExtendBorrowedDueDate(book.locations._id)}
+                                        >
+                                          {loadingId === book.locations._id ? "..." : "Gia hạn"}
+                                        </Button>
+                                      ) : book.locations.status === "reserved" ? (
+                                        <Button
+                                          sx={{ color: "white", backgroundColor: "#9d0303", width: "100px" }}
+                                          disabled={loadingId === book.locations._id}
+                                          onClick={() => handleCancelReserved(book.locations._id)}
+                                        >
+                                          Hủy
+                                        </Button>
+                                      ) : null
+                                    ) : (
+                                      <>
+                                        <IconButton 
+                                          sx={{ color: "#0b485e" }} 
+                                          onClick={() => router.push(`/reader/eBookDetails/${book._id}`)}
+                                        >
+                                          <MenuBookOutlined />
+                                        </IconButton>
+                                        <IconButton 
+                                          sx={{ color: "#9d0303" }} 
+                                          onClick={() => handleDelete(book._id)}
+                                        >
+                                          <Delete />
+                                        </IconButton>
+                                      </>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          ) : null}
                         </tbody>
                     </table>
                 </div>
