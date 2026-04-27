@@ -8,7 +8,7 @@ import { Box } from "@mui/system";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
     LibraryAddCheckOutlined, HelpOutlineOutlined, 
-    LockOutlined} 
+    LockOutlined, LibraryBooksOutlined} 
     from '@mui/icons-material';
 import api from "../../../lib/axios.js";
 import { format } from 'date-fns';
@@ -204,6 +204,11 @@ export default function Info() {
                                 <p onClick={() => router.push("/reader/availableBooks")}>
                                     <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                                     Kho sách thư viện
+                                </p>
+                                
+                                <p onClick={() => router.push("/reader/ebook")}>
+                                    <LibraryBooksOutlined/>
+                                    Kho Ebook
                                 </p>
                                 <p onClick={() => router.push("/reader/borrowedBooks")}>
                                     <LibraryAddCheckOutlined></LibraryAddCheckOutlined>

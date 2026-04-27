@@ -7,7 +7,8 @@ import { useContext, useState, useEffect } from "react";
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined } 
+    LibraryAddCheckOutlined, HelpOutlineOutlined,
+    LibraryBooksOutlined } 
     from '@mui/icons-material';
 import useReaderInfo from "@/hook/useReaderInfo";
 import BorrowModal from "./BorrowModal";
@@ -58,6 +59,22 @@ export default function HistoryBoard() {
         getBorrowedHistory();
     }, [readerId, search, currentPage]);
 
+    const getEbookStyle = (title) => {
+        let hash = 0; 
+        for (let i = 0; i < title.length; i++) {
+            hash = title.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        const h = Math.abs(hash % 360);
+        const s = 30;
+        const l = 90;
+
+        return {
+            backgroundColor: `hsl(${h}, ${s}%, ${l}%)`,
+            color: `hsl(${h}, ${s}%, 20%)`,
+            borderColor: `hsl(${h}, ${s}%, 80%)`
+        }
+    };
     
     return (
         <div className="container">
@@ -103,6 +120,11 @@ export default function HistoryBoard() {
                         <p onClick={() => router.push("/reader/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        
+                        <p onClick={() => router.push("/reader/ebook")}>
+                            <LibraryBooksOutlined/>
+                            Kho Ebook
                         </p>
                         <p onClick={() => router.push("/reader/borrowedBooks")}>
                             <LibraryAddCheckOutlined></LibraryAddCheckOutlined>
@@ -150,24 +172,64 @@ export default function HistoryBoard() {
                                             height: "650px"
                                         }}
                                     >
-                                        <img
-                                            src={getImageUrl(copy.bookInfo.image)}
-                                            className={styles.bookImage}
-                                        />
-                                        <div className={styles.bookDescription}>
+                                        {copy.type === "physical" ? (
                                             <div>
-                                                Mã sách: {copy.bookInfo.isbn}
+                                                <img
+                                                    src={getImageUrl(copy.bookInfo.image)}
+                                                    className={styles.bookImage}
+                                                />
+                                                <div className={styles.bookDescription}>
+                                                    <div>
+                                                        Mã sách: {copy.bookInfo.isbn}
+                                                    </div>
+                                                    <div>
+                                                        Mã copy: {formatShortId(copy._id)}
+                                                    </div>
+                                                    <div>
+                                                        Tên sách: {copy.bookInfo.title}
+                                                    </div>
+                                                    <div className={styles.bookAuthor}>
+                                                        Tên tác giả: {copy.bookInfo.author}
+                                                    </div>
+                                                </div>
                                             </div>
+                                        ) : (
                                             <div>
-                                                Mã copy: {formatShortId(copy._id)}
+                                                <div className={styles.bookImage}>
+                                                    {(() => {
+                                                        const eStyle = getEbookStyle(copy.bookInfo.title);
+                                                        return (
+                                                            <div
+                                                                className={styles.bookCoverBox}
+                                                                style={{
+                                                                    backgroundColor: eStyle.backgroundColor,
+                                                                    borderColor: eStyle.borderColor,
+                                                                    color: eStyle.color
+                                                                }}
+                                                            >
+                                                                <div className={styles.bookTitleOnCover}>
+                                                                    {copy.bookInfo.title}
+                                                                </div>
+                                                                <div className={styles.ebookAuthorOnCover}>
+                                                                    {copy.bookInfo.author}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </div>
+                                                    <div className={styles.bookDescription}>
+                                                    <div>
+                                                        Mã sách: {formatShortId(copy._id)}
+                                                    </div>
+                                                    <div>
+                                                        Tên sách: {copy.bookInfo.title}
+                                                    </div>
+                                                    <div className={styles.bookAuthor}>
+                                                        Tên tác giả: {copy.bookInfo.author}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                Tên sách: {copy.bookInfo.title}
-                                            </div>
-                                            <div className={styles.bookAuthor}>
-                                                Tên tác giả: {copy.bookInfo.author}
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
                             ))

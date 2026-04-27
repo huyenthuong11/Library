@@ -7,8 +7,9 @@ import { Avatar } from "@mui/material";
 import { 
     HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined 
-} from '@mui/icons-material';
+    LibraryAddCheckOutlined, HelpOutlineOutlined,
+    LibraryBooksOutlined } 
+    from '@mui/icons-material';
 import useReaderInfo from "@/hook/useReaderInfo";
 import api from "@/lib/axios";
 import { format } from 'date-fns';
@@ -164,6 +165,10 @@ export default function Dashboard() {
                     <p onClick={() => router.push("/reader/availableBooks")}>
                         <CollectionsBookmarkOutlined />
                         Kho sách thư viện
+                    </p>
+                    <p onClick={() => router.push("/reader/ebook")}>
+                        <LibraryBooksOutlined/>
+                        Kho Ebook
                     </p>
                     <p onClick={() => router.push("/reader/borrowedBooks")}>
                         <LibraryAddCheckOutlined />

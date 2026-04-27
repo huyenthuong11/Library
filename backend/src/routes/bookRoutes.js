@@ -18,7 +18,7 @@ const router = express.Router();
 router.get("/availableBook", async(req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const skip = (page - 1) * 20;
+        const skip = (page - 1) * 15;
         const {search, category} = req.query;
         let query = {};
         if (category && category !== '') {

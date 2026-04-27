@@ -49,7 +49,6 @@ router.get("/getNewsAndAnnounce", authMiddleware, checkRole(["librarian"]), chec
             image: item.image,
             displayType: 'NEWS',
             compareDate: item.createdAt
-            
         }));
 
         const announcesFormatted = [];

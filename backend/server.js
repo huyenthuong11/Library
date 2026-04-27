@@ -20,7 +20,8 @@ import publisherRoutes from "./src/routes/publisherRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import borrowRecordRoutes from "./src/routes/borrowRecordRoutes.js";
 import chartRoutes from "./src/routes/chartRoutes.js";
-import recommendRoutes from "./src/routes/recommendRoutes.js"; // Đã thêm lại dòng này
+import recommendRoutes from "./src/routes/recommendRoutes.js";
+import ebookRoutes from "./src/routes/ebookRoutes.js";
 import violationRoutes from "./src/routes/violationRoutes.js";
 
 //load env
@@ -45,7 +46,8 @@ app.use("/api/publisher", publisherRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/borrowRecord", borrowRecordRoutes);
 app.use("/api/chart", chartRoutes);
-app.use("/api/recommend", recommendRoutes); // Đã thêm lại dòng này
+app.use("/api/recommend", recommendRoutes);
+app.use("/api/ebooks", ebookRoutes);
 app.use("/api/violation", violationRoutes);
 
 //cron
