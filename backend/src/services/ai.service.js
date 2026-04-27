@@ -1,8 +1,10 @@
 import OpenAI from "openai";
 import Document from "../models/Document.js";
+import EBook from "../models/EBook.js";
 
 async function getBooksFromDB(query) {
   try {
+
     const docs = await Document.find({
       $or:[
         {title: {$regex: query, $options: 'i'}},
@@ -17,11 +19,38 @@ async function getBooksFromDB(query) {
         }
       }
     }).limit(3);
-    if (docs.length === 0) return "Hiện tại kệ sách không có cuốn nào phù hợp.";
-    return docs.map(d => {
-      const availableLoc = d.locations.find(l => l.status === "available" && !l.isDeleted);
-      return `- ${d.title} (Tác giả: ${d.author}) (Vị trí: ${availableLoc ? availableLoc.position : "Liên hệ thủ thư"})`;
-    }).join('\n');
+    
+    const eDocs = await EBook.find({
+      $or: [
+        {title: {$regex: query, $options: 'i'}},
+        {author: {$regex: query, $options: 'i'}},
+        {content: {$regex: query, $options: 'i'}}
+      ]
+    }).limit(2);
+
+    if (docs.length === 0 && eDocs.length === 0) {
+      return "Tiếc quá, Mộc không tìm thấy cuốn nào phù hợp trong kho sách giấy lẫn kho Ebook.";
+    }
+
+    let res = "";
+
+    if (docs.length > 0) {
+      res += "Sách vật lý: \n";
+      const docsList = docs.map(d => {
+        const loc = d.locations.find(l => l.status === "available" && !l.isDeleted);
+        return `- ${d.title} (${d.author}) - Vị trí: ${loc ? loc.position : "Hết hàng"}`;
+      }).join('\n');
+      res += docsList + "\n\n";
+    } 
+
+    if (eDocs.length > 0) {
+      res += "E-book:\n";
+      const eDocsList = eDocs.map(e => `- ${e.title} (Tác giả: ${e.author})`).join('\n');
+      res += eDocsList;
+    }
+
+    return res;
+
   } catch (error) {
     return "Lỗi truy vấn dữ liệu.";
   }
@@ -69,10 +98,12 @@ TÍNH CÁCH:
 - Thái độ: Luôn lắng nghe và sẵn lòng giúp đỡ.
 
 QUY TẮC PHẢN HỒI:
-1. Nếu người dùng hỏi về sách: Luôn ưu tiên sử dụng công cụ (functions) để tra cứu dữ liệu thực tế từ database. Không được bịa đặt thông tin sách không có thật.
-2. Nếu người dùng đang buồn/stress: Hãy đưa ra một lời an ủi ngắn trước, sau đó gợi ý một cuốn sách phù hợp với tâm trạng đó.
-3. Nếu thông tin sách không có trong thư viện: Hãy nói "Mộc chưa tìm thấy cuốn này trên kệ, nhưng Thương thử tham khảo cuốn [Tên sách tương tự] nhé, cũng rất hợp gu đấy!".
-4. Giới hạn: Chỉ trả lời các vấn đề liên quan đến sách, tâm lý đọc sách và quy định thư viện. Khéo léo từ chối các câu hỏi chính trị, tôn giáo hoặc nhạy cảm.
+1. Phân loại rõ ràng: Khi trả kết quả từ công cụ, Mộc PHẢI chia làm 2 mục rõ rệt là "Sách vật lý tại kệ" và "E-book đọc online" (nếu có đủ cả hai).
+2. Định dạng Sách vật lý: Hiện đầy đủ Tên sách, Tác giả và Vị trí kệ.
+3. Định dạng E-book: Hiện Tên sách, Tác giả và thêm lời mời đọc online.
+4. Nếu chỉ có một loại: Chỉ hiện loại đó, không cần hiện mục còn lại.
+5. Nếu người dùng hỏi về một chủ đề/cảm xúc, hãy tự suy luận ra các từ khóa liên quan (keywords) hoặc tên các tác giả nổi tiếng về chủ đề đó để truyền vào hàm search_books_from_db
+6. Nếu kết quả từ database trả về rỗng, đừng vội nói là không có. Hãy dựa vào kiến thức sẵn có của Mộc để gợi ý 2-3 cuốn sách nổi tiếng thế giới về chủ đề đó, và nói thêm: 'Dù hiện tại kệ sách của Mộc chưa cập nhật bản này, nma ${userName} tham khảo thử xem sao nhé!
 
 ĐỊNH DẠNG:
 - Sử dụng xuống dòng để dễ đọc.

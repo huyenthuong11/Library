@@ -14,8 +14,8 @@ import publisherRoutes from "./src/routes/publisherRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import borrowRecordRoutes from "./src/routes/borrowRecordRoutes.js";
 import chartRoutes from "./src/routes/chartRoutes.js";
-import recommendRoutes from "./src/routes/recommendRoutes.js"
-
+import recommendRoutes from "./src/routes/recommendRoutes.js";
+import ebookRoutes from "./src/routes/ebookRoutes.js";
 
 
 //load env
@@ -37,6 +37,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/borrowRecord", borrowRecordRoutes);
 app.use("/api/chart", chartRoutes);
 app.use("/api/recommend", recommendRoutes);
+app.use("/api/ebooks", ebookRoutes);
 
 //cron
 startCronJobs();

@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import Document from "../models/Document.js";
 import Reader from "../models/user/Reader.js";
+import Account from "../models/user/Account.js";
 
 const startCronJobs = () => {
 
@@ -114,6 +115,44 @@ const startCronJobs = () => {
 
     }, { timezone: "Asia/Ho_Chi_Minh" });
 
+    //deactivate acc
+    cron.schedule("12 0 * * *", async () => {
+        const dateLimit = new Date();
+        dateLimit.setDate(dateLimit.getDate() - 15);
+        try {
+            const exAcc = await Document.aggregate([
+                {$unwind: "$locations"},
+                {$match: 
+                    {
+                        "locations.status": "overdue",
+                        "locations.dueDate": {$lt: dateLimit}
+                    }
+                },
+                {$lookup: {
+                    from: "readers",
+                    localField: "locations.readerId",
+                    foreignField: "_id",
+                    as: "reader"
+                }},
+                {$unwind: "$reader"},
+                {$unwind: "$account"},
+                {$group: {_id: "$reader.accountId"}}
+            ]);
+
+            const accIds = exAcc.map(item => item._id);
+
+            if(accIds.length > 0) {
+                await Account.updateMany(
+                    {_id: {$in: accIds}},
+                    {$set: {status: "deactivate"}}
+                )
+            }
+
+            console.log(`Đã khóa ${accountIds.length} tài khoản quá hạn.`)
+        } catch (error) {
+            console.error("Lỗi khi chạy cron job:", error);
+        }
+    })
 };
 
 export default startCronJobs;

@@ -111,3 +111,32 @@
   font-size: 0.8rem;
   color: #6b7280;
 }
+
+.bookTitleOnCover {
+    font-family: 'Serif', 'Times New Roman', serif;
+    font-weight: bold;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    line-height: 1.5;
+    padding: 3px;
+}
+
+.ebookAuthorOnCover {
+    font-size: 0.5rem;
+    opacity: 0.5;
+}
+
+.bookCoverBox {
+    max-width: 50px;
+    height: 75px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid rgba(0, 0, 0, 0.575);
+    
+}

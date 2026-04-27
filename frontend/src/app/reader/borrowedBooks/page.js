@@ -3,16 +3,16 @@ import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
 import { useContext, useEffect } from "react";
-import { Avatar, Button } from "@mui/material";
+import { Avatar, Button, IconButton} from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,} 
+    LibraryAddCheckOutlined, HelpOutlineOutlined,
+    LibraryBooksOutlined, MenuBookOutlined, Delete} 
     from '@mui/icons-material';
 import useReaderInfo from "@/hook/useReaderInfo";
 import { useState } from "react";
 import api from "@/lib/axios";
 import { format } from "date-fns";
-
 
 export default function BookStore() {
     const router = useRouter();
@@ -44,6 +44,23 @@ export default function BookStore() {
         }
     }
 
+    const getEbookStyle = (title) => {
+        let hash = 0; 
+        for (let i = 0; i < title.length; i++) {
+            hash = title.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        const h = Math.abs(hash % 360);
+        const s = 30;
+        const l = 90;
+
+        return {
+            backgroundColor: `hsl(${h}, ${s}%, ${l}%)`,
+            color: `hsl(${h}, ${s}%, 20%)`,
+            borderColor: `hsl(${h}, ${s}%, 80%)`
+        }
+    };
+
     useEffect(() => {
         if(!readerId) return;
         
@@ -58,6 +75,7 @@ export default function BookStore() {
 
         return () => clearInterval(timer); 
     }, []);
+
     const categoryList = [
         { value: [""], label: "Tất cả" },
         { value: ["technology"], label: "Công nghệ" },
@@ -143,6 +161,19 @@ export default function BookStore() {
         return `${strId.slice(-7).toUpperCase()}`;
     };
 
+    const handleDelete = async (id) => {
+        if(!readerId) return;
+        try {
+            await api.patch(`/ebooks/return/${readerId}/${id}`);
+            alert("Xóa sách khỏi kệ thành công!");
+            getBorrowedBookList();
+        } catch (error) {
+            alert("Xóa sách khỏi kệ thất bại!")
+        }
+    }
+
+    console.log(filteredBook);
+
     return(
         <div className="container">
             <div className="main">
@@ -186,6 +217,10 @@ export default function BookStore() {
                         <p onClick={() => router.push("/reader/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        <p onClick={() => router.push("/reader/ebook")}>
+                            <LibraryBooksOutlined/>
+                            Kho Ebook
                         </p>
                         <a>
                             <LibraryAddCheckOutlined></LibraryAddCheckOutlined>
@@ -253,9 +288,9 @@ export default function BookStore() {
                             <tr>
                                 <th>Mã sách</th>
                                 <th>Ảnh bìa</th>
-                                <th>Tên sách</th>
+                                <th style={{'width': '200px'}}>Tên sách</th>
                                 <th>Tác giả</th>
-                                <th>Trạng thái</th>
+                                <th style={{'width': '200px'}}>Trạng thái</th>
                                 <th>Thông tin</th>
                                 <th>Hành động</th>
                             </tr>
@@ -264,6 +299,7 @@ export default function BookStore() {
                             { (!loading && filteredBook?.length > 0) ? (
                                 filteredBook?.map((book) => (
                                     <>
+                                    {book.type === "physical" ? (
                                         <tr
                                             key={book._id}
                                             className={styles.desBar}
@@ -352,6 +388,7 @@ export default function BookStore() {
                                                                 border: "none",
                                                                 borderRadius: "5px",
                                                                 cursor: "pointer",
+                                                                width: "100px"
                                                             }}
                                                             disabled={loadingId === book.locations._id}
                                                             onClick={() => {
@@ -370,6 +407,7 @@ export default function BookStore() {
                                                                 border: "none",
                                                                 borderRadius: "5px",
                                                                 cursor: "pointer",
+                                                                width: "100px"
                                                             }}
                                                             disabled={loadingId === book.locations._id}
                                                             onClick={() => {
@@ -386,6 +424,82 @@ export default function BookStore() {
                                                 )
                                             }
                                         </tr>
+                                    ) : (
+                                        <tr
+                                            key={book._id}
+                                            className={styles.desBar}
+                                        >
+                                            <td>{formatShortId(book._id)}</td>
+                                            <td>
+                                                {(() => {
+                                                    const eStyle = getEbookStyle(book.title);
+                                                    return (
+                                                        <div
+                                                            className={styles.bookCoverBox}
+                                                            style={{
+                                                                backgroundColor: eStyle.backgroundColor,
+                                                                borderColor: eStyle.borderColor,
+                                                                color: eStyle.color
+                                                            }}
+                                                        >
+                                                            <div className={styles.bookTitleOnCover}>
+                                                                {book.title}
+                                                            </div>
+                                                            <div className={styles.ebookAuthorOnCover}>
+                                                                {book.author}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </td>   
+                                            <td>
+                                                <span className={styles.bookTitle}>
+                                                    {book.title}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className={styles.bookAuthor}>
+                                                    {book.author}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className={`${styles['status']} ${styles[`${"borrowed"}`]}`}>
+                                                </div>
+                                                Đang mượn (Ebook)
+                                            </td>     
+                                            <td>Vĩnh viễn</td>    
+                                            <td>
+                                                <div style={{
+                                                    gap: "30px",
+                                                    display: "flex",
+                                                }}>
+                                                <IconButton
+                                                    sx={{
+                                                        color: "#0b485e",
+                                                        border: "none",
+                                                        borderRadius: "5px",
+                                                        cursor: "pointer",
+                                                    }}
+                                                    onClick={() => router.push(`/reader/eBookDetails/${book._id}`)}
+                                                >
+                                                    <MenuBookOutlined/>
+                                                </IconButton>
+                                                <IconButton
+                                                    sx={{
+                                                        color: "#9d0303",
+                                                        border: "none",
+                                                        borderRadius: "5px",
+                                                        cursor: "pointer",
+                                                    }}
+                                                    onClick={() => handleDelete(book._id)}
+                                                >
+                                                    <Delete/>
+                                                </IconButton>
+                                                </div>
+                                            </td>     
+                                        </tr>
+                                        )
+                                    }
                                     </>
                                 ))
                             ) : (

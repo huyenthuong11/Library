@@ -10,6 +10,9 @@ import Document from "../models/Document.js";
 import mongoose from "mongoose";
 import { error } from "console";
 import checkStatus from "../middleware/authStatusMiddleware.js";
+import EBook from "../models/EBook.js";
+import EBookRecord from "../models/EBookRecord.js";
+
 
 const router = express.Router();
 
@@ -177,11 +180,24 @@ router.get("/bookStore/:readerId", authMiddleware, checkRole(["reader"]), checkS
             {$match: query},
             {$unwind: "$locations"},
             {$match: {"locations.readerId": new mongoose.Types.ObjectId(req.params.readerId)}},
-            {$skip: skip},
-            {$limit: 20}
+            {$addFields: { type: "physical" }}
         ]);
-        console.log(borrowedBookList);
-        res.status(200).json(borrowedBookList);
+
+        const borrowedEBookList = await EBook.aggregate([
+            {$match: query},
+            {$unwind: "$readerId"},
+            {$match: {"readerId.reader": new mongoose.Types.ObjectId(req.params.readerId)}},
+            {$project: {
+                _id: 1,
+                title: 1,
+                author: 1,
+                type: { $literal: "ebook" },
+                borrowedAt: "$readerId.borrowedAt"
+            }}
+        ])
+
+        const borrowedBooks = [...borrowedBookList, ...borrowedEBookList];
+        res.status(200).json(borrowedBooks);
     } catch (err) {
         console.error(err);
         res.status(500).json({message: "Lỗi tải danh sách sách đang mượn", error: err.message});
@@ -346,67 +362,92 @@ router.get("/borrowedBooks/:readerId", authMiddleware, checkRole(["reader"]), ch
 })
 
 //GET api/reader/borrowedHistory/:readerId
-router.get("/borrowedHistory/:readerId", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async(req, res) => {
+router.get("/borrowedHistory/:readerId", authMiddleware, checkRole(["reader"]), checkStatus(["activate"]), async (req, res) => {
     try {
+        const readerId = new mongoose.Types.ObjectId(req.params.readerId);
         const page = parseInt(req.query.page) || 1;
         const limit = 15;
         const skip = (page - 1) * limit;
         const { search } = req.query;
 
+        // 1. Khởi tạo Search Query linh hoạt
         let searchQuery = {};
         if (search && search.trim()) {
             const searchRegex = new RegExp(search.trim(), 'i');
             searchQuery = {
                 $or: [
-                    { "bookInfo.title": { $regex: searchRegex } },
-                    { "bookInfo.author": { $regex: searchRegex } },
-                    { "bookInfo.isbn": { $regex: searchRegex } },
-                    { "copyIdString": { $regex: searchRegex } }
+                    { "bookInfo.title": searchRegex },
+                    { "bookInfo.author": searchRegex },
+                    { "bookInfo.isbn": searchRegex },
+                    { "searchableId": searchRegex }
                 ]
             };
         }
 
         const result = await BorrowRecord.aggregate([
-            { $match: { readerId: new mongoose.Types.ObjectId(req.params.readerId) } },
+            { $match: { readerId: readerId } },
             { $sort: { createdAt: 1 } },
             { $group: { 
                 _id: "$copyId",
                 documentId: { $first: "$documentId" },
-                timeline: {
-                    $push: {
-                        action: "$action",
-                        date: "$createdAt"
-                    }
-                },
+                timeline: { $push: { action: "$action", date: "$createdAt" } },
                 latestActionDate: { $last: "$createdAt" }
             }},
-            { $addFields: { copyIdString: { $toString: "$_id" } } },
             { $lookup: {
-                from: "documents",
+                from: "documents", 
                 localField: "documentId",
                 foreignField: "_id",
                 as: "bookInfo"
             }},
             { $unwind: "$bookInfo" },
-            { $match: searchQuery },
-            { $sort: { latestActionDate: -1 } }, 
+            { $addFields: { type: "physical" } }, 
+            {
+                $unionWith: {
+                    coll: "ebookrecords",
+                    pipeline: [
+                        { $match: { readerId: readerId } },
+                        { $sort: { createdAt: 1 } },
+                        { $group: {
+                            _id: "$ebookId",
+                            ebookId: { $first: "$ebookId" },
+                            timeline: { $push: { action: "$action", date: "$createdAt" } },
+                            latestActionDate: { $last: "$createdAt" }
+                        }},
+                        { $lookup: {
+                            from: "ebooks", 
+                            localField: "ebookId",
+                            foreignField: "_id",
+                            as: "bookInfo"
+                        }},
+                        { $unwind: "$bookInfo" },
+                        { $addFields: { type: "ebook" } }
+                    ]
+                }
+            },
+
+            { $addFields: { searchableId: { $toString: "$_id" } } },
             
+            { $match: searchQuery }, 
+            
+            { $sort: { latestActionDate: -1 } }, 
+
             { $facet: {
                 metadata: [{ $count: "total" }],
                 data: [{ $skip: skip }, { $limit: limit }]
             }}
         ]);
 
-        const data = result[0].data;
-        const total = result[0].metadata[0]?.total || 0;
+        const data = result[0]?.data || [];
+        const total = result[0]?.metadata[0]?.total || 0;
 
         res.status(200).json({
             data: data,
-            totalPages: Math.ceil(total / limit)
+            totalPages: Math.ceil(total / limit),
         });
+
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: "Failed to get data" });
+        console.error("Lỗi Borrowed History:", err);
+        res.status(500).json({ message: "Không thể lấy lịch sử mượn sách" });
     }
 });
 export default router;

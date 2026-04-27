@@ -18,7 +18,6 @@ export default function NewsDetails () {
     const {fullName, avatar} = useReaderInfo(account?.id);
     const params = useParams();
     const id = params.id;
-    console.log(id);
 
     const getNews = async () => {
         try {
