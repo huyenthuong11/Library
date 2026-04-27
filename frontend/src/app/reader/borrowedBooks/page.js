@@ -110,7 +110,8 @@ export default function BookStore() {
         {value: null, label: "Tất cả"},
         {value: "reserved", label: "Đặt trước"},
         {value: "borrowed", label: "Đang mượn"},
-        {value: "overdue", label: "Quá hạn"}
+        {value: "overdue", label: "Quá hạn"},
+        {value: "ebook", label: "Sách điện tử"}
     ];
 
     const handleLogout = () => {
@@ -125,7 +126,11 @@ export default function BookStore() {
     
     const filteredBook = borrowedBookList?.filter((book) => {
         if (!activeFilter) return true;
-        return book.locations.status === activeFilter;
+        if(book.locations) {
+            return book.locations.status === activeFilter;
+        } else if (activeFilter === "ebook") {
+            return !book.locations
+        }
     }); 
 
     const handleExtendBorrowedDueDate = async (copyId) => {
@@ -171,7 +176,6 @@ export default function BookStore() {
         }
     }
 
-    console.log(filteredBook);
 
     return(
         <div className="container">
@@ -285,7 +289,7 @@ export default function BookStore() {
                             <tr>
                                 <th>Mã sách</th>
                                 <th>Ảnh bìa</th>
-                                <th style={{'width': '200px'}}>Tên sách</th>
+                                <th style={{'width': '300px'}}>Tên sách</th>
                                 <th>Tác giả</th>
                                 <th style={{'width': '200px'}}>Trạng thái</th>
                                 <th>Thông tin</th>
