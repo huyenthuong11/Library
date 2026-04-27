@@ -339,52 +339,59 @@ export default function BookStore() {
 
                                 {/* Trạng thái & Thời gian */}
                                 <td>
-                                  {book.type === "physical" ? (
-                                    <>
-                                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                    {book.type === "physical" ? (
+                                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                                         <div
-                                          className={`${styles["status"]} ${
+                                            className={`${styles["status"]} ${
                                             styles[
-                                              Math.floor(Date.now() - new Date(book.locations.dueDate)) > 0
+                                                Math.floor(Date.now() - new Date(book.locations.dueDate)) > 0
                                                 ? "overdue"
                                                 : book.locations.status
                                             ]
-                                          }`}
+                                            }`}
                                         ></div>
-                                        {Math.floor(Date.now() - new Date(book.locations.dueDate)) > 0
-                                          ? "Quá hạn"
-                                          : statusList.find((s) => s.value === book.locations.status)?.label ||
-                                            book.locations.status}
-                                      </div>
-                                      <div style={{ fontSize: "0.85rem", marginTop: "4px" }}>
-                                        <div>Vào lúc: {book.locations.createdAt ? format(new Date(book.locations.createdAt), "dd-MM-yyyy HH:mm") : ""}</div>
-                                        <div>Hạn trả: {book.locations.dueDate ? format(new Date(book.locations.dueDate), "dd-MM-yyyy HH:mm") : ""}</div>
+                                        <span>
+                                            {Math.floor(Date.now() - new Date(book.locations.dueDate)) > 0
+                                            ? "Quá hạn"
+                                            : statusList.find((s) => s.value === book.locations.status)?.label ||
+                                                book.locations.status}
+                                        </span>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                        <div className={`${styles["status"]} ${styles["borrowed"]}`}></div>
+                                        <span>Đang mượn (Ebook)</span>
+                                        </div>
+                                    )}
+                                </td>
 
-                                        {/* Logic tính thời gian chi tiết */}
-                                        {(() => {
-                                          const diff = Date.now() - new Date(book.locations.dueDate);
-                                          const days = Math.floor(Math.abs(diff) / (1000 * 60 * 60 * 24));
-                                          const hours = Math.floor((Math.abs(diff) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                          const mins = Math.floor((Math.abs(diff) % (1000 * 60 * 60)) / (1000 * 60));
+                                <td>
+                                    <div style={{ fontSize: "0.85rem" }}>
+                                        {book.type === "physical" ? (
+                                        <>
+                                            <div>Vào lúc: {book.locations.createdAt ? format(new Date(book.locations.createdAt), "dd-MM-yyyy HH:mm") : ""}</div>
+                                            <div>Hạn trả: {book.locations.dueDate ? format(new Date(book.locations.dueDate), "dd-MM-yyyy HH:mm") : ""}</div>
+                                            
+                                            {(() => {
+                                            const diff = Date.now() - new Date(book.locations.dueDate);
+                                            const days = Math.floor(Math.abs(diff) / (1000 * 60 * 60 * 24));
+                                            const hours = Math.floor((Math.abs(diff) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                            const mins = Math.floor((Math.abs(diff) % (1000 * 60 * 60)) / (1000 * 60));
 
-                                          if (diff > 0) {
-                                            return <div>Đã muộn {days} ngày {hours} giờ {mins} phút</div>;
-                                          } else if (book.locations.status === "reserved") {
-                                            return <div>Còn {days} ngày {hours} giờ {mins} phút để nhận</div>;
-                                          } else if (book.locations.status === "borrowed") {
-                                            return <div>Đang mượn - còn {days} ngày {hours} giờ {mins} phút</div>;
-                                          }
-                                          return null;
-                                        })()}
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <div className={`${styles["status"]} ${styles["borrowed"]}`}></div>
-                                      Đang mượn (Ebook)
-                                      <div style={{ fontSize: "0.85rem", marginTop: "4px" }}>Vĩnh viễn</div>
-                                    </>
-                                  )}
+                                            if (diff > 0) {
+                                                return <div>Đã muộn {days} ngày {hours} giờ {mins} phút</div>;
+                                            } else if (book.locations.status === "reserved") {
+                                                return <div>Còn {days} ngày {hours} giờ {mins} phút để nhận</div>;
+                                            } else if (book.locations.status === "borrowed") {
+                                                return <div>Đang mượn - còn {days} ngày {hours} giờ {mins} phút</div>;
+                                            }
+                                            return null;
+                                            })()}
+                                        </>
+                                        ) : (
+                                        <div>Vĩnh viễn</div>
+                                        )}
+                                    </div>
                                 </td>
 
                                 {/* Hành động (Actions) */}
