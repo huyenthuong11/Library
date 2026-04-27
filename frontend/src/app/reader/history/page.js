@@ -185,11 +185,14 @@ export default function HistoryBoard() {
                                                     <div>
                                                         Mã copy: {formatShortId(copy._id)}
                                                     </div>
-                                                    <div>
+                                                    <div className={styles.bookAuthor}>
                                                         Tên sách: {copy.bookInfo.title}
                                                     </div>
                                                     <div className={styles.bookAuthor}>
                                                         Tên tác giả: {copy.bookInfo.author}
+                                                    </div>
+                                                    <div>
+                                                        Loại sách: Sách giấy
                                                     </div>
                                                 </div>
                                             </div>
@@ -221,11 +224,14 @@ export default function HistoryBoard() {
                                                     <div>
                                                         Mã sách: {formatShortId(copy._id)}
                                                     </div>
-                                                    <div>
+                                                    <div className={styles.bookAuthor}>
                                                         Tên sách: {copy.bookInfo.title}
                                                     </div>
                                                     <div className={styles.bookAuthor}>
                                                         Tên tác giả: {copy.bookInfo.author}
+                                                    </div>
+                                                    <div>
+                                                        Loại sách: Sách điện tử
                                                     </div>
                                                 </div>
                                             </div>

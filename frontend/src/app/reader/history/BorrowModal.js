@@ -91,7 +91,7 @@ export default function BorrowModal({ handleClose, data }) {
                 <div className={styles.content}>
                   <span className={styles.actionLabel}>
                     {step.action === 'registered' && 'Đã đặt chỗ online'}
-                    {step.action === 'borrowed' && 'Đã nhận sách'}
+                    {step.action === 'borrowed' && 'Đã mượn sách'}
                     {step.action === 'returned' && 'Đã trả sách'}
                     {step.action === 'canceled' && 'Yêu cầu bị hủy'}
                   </span>
