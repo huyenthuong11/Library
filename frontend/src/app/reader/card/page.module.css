@@ -1,0 +1,43 @@
+
+.main {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    font-size: clamp(15px, 1vw, 20px);
+    background: rgb(6, 16, 119);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.cardWrapper {
+    padding: 20px;
+    background: white;
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    max-width: 300px;
+    margin: 20px auto;
+}
+
+.qrContainer {
+    background: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.downloadBtn {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}

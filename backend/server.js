@@ -34,6 +34,27 @@ console.log("ENV TEST: - server.js:15", process.env.MONGO_URI);
 app.use(cors());
 app.use(express.json());
 
+let latestScan = null;
+
+app.post("/scan", (req, res) => {
+    const { readerId } = req.body;
+    latestScan = readerId;
+    console.log("Dữ liệu nhận được từ điện thoại:", readerId);
+    res.send("ok");
+});
+
+
+app.get("/scanResult", (req, res) => {
+    console.log(latestScan);
+    res.json(latestScan);
+});
+
+app.delete("/scanResult", (req, res) => {
+    latestScan = null;
+    res.send("cleared");
+});
+
+
 // Khai báo API endpoints
 app.use("/api/auth", authRoutes);
 app.use("/api/reader", readerRoutes);
@@ -59,6 +80,6 @@ mongoose.connect(process.env.MONGO_URI, { family: 4 })
 .catch((err) => console.log("MongoDB error - server.js:30", err));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT} - server.js:35`);
 });

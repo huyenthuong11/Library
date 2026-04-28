@@ -10,6 +10,8 @@ import upload from "../middleware/imageMiddleware.js";
 import path from "path";
 import fs from "fs";
 import checkStatus from "../middleware/authStatusMiddleware.js";
+import Violation from "../models/Violation.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -539,6 +541,99 @@ router.post("/addCopy/:id", authMiddleware, checkRole(["admin", "librarian"]), c
     } catch (err) {
         console.error("Lỗi khi thêm bản sao:", err);
         res.status(500).json({ message: "Lỗi hệ thống khi thêm bản sao", error: err.message });
+    }
+})
+
+//PATCH /api/books/confirmByCard/:readerId
+router.patch('/confirmByCard/:readerId', authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) => {
+    try {
+        const booksToConfirm = await Document.find({
+            "locations.readerId": req.params.readerId,
+            "locations.status": "reserved"
+        });
+
+        let totalConfirmed = 0;
+
+        for (const doc of booksToConfirm) {
+            const reservedCountInThisDoc = doc.locations.filter(
+                loc => loc.readerId 
+                && loc.readerId.toString() === req.params.readerId
+                && loc.status === "reserved"
+            );
+            const count = reservedCountInThisDoc.length;
+            if (count > 0) {
+                await Document.updateOne(
+                    {_id: doc._id},
+                    {
+                        $set: {
+                            "locations.$[elem].status": "borrowed",
+                            "locations.$[elem].createdAt": new Date(),
+                            "locations.$[elem].dueDate": new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+                        },
+                        $inc: {
+                            borrowedCount: count,
+                        }
+                    },
+                    {arrayFilters: [{ "elem.readerId": req.params.readerId, "elem.status": "reserved" }]}
+                );
+            }
+            totalConfirmed += count;
+        }
+
+        res.status(200).json({message: `Xác nhận mượn thành công ${totalConfirmed} cuốn sách!`});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: error.message});
+    }
+})
+
+//GET /api/books/pendingBorrow/:readerId
+router.get('/pendingBorrow/:readerId', authMiddleware, checkRole(["admin", "librarian"]), checkStatus(["activate"]), async(req, res) =>{
+    try {
+        
+        const reader = await Reader.findById(req.params.readerId);
+        if(!reader) return res.status(400).json("Không tồn tại người dùng này!");
+        const borrowedBookList = await Document.aggregate([
+            {$match: {"locations.readerId": new mongoose.Types.ObjectId(req.params.readerId)}},
+            {$unwind: "$locations"},
+            {
+                $match: {
+                    "locations.readerId": new mongoose.Types.ObjectId(req.params.readerId),
+                    "locations.status": "reserved",
+                    "locations.isDeleted": false
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    title: { $first: "$title" },
+                    isbn: { $first: "$isbn" },
+                    image: { $first: "$image" },
+                    author: { $first: "$author" },
+                    reservedCopies: {
+                        $push: {
+                            copyId: "$locations._id"
+                        }
+                    },
+                    totalReservedCount: { $sum: 1 }
+                }
+            }
+        ])
+
+        const violateOfReader = await Violation
+            .find({
+                readerId: req.params.readerId,
+                status: "unpaid"
+            })
+            .populate("documentId");
+        res.status(200).json({
+            data: borrowedBookList,
+            reader: reader,
+            violate: violateOfReader
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
     }
 })
 

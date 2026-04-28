@@ -6,10 +6,9 @@ import { AuthContext } from "../../../context/AuthContext";
 import { useContext, useEffect, useState, Fragment } from "react"; 
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
-    HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,
     AddBoxOutlined, EditSquare, CancelOutlined, ListAltRounded,
-    SaveOutlined, AddCircleOutlined, ReceiptLongOutlined} 
+    SaveOutlined, AddCircleOutlined, ReceiptLongOutlined, 
+    MedicalInformationOutlined} 
     from '@mui/icons-material';
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import useAvailableBooks from "@/hook/useAvailableBooks";
@@ -259,6 +258,10 @@ export default function AvailableBook() {
                                 <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                                 Kho sách thư viện
                             </a>
+                            <p onClick={() => router.push("/librarian/readerCheck")}>
+                                <MedicalInformationOutlined/>
+                                Tìm kiếm thông tin người dùng
+                            </p>
                             <p onClick={() => router.push("/librarian/violationManagement")}>
                                 <ReceiptLongOutlined></ReceiptLongOutlined>
                                 Quản lý vi phạm

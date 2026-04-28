@@ -7,7 +7,7 @@ import { Avatar, Button, Grid, Typography, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined, 
+    LibraryAddCheckOutlined, QrCodeScannerOutlined, 
     LockOutlined, LibraryBooksOutlined} 
     from '@mui/icons-material';
 import api from "../../../lib/axios.js";
@@ -222,9 +222,10 @@ export default function Info() {
                                     <PermIdentityOutlined></PermIdentityOutlined>
                                     Hồ sơ của bạn
                                 </a>
-                                <p onClick={() => router.push("/reader/ask")}>
-                                    <HelpOutlineOutlined></HelpOutlineOutlined>
-                                    Yêu cầu
+            
+                                <p onClick={() => router.push("/reader/card")}>
+                                    <QrCodeScannerOutlined/>
+                                    Thẻ mượn sách
                                 </p>
                             </nav>
                         </aside>

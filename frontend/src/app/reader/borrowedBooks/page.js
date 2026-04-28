@@ -5,7 +5,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import { Avatar, Button, IconButton} from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,
+    LibraryAddCheckOutlined, QrCodeScannerOutlined,
     LibraryBooksOutlined, MenuBookOutlined, Delete} 
     from '@mui/icons-material';
 import { useContext, useEffect, useState } from "react";
@@ -237,9 +237,9 @@ export default function BookStore() {
                             <PermIdentityOutlined></PermIdentityOutlined>
                             Hồ sơ cá nhân
                         </p>
-                        <p onClick={() => router.push("/reader/ask")}>
-                            <HelpOutlineOutlined></HelpOutlineOutlined>
-                            Yêu cầu
+                        <p onClick={() => router.push("/reader/card")}>
+                            <QrCodeScannerOutlined/>
+                            Thẻ mượn sách
                         </p>
                     </nav>
                 </aside>
@@ -370,7 +370,7 @@ export default function BookStore() {
                                 </td>
 
                                 <td>
-                                    <div style={{ fontSize: "0.85rem" }}>
+                                    <div>
                                         {book.type === "physical" ? (
                                         <>
                                             <div>Vào lúc: {book.locations.createdAt ? format(new Date(book.locations.createdAt), "dd-MM-yyyy HH:mm") : ""}</div>

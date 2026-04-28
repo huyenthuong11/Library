@@ -1,7 +1,7 @@
 "use client";
 import styles from "./page.module.css";
 import { useRouter, useParams } from "next/navigation";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
@@ -9,56 +9,43 @@ import { HomeOutlined, CollectionsBookmarkOutlined,
     LibraryBooksOutlined} 
     from '@mui/icons-material';
 import useReaderInfo from "@/hook/useReaderInfo";
-import { useState } from "react";
-import api from "@/lib/axios";
 import { AuthContext } from "@/context/AuthContext";
-import { format } from 'date-fns';
+import { QRCodeSVG } from 'qrcode.react';
 
-
-export default function EBooksDetails () {
+export default function UserLibraryCard () {
+    const qrRef = useRef();
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
     const {fullName, avatar, readerId, refreshReaderInfo} = useReaderInfo(account?.id);
-    const [eBook, setEBook] = useState(null);
-    const params = useParams();
-    const id = params.id;
-    
     const handleLogout = () => {
         logout();
         router.push("/");
     };
+    const handleDownload = () => {
+        const svg = qrRef.current.querySelector("svg");
+        if (!svg) return alert("Không tìm thấy mã QR!");
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
 
-    const getImageUrl = (path) => {
-        if (path.startsWith("http")) return path;
-        return `http://localhost:5000/${path}`;
+        img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const pngFile = canvas.toDataURL("image/png");
+            const downloadLink = document.createElement("a");
+            downloadLink.download = `LibraryCard-${readerId}.png`;
+            downloadLink.href = pngFile;
+            downloadLink.click();
+        };
+        // Chuyển SVG sang Base64 để vẽ lên Canvas
+        img.src = "data:image/svg+xml;base64," + btoa(svgData);
     };
 
-    const getEBook = async () => {
-        try {
-            const response = await api.get(`/ebooks/getBooks/${id}`);
-            const data = response.data;
-            setEBook(data);
-        } catch (error) {
-            console.error("Failed to fetch books");
-        }
-    }
-
-    useEffect(() => {
-        getEBook();
-    }, [id]);
-
-    const formatStoryContent = (text) => {
-        if (!text) return "";
-        
-        return text
-            .replace(/([.?!])\s*([A-ZÀ-Ỹ])/g, '$1\n\n$2')
-            .replace(/\s*-\s*(?=[A-ZÀ-Ỹ])/g, '\n- ')
-            .replace(/(\w)\s*-\s*([a-zà-ỹ])/g, '$1 - $2')
-            .split('\n').map(line => line.trim()).join('\n');
-    };
     return (
         <>
-            <div className="container">
+        <div className="container">
             <div className="main">
                 <div className="header">
                     <div className="webicon"></div>
@@ -101,6 +88,7 @@ export default function EBooksDetails () {
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
                         </p>
+                        
                         <p onClick={() => router.push("/reader/ebook")}>
                             <LibraryBooksOutlined/>
                             Kho Ebook
@@ -115,58 +103,30 @@ export default function EBooksDetails () {
                         </p>
                         <p onClick={() => router.push("/reader/setinfo")}>
                             <PermIdentityOutlined></PermIdentityOutlined>
-                            Hồ sơ cá nhân
+                            Hồ sơ của bạn
                         </p>
-                        <p onClick={() => router.push("/reader/card")}>
+    
+                        <a>
                             <QrCodeScannerOutlined/>
                             Thẻ mượn sách
-                        </p>
+                        </a>
                     </nav>
                 </aside>
-                { eBook && (
-                        <div className={styles.detailsContainer}>
-                            <div className={styles.inner}>
-                                <header className={styles.detailsHeader}>
-                                    <h1 className={styles.mainTitle}>{eBook.title}</h1>
-                                    <div className={styles.authorInfo}>
-                                        <span>
-                                            {
-                                                eBook.createdAt
-                                                ? format(new Date(eBook?.createdAt), 'dd-MM-yyyy')
-                                                :""
-                                            }
-                                        </span> - <span>{eBook.author}</span>
-                                    </div>
-                                </header>
-                                <div 
-                                    className={styles.bodyText}
-                                    style={{whiteSpace: 'pre-line'}}
-                                >
-                                    {
-                                        formatStoryContent(eBook.content)
-                                    }
-                                </div>
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        background: '#9bc7e3',
-                                        color: '#f6f8f9',
-                                        height: "30px",
-                                        width:"100px",
-                                        margin: "auto",
-                                        marginTop: "20px",
-                                        fontSize: "14px"
-                                    }}
-                                    onClick={() => {router.push("/reader/borrowedBooks")}}
-                                >
-                                    Quay lại
-                                </Button>
-                            </div>
+                <div className={styles.main}>
+                    <div className={styles.cardWrapper}>
+                        <div ref={qrRef} className={styles.qrContainer}>
+                            <QRCodeSVG value={readerId} size={200} level="H"/>
                         </div>
-                    )}
+                        <div style={{marginTop: '15px'}}>
+                            <h3 style={{ margin: '5px 0' }}>{fullName}</h3>
+                        </div>
+                        <Button onClick={handleDownload} className={styles.downloadBtn}>
+                            Tải mã QR mượn sách
+                        </Button>
+                    </div>
                 </div>
-                    
             </div>
-        </>
+        </div>
+        </>                    
     )
 }

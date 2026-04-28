@@ -87,6 +87,10 @@ export default function ViolationManagement() {
                     <nav>
                         <p onClick={() => router.push("/librarian/dashboard")}><HomeOutlined/> Tổng quan</p>
                         <p onClick={() => router.push("/librarian/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
+                        <p onClick={() => router.push("/librarian/readerCheck")}>
+                            <MedicalInformationOutlined/>
+                            Tìm kiếm thông tin người dùng
+                        </p>
                         <a className="active"><ReceiptLongOutlined/> Quản lý vi phạm</a>
                     </nav>
                 </aside>

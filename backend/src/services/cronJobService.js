@@ -204,7 +204,7 @@ const startCronJobs = () => {
                 )
             }
 
-            console.log(`Đã khóa ${accountIds.length} tài khoản quá hạn.`)
+            console.log(`Đã khóa ${accIds.length} tài khoản quá hạn.`)
         } catch (error) {
             console.error("Lỗi khi chạy cron job:", error);
         }

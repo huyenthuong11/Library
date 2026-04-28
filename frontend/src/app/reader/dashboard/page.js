@@ -7,7 +7,7 @@ import { Avatar } from "@mui/material";
 import { 
     HomeOutlined, CollectionsBookmarkOutlined, 
     HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,
+    LibraryAddCheckOutlined, QrCodeScannerOutlined,
     LibraryBooksOutlined } 
     from '@mui/icons-material';
 import useReaderInfo from "@/hook/useReaderInfo";
@@ -182,9 +182,9 @@ export default function Dashboard() {
                         <PermIdentityOutlined />
                         Hồ sơ cá nhân
                     </p>
-                    <p onClick={() => router.push("/reader/ask")}>
-                        <HelpOutlineOutlined />
-                        Yêu cầu
+                    <p onClick={() => router.push("/reader/card")}>
+                        <QrCodeScannerOutlined/>
+                        Thẻ mượn sách
                     </p>
                 </nav>
             </aside>
