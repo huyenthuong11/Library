@@ -110,17 +110,20 @@ findHooks.forEach(hook => {
 });
 
 documentSchema.pre('aggregate', async function() {
-    this.pipeline().unshift({
-        $addFields: {
-            locations: {
-                $filter: {
-                    input: "$locations",
-                    as: "location",
-                    cond: { $eq: ["$$location.isDeleted", false] }
+    this.pipeline().unshift(
+        { $match: { deleted: false } },
+        {
+            $addFields: {
+                locations: {
+                    $filter: {
+                        input: "$locations",
+                        as: "location",
+                        cond: { $eq: ["$$location.isDeleted", false] }
+                    }
                 }
             }
         }
-    });
+    );
 });
 
 export default mongoose.model("Document", documentSchema); 

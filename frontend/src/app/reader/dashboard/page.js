@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import BookDesModal from "./bookDesModal";
 import Chatbot from "@/app/chatbot/page";
 import ViolationModal from "./ViolationModal";
+import NewsSlider from "./NewsSlider";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -35,6 +36,16 @@ export default function Dashboard() {
     const [violations, setViolations] = useState([]);
     const [totalUnpaid, setTotalUnpaid] = useState(0);
     const [isViolationModalOpen, setIsViolationModalOpen] = useState(false);
+     const [newestBooks, setNewestBooks] = useState([]);
+    const getNewestBooks = async () => {
+        try {    
+            const response = await api.get("books/newestBooks?limit=4");
+            const data = response.data.data;
+            setNewestBooks(data);
+        } catch (err) {
+            console.error("Failed to fetch books: - useAvailableBooks.js:20", err);
+        }
+    }
 
     // Xử lý gọi API lấy dữ liệu nộp phạt
     useEffect(() => {
@@ -97,6 +108,7 @@ export default function Dashboard() {
         if(!readerId) return;
         getBorrowedBooks();
         getRecommendBooks();
+        getNewestBooks();
     }, [readerId]);
 
     // Timer cập nhật thời gian thực
@@ -123,6 +135,7 @@ export default function Dashboard() {
     const hasOverdueRealtime = actualOverdueBooks.length > 0;
     const overdueCount = actualOverdueBooks.length;
 
+    
   return (
     <>
     <div className="container">
@@ -190,12 +203,7 @@ export default function Dashboard() {
             </aside>
 
             <div className={styles.main}>
-                <div className={styles.banner}>
-                    <div className="bannerFill">
-                        <div className="headerBanner">KHÁM PHÁ THẾ GIỚI TRI THỨC</div>
-                        <div className="fullName">Hệ thống Quản lý thư viện</div>
-                    </div>
-                </div>
+                <NewsSlider/>
                 <div className={styles.headliner}>
                     <div style={{
                         fontSize: "25px",
@@ -317,7 +325,7 @@ export default function Dashboard() {
                                 <div style={{
                                     height: "94%", 
                                     width: "67%", 
-                                    fontSize: "17px",
+                                    fontSize: "15px",
                                     display: "flex",
                                     flexDirection: "column",
                                     justifyContent:"center",
@@ -392,14 +400,64 @@ export default function Dashboard() {
                                     justifyContent:"center",
                                     alignContent: "center"
                                 }}>
-                                    <div>Tên sách: {book.title}</div>
-                                    <div>Tác giả: {book.author}</div>
+                                    <div className={styles.bookAuthor}>Tên sách: {book.title}</div>
+                                    <div className={styles.bookAuthor}>Tác giả: {book.author}</div>
                                 </div>
                             </div>
                         ))
                     )}
                     {readerId && (
                         <Chatbot readerId={readerId} />
+                    )}
+                </div>
+
+                <div style={{
+                    color: "white",
+                    marginTop: "10px",
+                    fontFamily: "Quicksand",
+                    fontSize: "20px",
+                    width: "95%",
+                    fontWeight: "500",
+                    marginBottom: "10px"
+                }}>
+                    Sách Mới Nhất
+                </div>
+
+                <div className={styles.grid2}>
+                    {newestBooks && (
+                        newestBooks.map((book) => (
+                            <div 
+                                key={book._id} 
+                                className={styles.card2}
+                                onClick={() =>  setSelectedBook(book)}  
+                                style={{
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                }}
+                            >
+                                <img
+                                    style={{height: "100%", width: "32%"}}
+                                    src={getImageUrl(book.image)}
+                                />
+                                <div style={{
+                                    height: "94%", 
+                                    width: "67%", 
+                                    fontSize: "17px",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent:"center",
+                                    alignContent: "center"
+                                }}>
+                                    <div className={styles.bookAuthor}>Tên sách: {book.title}</div>
+                                    <div className={styles.bookAuthor}>Tác giả: {book.author}</div>
+                                    <div>Ngày nhập sách: {
+                                        book.createdAt 
+                                        ? format(new Date(book.createdAt), 'dd-MM-yyyy')
+                                        : ""
+                                    }</div>
+                                </div>
+                            </div>
+                        ))
                     )}
                 </div>
             </div>

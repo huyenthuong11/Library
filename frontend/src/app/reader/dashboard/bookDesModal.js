@@ -46,6 +46,10 @@ export default function BookDesModal({
         { value: ["general"], label: "Tổng hợp" }
     ];
     
+    const getImageUrl = (path) => {
+        if (path.startsWith("http")) return path;
+        return `http://localhost:5000/${path}`;
+    }; 
     
     console.log("RENDER modal - page.js:30");
     return (
@@ -63,7 +67,7 @@ export default function BookDesModal({
                     </div>
                     <div className={styles.board}>
                         <div className={styles.image}>
-                            <img src={image}/>
+                            <img src={getImageUrl(image)}/>
                             <div>Còn : {availableCopies} cuốn</div>
                         </div>
                         <div style={{display: "flex", flexDirection: "column"}}>

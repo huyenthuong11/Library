@@ -2,13 +2,13 @@
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
-import { useContext, useEffect, useState, Fragment } from "react"; 
+import { useContext, useEffect, useState, Fragment, useMemo } from "react"; 
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     PermIdentityOutlined, AssignmentIndOutlined, 
     AddHomeWorkOutlined, ReceiptLongOutlined,
     AddBoxOutlined, EditSquare, CancelOutlined, 
-    SaveOutlined, AddCircleOutlined} 
+    SaveOutlined, AddCircleOutlined, NewspaperOutlined} 
     from '@mui/icons-material';
 import useAvailableBooks from "@/hook/useAvailableBooks";
 import { format } from 'date-fns';
@@ -30,8 +30,8 @@ export default function AdminAvailableBook() {
     const [currentPage, setCurrentPage] = useState(1);
     const [search, setSearch] = useState("");
     const [choosenCategory, setChoosenCategory] = useState("");
-    const {availableBooks, totalPages, inventorySummary, total, loading, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory, search);
     const [activeFilter, setActiveFilter] = useState(null);
+    const {availableBooks, totalPages, inventorySummary, total, loading, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory, search, activeFilter);
     const [openDetailsBar, setOpenDetailsBar] = useState(null);
     const [openEditBar, setOpenEditBar] = useState(null);
     const [selectedBook, setSelectedBook] = useState(null);
@@ -119,7 +119,7 @@ export default function AdminAvailableBook() {
 
     const handleDeleteBook = async (id) => {
         try {
-            const response = await api.delete(`/documents/deleteBook/${id}`)
+            const response = await api.delete(`/books/deleteBook/${id}`)
             if (response.status === 200 || response.status === 201) {
                 refreshAvailableBooks();
                 alert(response?.data?.message);
@@ -132,7 +132,7 @@ export default function AdminAvailableBook() {
 
     const handleDeleteCopy = async (id) => {
         try {
-            const response = await api.delete(`/documents/deleteCopy/${id}`);
+            const response = await api.delete(`/books/deleteCopy/${id}`);
             if (response.status === 200 || response.status === 201) {
                 refreshAvailableBooks();
                 alert(response?.data?.message);
@@ -154,13 +154,6 @@ export default function AdminAvailableBook() {
         return `${strId.slice(-7).toUpperCase()}`;
     };
 
-    const filteredBook = availableBooks.filter((book) => {
-        if (!activeFilter) return true;
-        return book.locations?.some((loc) => 
-            loc.status === activeFilter
-        );
-    });
-
     const getImageUrl = (path) => {
         if (path.startsWith("http")) return path;
         return `http://localhost:5000/${path}`;
@@ -168,7 +161,7 @@ export default function AdminAvailableBook() {
 
     const handleSubmit = async () => {
         try {           
-            await api.patch(`/documents/updateCopy/${openEditCopyBar}`, {
+            await api.patch(`/books/updateCopy/${openEditCopyBar}`, {
                 position: editData.position,
                 status: editData.status,
                 readerId: editData.readerId,
@@ -235,6 +228,10 @@ export default function AdminAvailableBook() {
                         <nav>
                             <p onClick={() => router.push("/admin/dashboard")}><HomeOutlined/> Trang chủ</p>
                             <a className="active"><CollectionsBookmarkOutlined/> Kho sách thư viện</a>
+                            <p onClick={() => router.push("/admin/upNewsandEvents")}>
+                                <NewspaperOutlined/>
+                                Đăng thông báo 
+                            </p>
                             <p onClick={() => router.push("/admin/violationManagement")}><ReceiptLongOutlined /> Quản lý vi phạm</p>
                             <p onClick={() => router.push("/admin/readerManagement")}><PermIdentityOutlined/> Quản lý người đọc</p>
                             <p onClick={() => router.push("/admin/librarianManagement")}><AssignmentIndOutlined/> Quản lý thủ thư</p>
@@ -350,8 +347,8 @@ export default function AdminAvailableBook() {
                             </thead>
                             
                             <tbody>
-                                { (!loading && filteredBook.length > 0) ? (
-                                        filteredBook.map((availableBook) => (
+                                { (!loading && availableBooks.length > 0) ? (
+                                        availableBooks.map((availableBook) => (
                                             <Fragment key={availableBook._id}>
                                                 <tr className={styles.desBar}>
                                                     <td>{availableBook.isbn}</td>

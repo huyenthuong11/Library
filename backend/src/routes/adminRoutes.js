@@ -13,6 +13,7 @@ import upload from "../middleware/imageMiddleware.js";
 import fs from "fs";
 import path from "path";
 import checkStatus from "../middleware/authStatusMiddleware.js";
+import News from "../models/News.js";
 
 const router = express.Router();
 
@@ -269,6 +270,118 @@ router.patch("/deactivateAccount/:accountId", authMiddleware, checkRole(["admin"
     } catch (error) {
         console.error(err);
         res.status(500).json({message: "Vô hiệu hóa tài khoản thất bại!"})
+    }
+})
+
+// GET /api/admin/getNewsAndAnnounce
+router.get("/getNewsAndAnnounce", authMiddleware, checkRole(["admin"]), checkStatus(["activate"]), async(req, res) => {
+    try {
+        const threeDaysAgo = new Date();
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+        const [news, announces] = await Promise.all([
+            News.find({ createdAt: {$gte: threeDaysAgo}}).
+            sort({createdAt: -1}),
+            Document.find({
+                locations: {
+                    $elemMatch: {
+                        "status": { $in: ["overdue", "reserved"] },
+                        "createdAt": { $gte: threeDaysAgo }
+                    }
+                }
+            })
+            .sort({"locations.createdAt": -1})
+            .lean()
+        ]);
+        const newsFormatted = news.map(item => ({
+            _id: item._id,
+            title: item.title,
+            image: item.image,
+            displayType: 'NEWS',
+            compareDate: item.createdAt
+        }));
+
+        const announcesFormatted = [];
+        announces.forEach(doc => {
+            doc.locations.forEach(loc => {
+                if (["overdue", "reserved"].includes(loc.status)
+                    && loc.createdAt >= threeDaysAgo
+                ) {
+                    announcesFormatted.push({
+                        _id: doc._id,
+                        title: doc.title,
+                        copyId: loc._id,
+                        status: loc.status,
+                        displayType: "ANNOUNCE",
+                        compareDate: loc.createdAt
+                    });
+                }
+            });
+        });
+
+        const cancelledOrders = await BorrowRecord.aggregate([
+            {
+                $match: { 
+                    action: "canceled",
+                    createdAt: { $gte: threeDaysAgo }
+                }
+            },
+            { $sort: { createdAt: -1 } },
+            {
+                $lookup: {
+                    from: "readers",
+                    localField: "readerId",
+                    foreignField: "_id",
+                    as: "reader"
+                }
+            },
+            { $unwind: "$reader" },
+            {
+                $lookup: {
+                    from: "documents",
+                    localField: "documentId",
+                    foreignField: "_id",
+                    as: "document"
+                }
+            },
+            { $unwind: "$document" }
+        ]);
+
+        const cancelledOrdersFormatted = [];
+        cancelledOrders.map(co => {
+            cancelledOrdersFormatted.push({
+                _id: co._id,
+                title: co.document.title,
+                copyId: co.copyId,
+                status: "cancelled",
+                displayType: "ANNOUNCE",
+                compareDate: co.createdAt
+            })
+        })
+
+        const newReaders = await Account.aggregate([
+            {
+                $match: { 
+                    role: "reader",
+                    createdAt: { $gte: threeDaysAgo }
+                }
+            },
+            {$sort: { createdAt: -1 }}
+        ]);
+
+        const newReadersFormatted = [];
+        newReaders.map(reader => {
+            newReadersFormatted.push({
+                displayType: "READER",
+                compareDate: reader.createdAt
+            })
+        })
+
+        const combined = [...newsFormatted, ...announcesFormatted, ...cancelledOrdersFormatted, ...newReadersFormatted]
+        .sort((a, b) => b.compareDate - a.compareDate);
+        res.status(200).json(combined);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: "Get news and annouces failed!"})
     }
 })
 

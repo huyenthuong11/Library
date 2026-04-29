@@ -7,16 +7,16 @@ import { useContext, useEffect, useState } from "react";
 import { format } from 'date-fns';
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
-    PermIdentityOutlined, AssignmentIndOutlined, 
-    AddHomeWorkOutlined, EditSquare, AddBoxOutlined, 
-    ReceiptLongOutlined, NewspaperOutlined} 
+    HistoryOutlined, PermIdentityOutlined, 
+    LibraryAddCheckOutlined, QrCodeScannerOutlined,
+    LibraryBooksOutlined} 
     from '@mui/icons-material';
-    import useLibrarianInfo from "@/hook/useLibrarianInfo";
+    import useReaderInfo from "@/hook/useReaderInfo";
 export default function NewsDetails () {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
     const [news, setNews] = useState(null);
-    const {fullName, avatar} = useLibrarianInfo(account?.id);
+    const {fullName, avatar} = useReaderInfo(account?.id);
     const params = useParams();
     const id = params.id;
     console.log(id);
@@ -83,35 +83,35 @@ export default function NewsDetails () {
                         </div>
                     </div>
                     <nav>
-                        <p onClick={() => router.push("/admin/dashboard")}>
+                        <p onClick={() => router.push("/reader/dashboard")}>
                             <HomeOutlined></HomeOutlined>
                             Trang chủ
                         </p>
-                        <p onClick={() => router.push("/admin/availableBooks")}>
-                            <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
+                        <p onClick={() => router.push("/reader/availableBooks")}>
+                            <CollectionsBookmarkOutlined />
                             Kho sách thư viện
                         </p>
-                        <p onClick={() => router.push("/admin/upNewsandEvents")}>
-                            <NewspaperOutlined/>
-                            Đăng thông báo 
+                        <p onClick={() => router.push("/reader/ebook")}>
+                            <LibraryBooksOutlined/>
+                            Kho Ebook
                         </p>
-                        <p onClick={() => router.push("/admin/violationManagement")}>
-                            <ReceiptLongOutlined />
-                            Quản lý vi phạm
+                        <p onClick={() => router.push("/reader/borrowedBooks")}>
+                            <LibraryAddCheckOutlined></LibraryAddCheckOutlined>
+                            Giá sách của bạn
                         </p>
-                        <p onClick={() => router.push("/admin/readerManagement")}>
-                            <PermIdentityOutlined/>
-                            Quản lý người đọc
+                        <p onClick={() => router.push("/reader/history")}>
+                            <HistoryOutlined></HistoryOutlined>
+                            Lịch sử mượn sách
                         </p>
-                        <p onClick={() => router.push("/admin/librarianManagement")}>
-                            <AssignmentIndOutlined/>
-                            Quản lý thủ thư
+                        <p onClick={() => router.push("/reader/setinfo")}>
+                            <PermIdentityOutlined></PermIdentityOutlined>
+                            Hồ sơ cá nhân
                         </p>
-                        <p onClick={() => router.push("/admin/publisherManagement")}>
-                            <AddHomeWorkOutlined/>
-                            Nhà xuất bản
+                        <p onClick={() => router.push("/reader/card")}>
+                            <QrCodeScannerOutlined/>
+                            Thẻ mượn sách
                         </p>
-                    </nav>
+</nav>
                 </aside>
                 { news && (
                         <div className={styles.detailsContainer}>
@@ -153,7 +153,7 @@ export default function NewsDetails () {
                                         marginTop: "20px",
                                         fontSize: "14px"
                                     }}
-                                    onClick={() => {router.push("/admin/dashboard")}}
+                                    onClick={() => {router.push("/reader/dashboard")}}
                                 >
                                     Quay lại
                                 </Button>

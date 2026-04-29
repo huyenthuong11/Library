@@ -33,6 +33,8 @@
 .news { border-left-color: #c084fc; }    
 .overdue { border-left-color: #f87171; } 
 .reserved { border-left-color: #fb923c; }
+.cancelled {border-left-color: #ef4444;}
+.reader { border-left-color: #68fd4e; }    
 
 .content {
   font-size: 14px;
@@ -68,6 +70,9 @@
 .news .statusTag { color: #a855f7; }
 .overdue .statusTag { color: #ef4444; }
 .reserved .statusTag { color: #f97316; }
+.cancelled .statusTag { color:#9d0303; }
+.reader .statusTag { color:#039d34 }
+
 
 .time {
   font-size: 11px;

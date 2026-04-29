@@ -77,7 +77,6 @@ router.get("/getNewsAndAnnounce", authMiddleware, checkRole(["librarian"]), chec
                 }
             },
             { $sort: { createdAt: -1 } },
-            { $limit: 10 },
             {
                 $lookup: {
                     from: "readers",

@@ -3,7 +3,7 @@ import { useState, useEffect} from "react";
 import api from "../lib/axios";
 import { set } from "date-fns";
 
-export default function useAvailableBooks(page, category, search) {
+export default function useAvailableBooks(page, category, search, status) {
     
     const [availableBooks, setAvailableBooks] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
@@ -22,7 +22,7 @@ export default function useAvailableBooks(page, category, search) {
         setLoading(true);
         try {
             const response = await api.get(`/books/availableBook?page=${page}`, {
-                params: {category, search}
+                params: {category, search, status}
             });
             const data = response.data.data;
             const totalPage = response.data.totalPages;
@@ -44,7 +44,7 @@ export default function useAvailableBooks(page, category, search) {
         }, 400);
 
         return () => clearTimeout(delay);
-    }, [page, category, search]);
+    }, [page, category, search, status]);
     return (
         {availableBooks, loading, totalPages, inventorySummary, total, refreshAvailableBooks: getAvailableBooks}
     );

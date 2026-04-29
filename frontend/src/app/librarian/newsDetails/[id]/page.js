@@ -7,8 +7,7 @@ import { useContext, useEffect, useState } from "react";
 import { format } from 'date-fns';
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
-    HistoryOutlined, PermIdentityOutlined, 
-    LibraryAddCheckOutlined, HelpOutlineOutlined,} 
+    MedicalInformationOutlined, ReceiptLongOutlined} 
     from '@mui/icons-material';
     import useLibrarianInfo from "@/hook/useLibrarianInfo";
 export default function NewsDetails () {
@@ -54,7 +53,7 @@ export default function NewsDetails () {
                             {avatar ? (
                                 <Avatar
                                     alt="User Avatar"
-                                    src={avatar}
+                                    src={getImageUrl(avatar)}
                                     sx={{
                                         objectFit: 'cover',
                                         border: '1px solid rgba(150, 149, 149, 0.65)'
@@ -87,6 +86,14 @@ export default function NewsDetails () {
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
                         </p>
+                        <p onClick={() => router.push("/librarian/readerCheck")}>
+                            <MedicalInformationOutlined/>
+                            Thông tin người đọc
+                        </p>
+                        <p onClick={() => router.push("/librarian/violationManagement")}>
+                            <ReceiptLongOutlined></ReceiptLongOutlined>
+                            Quản lý vi phạm
+                        </p>
                     </nav>
                 </aside>
                 { news && (
@@ -108,7 +115,7 @@ export default function NewsDetails () {
                                 <img
                                     src={getImageUrl(news.image)} 
                                     alt={news.title} 
-                                    style={{ width: '100%', height: '400px' }}
+                                    style={{ width: '200px', height: '200px' }}
                                     className={styles.featuredImage}
                                 />
                                 <div className={styles.bodyText}>

@@ -2,15 +2,13 @@
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
-// ĐÃ SỬA: Bổ sung import Fragment từ react
-import { useContext, useEffect, useState, Fragment } from "react"; 
+import { useContext, useEffect, useState, Fragment, useMemo } from "react"; 
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
-    AddBoxOutlined, EditSquare, CancelOutlined, ListAltRounded,
-    SaveOutlined, AddCircleOutlined, ReceiptLongOutlined, 
-    MedicalInformationOutlined} 
+    MedicalInformationOutlined, ReceiptLongOutlined,
+    AddBoxOutlined, EditSquare, CancelOutlined, 
+    SaveOutlined, AddCircleOutlined} 
     from '@mui/icons-material';
-import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import useAvailableBooks from "@/hook/useAvailableBooks";
 import { format } from 'date-fns';
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -25,15 +23,14 @@ import useLocationList from "@/hook/useAvailableLocation";
 import AddCopy from "./AddCopy";
 import CreateViolationModal from "../violationManagement/CreateViolationModal";
 
-export default function AvailableBook() {
+export default function AdminAvailableBook() {
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
-    const {fullName, avatar} = useLibrarianInfo(account?.id);
     const [currentPage, setCurrentPage] = useState(1);
     const [search, setSearch] = useState("");
     const [choosenCategory, setChoosenCategory] = useState("");
-    const {availableBooks, totalPages, inventorySummary, total, loading, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory, search);
     const [activeFilter, setActiveFilter] = useState(null);
+    const {availableBooks, totalPages, inventorySummary, total, loading, refreshAvailableBooks} = useAvailableBooks(currentPage, choosenCategory, search, activeFilter);
     const [openDetailsBar, setOpenDetailsBar] = useState(null);
     const [openEditBar, setOpenEditBar] = useState(null);
     const [selectedBook, setSelectedBook] = useState(null);
@@ -121,7 +118,7 @@ export default function AvailableBook() {
 
     const handleDeleteBook = async (id) => {
         try {
-            const response = await api.delete(`/documents/deleteBook/${id}`)
+            const response = await api.delete(`/books/deleteBook/${id}`)
             if (response.status === 200 || response.status === 201) {
                 refreshAvailableBooks();
                 alert(response?.data?.message);
@@ -134,7 +131,7 @@ export default function AvailableBook() {
 
     const handleDeleteCopy = async (id) => {
         try {
-            const response = await api.delete(`/documents/deleteCopy/${id}`);
+            const response = await api.delete(`/books/deleteCopy/${id}`);
             if (response.status === 200 || response.status === 201) {
                 refreshAvailableBooks();
                 alert(response?.data?.message);
@@ -156,13 +153,6 @@ export default function AvailableBook() {
         return `${strId.slice(-7).toUpperCase()}`;
     };
 
-    const filteredBook = availableBooks.filter((book) => {
-        if (!activeFilter) return true;
-        return book.locations?.some((loc) => 
-            loc.status === activeFilter
-        );
-    });
-
     const getImageUrl = (path) => {
         if (path.startsWith("http")) return path;
         return `http://localhost:5000/${path}`;
@@ -170,7 +160,7 @@ export default function AvailableBook() {
 
     const handleSubmit = async () => {
         try {           
-            await api.patch(`/documents/updateCopy/${openEditCopyBar}`, {
+            await api.patch(`/books/updateCopy/${openEditCopyBar}`, {
                 position: editData.position,
                 status: editData.status,
                 readerId: editData.readerId,
@@ -209,7 +199,6 @@ export default function AvailableBook() {
         const timer = setInterval(() => {
             setNow(Date.now()); 
         }, 60000); 
-
         return () => clearInterval(timer); 
     }, []);
 
@@ -220,28 +209,14 @@ export default function AvailableBook() {
                     <div className="header">
                         <div className="webicon"></div>
                         <div className="user">
-                            {avatar ? (
-                                <Avatar
-                                    alt="User Avatar"
-                                    src={avatar}
-                                    sx={{
-                                        objectFit: 'cover',
-                                        border: '1px solid rgba(150, 149, 149, 0.65)'
-                                    }}
-                                />
-                            ) : (
-                                <Avatar></Avatar>
-                            )}
-                            {fullName ? (
-                                <span>{fullName}</span>
-                            ):(
-                                <span>{account?.email || "Email"}</span>
-                            )}
+                            <Avatar></Avatar>
+                            <span>{account?.email || "Admin"}</span>
                             <div className="sign">
                                 <a onClick={handleLogout}>Đăng xuất</a>
                             </div>
                         </div>
                     </div>
+                    {/* SIDEBAR DÀNH RIÊNG CHO ADMIN */}
                     <aside className="sidebar">
                         <div style={{marginTop:10}}>
                             <div className="webicon">
@@ -250,17 +225,11 @@ export default function AvailableBook() {
                             </div>
                         </div>
                         <nav>
-                            <p onClick={() => router.push("/librarian/dashboard")}>
-                                <HomeOutlined></HomeOutlined>
-                                Trang chủ
-                            </p>
-                            <a>
-                                <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
-                                Kho sách thư viện
-                            </a>
+                            <p onClick={() => router.push("/librarian/dashboard")}><HomeOutlined/> Trang chủ</p>
+                            <a className="active"><CollectionsBookmarkOutlined/> Kho sách thư viện</a>
                             <p onClick={() => router.push("/librarian/readerCheck")}>
                                 <MedicalInformationOutlined/>
-                                Tìm kiếm thông tin người dùng
+                                Thông tin người đọc
                             </p>
                             <p onClick={() => router.push("/librarian/violationManagement")}>
                                 <ReceiptLongOutlined></ReceiptLongOutlined>
@@ -377,9 +346,8 @@ export default function AvailableBook() {
                             </thead>
                             
                             <tbody>
-                                { (!loading && filteredBook.length > 0) ? (
-                                        filteredBook.map((availableBook) => (
-                                            /* ĐÃ SỬA LỖI KEY BẰNG CÁCH DÙNG FRAGMENT */
+                                { (!loading && availableBooks.length > 0) ? (
+                                        availableBooks.map((availableBook) => (
                                             <Fragment key={availableBook._id}>
                                                 <tr className={styles.desBar}>
                                                     <td>{availableBook.isbn}</td>
@@ -404,7 +372,7 @@ export default function AvailableBook() {
                                                             .join(', ')
                                                         }
                                                     </td>
-                                                    <td>{availableBook.publisherId.name}</td>
+                                                    <td>{availableBook.publisherId?.name || "N/A"}</td>
                                                     <td style={{width: "100px"}}>
                                                         {
                                                             availableBook.publishDate
@@ -412,7 +380,7 @@ export default function AvailableBook() {
                                                             :""
                                                         }
                                                     </td>
-                                                    <td>{availableBook.coverPrice.toLocaleString()} VND</td>
+                                                    <td>{(availableBook.coverPrice || 0).toLocaleString()} VND</td>
                                                     <td>{availableBook.numberOfCopy}</td>
                                                     <td>{availableBook.availableCopies}</td>
                                                     <td style={{width: "250px"}}>
@@ -520,7 +488,6 @@ export default function AvailableBook() {
                                                                                                                 setIsDirty(true)
                                                                                                             }}
                                                                                                             value={readerOptions.find(opt => opt.value === editData.readerId)}
-                                                                                                            // FIX DROPDOWN BỊ ĐÈ
                                                                                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                                                                                             menuPortalTarget={typeof document !== "undefined" ? document.body : null}
                                                                                                         /> 
@@ -590,7 +557,7 @@ export default function AvailableBook() {
                                                                                             <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #eee" }}>
                                                                                                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
                                                                                                     
-                                                                                                    {/* NÚT PHẠT */}
+                                                                                                    {/* NÚT PHẠT Ở ĐÂY NÀY */}
                                                                                                     {(l.status === 'borrowed' || l.status === 'overdue') && l.readerId && (
                                                                                                         <Button
                                                                                                             variant="outlined"
@@ -607,7 +574,7 @@ export default function AvailableBook() {
                                                                                                                     readerId: l.readerId._id || l.readerId,
                                                                                                                     documentId: availableBook._id,
                                                                                                                     copyId: l._id,
-                                                                                                                    coverPrice: availableBook.coverPrice // Truyền trực tiếp giá bìa
+                                                                                                                    coverPrice: availableBook.coverPrice 
                                                                                                                 });
                                                                                                                 setIsViolationOpen(true);
                                                                                                             }}

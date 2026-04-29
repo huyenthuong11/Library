@@ -147,7 +147,7 @@ export default function NewsDetails () {
                                 <img
                                     src={getImageUrl(news.image)} 
                                     alt={news.title} 
-                                    style={{ width: '100%', height: '400px' }}
+                                    style={{ width: '200px', height: '200px' }}
                                     className={styles.featuredImage}
                                 />
                                 <div className={styles.bodyText}>
