@@ -1,6 +1,5 @@
 "use client"
 
-import useReaderList from "@/hook/useGetReaderList";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
@@ -8,14 +7,15 @@ import { useContext, useEffect } from "react";
 import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     PermIdentityOutlined, AssignmentIndOutlined, 
-    AddHomeWorkOutlined, EditSquare, AddBoxOutlined, ReceiptLongOutlined} 
+    AddHomeWorkOutlined, EditSquare, AddBoxOutlined, 
+    ReceiptLongOutlined, NewspaperOutlined} 
     from '@mui/icons-material';
 import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddLibrarianModal from "./OpenAddLibrarianBar";
 import api from "@/lib/axios";
 
-export default function ReaderManagement() {
+export default function LibManagement() {
     const router = useRouter();
     const {account, logout} = useContext(AuthContext);
     const [search, setSearch] = useState("");
@@ -127,6 +127,10 @@ export default function ReaderManagement() {
                         <p onClick={() => router.push("/admin/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        <p onClick={() => router.push("/admin/upNewsandEvents")}>
+                            <NewspaperOutlined/>
+                            Đăng thông báo 
                         </p>
                         <p onClick={() => router.push("/admin/violationManagement")}>
                             <ReceiptLongOutlined />

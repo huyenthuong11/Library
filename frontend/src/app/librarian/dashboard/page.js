@@ -114,7 +114,7 @@ export default function Dashboard() {
                         </p>
                         <p onClick={() => router.push("/librarian/readerCheck")}>
                             <MedicalInformationOutlined/>
-                            Tìm kiếm thông tin người dùng
+                            Thông tin người đọc
                         </p>
                         <p onClick={() => router.push("/librarian/violationManagement")}>
                             <ReceiptLongOutlined></ReceiptLongOutlined>

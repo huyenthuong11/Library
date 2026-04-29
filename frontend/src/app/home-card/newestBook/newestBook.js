@@ -7,7 +7,7 @@ export default function NewestBooks() {
     const [newestBooks, setNewestBooks] = useState([]);
     const getNewestBooks = async () => {
         try {    
-            const response = await api.get("books/10newestBooks");
+            const response = await api.get("books/newestBooks?limit=10");
             const data = response.data.data;
             setNewestBooks(data);
         } catch (err) {

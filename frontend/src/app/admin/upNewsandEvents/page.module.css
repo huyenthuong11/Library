@@ -1,0 +1,106 @@
+
+.main {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    font-size: clamp(15px, 1vw, 20px);
+    background: rgb(6, 16, 119);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.header {
+    margin-bottom: 25px;
+    font-weight: 600;
+    color: aliceblue;
+}
+
+.image {
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    gap: 10px;
+    color: #8a0d0d;
+    font-weight: bold;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.image img{
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    gap: 10px;
+    object-fit: cover;
+    border: 1px solid rgba(32, 31, 31, 0.366);
+}
+.formCard {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    color: #333;
+    max-width: 800px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.inputGroup {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.inputGroup label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #000066;
+}
+
+.inputGroup input, .inputGroup select, .contentArea {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.contentArea {
+    min-height: 80px;
+    margin-bottom: 10px;
+    resize: vertical;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.btnAdd {
+    background: none;
+    border: 2px dashed #000066;
+    color: #000066;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.btnSubmit {
+    background-color: #0056b3; /* Màu xanh nút Đăng xuất của bạn */
+    color: white;
+    border: none;
+    padding: 15px;
+    width: 100%;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btnSubmit:hover {
+    background-color: #004494;
+}

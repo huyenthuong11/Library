@@ -24,6 +24,7 @@
 .headliner {
     width: 95%;
     border-radius: 8px;
+    margin-top: 10px;
     background-color: white;
     display: flex;
     justify-content: space-between;
@@ -98,8 +99,11 @@
 
 .bookAuthor {
     display: -webkit-box;
-    -webkit-line-clamp: 2; 
+    -webkit-line-clamp: 3; 
     -webkit-box-orient: vertical;  
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+
+

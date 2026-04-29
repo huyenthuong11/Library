@@ -5,7 +5,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import { useContext, useEffect, useState } from "react";
 import { Avatar, Chip, IconButton } from "@mui/material";
 import { 
-    HomeOutlined, CollectionsBookmarkOutlined, ReceiptLongOutlined, EditSquare 
+    HomeOutlined, CollectionsBookmarkOutlined, ReceiptLongOutlined, EditSquare, MedicalInformationOutlined
 } from '@mui/icons-material';
 import DeleteIcon from "@mui/icons-material/Delete";
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
@@ -89,7 +89,7 @@ export default function ViolationManagement() {
                         <p onClick={() => router.push("/librarian/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
                         <p onClick={() => router.push("/librarian/readerCheck")}>
                             <MedicalInformationOutlined/>
-                            Tìm kiếm thông tin người dùng
+                            Thông tin người đọc
                         </p>
                         <a className="active"><ReceiptLongOutlined/> Quản lý vi phạm</a>
                     </nav>

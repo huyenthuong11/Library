@@ -6,7 +6,8 @@ import { useContext, useEffect, useState } from "react";
 import { Avatar } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     PermIdentityOutlined, AssignmentIndOutlined, 
-    AddHomeWorkOutlined, ReceiptLongOutlined
+    AddHomeWorkOutlined, ReceiptLongOutlined,
+    NewspaperOutlined
 } 
     from '@mui/icons-material';
 import api from "@/lib/axios";
@@ -88,6 +89,10 @@ export default function Dashboard() {
                         <p onClick={() => router.push("/admin/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        <p onClick={() => router.push("/admin/upNewsandEvents")}>
+                            <NewspaperOutlined/>
+                            Đăng thông báo 
                         </p>
                         <p onClick={() => router.push("/admin/violationManagement")}>
                             <ReceiptLongOutlined />

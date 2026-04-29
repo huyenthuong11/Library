@@ -12,6 +12,7 @@ import fs from "fs";
 import checkStatus from "../middleware/authStatusMiddleware.js";
 import Violation from "../models/Violation.js";
 import mongoose from "mongoose";
+import { resourceLimits } from "worker_threads";
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.get("/availableBook", async(req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const skip = (page - 1) * 15;
-        const {search, category} = req.query;
+        const {search, category, status} = req.query;
         let query = {};
         if (category && category !== '') {
             query.category = { $in: [category] }; 
@@ -34,7 +35,13 @@ router.get("/availableBook", async(req, res) => {
                 { isbn: { $regex: searchRegex }}
             ];
         }
+
+        if (status) {
+            query['locations.status'] = status;
+        }
+
         const inventorySummary = await Document.aggregate([
+            
             { $unwind: { path: "$locations", preserveNullAndEmptyArrays: true } },
             {
                 $group: {
@@ -68,13 +75,14 @@ router.get("/availableBook", async(req, res) => {
     }
 })
 
-// GET /api/books/10newestBooks
-router.get("/10newestBooks", async(req, res) => {
+// GET /api/books/newestBooks
+router.get("/newestBooks", async(req, res) => {
     try {
+        const limit = parseInt(req.query.limit) 
         const books = await Document
         .find()
         .sort({createdAt: -1})
-        .limit(10);
+        .limit(limit);
 
         res.json({
             data: books,
@@ -554,7 +562,18 @@ router.patch('/confirmByCard/:readerId', authMiddleware, checkRole(["admin", "li
 
         let totalConfirmed = 0;
 
+
         for (const doc of booksToConfirm) {
+
+            
+            await BorrowRecord.create({
+                readerId: req.params.readerId,
+                documentId: doc._id,
+                copyId: doc.locations._id,
+                action: "borrowed",
+                date: new Date()
+            })
+
             const reservedCountInThisDoc = doc.locations.filter(
                 loc => loc.readerId 
                 && loc.readerId.toString() === req.params.readerId
