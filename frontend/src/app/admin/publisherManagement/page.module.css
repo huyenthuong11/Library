@@ -28,8 +28,7 @@
 
 .iventoryDashboardHeader {
     font-weight: bolder;
-    font-size: 18px;
-    margin-bottom: 5px;
+    font-weight: 30px; 
 }
 
 .mainHeader {
@@ -69,35 +68,6 @@
     font-size: 1em;
 }
 
-.subHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    width: 850px;
-} 
-
-.tableFilters ul {
-    list-style: none;
-    padding: 0;
-}
-
-.tableFilters li {
-    display: inline-block;
-    padding: 10px 15px;
-    background-color: #e9ecef;
-    border-radius: 5px;
-    margin-right: 10px;
-    cursor: pointer;
-    width: max-content;
-    font-size: 17px;
-}
-
-.tableFilters li.active {
-    background-color: #007bff;
-    color: #fff;
-}
-
 .bookTable {
     width: 100%;
     border-collapse: collapse;
@@ -113,8 +83,4 @@
 
 .bookTable th {
     background-color: #f2f2f2;
-}
-
-.bookCover {
-    max-width: 70px;
 }

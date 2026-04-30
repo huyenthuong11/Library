@@ -47,13 +47,13 @@ export default function Dashboard() {
         }
     }
 
-    // Xử lý gọi API lấy dữ liệu nộp phạt
+    // API lấy dữ liệu nộp phạt
     useEffect(() => {
         if (!readerId) return; 
 
         const fetchViolations = async () => {
             try {
-                const res = await api.get(`/violation/my-violations?readerId=${readerId}`);
+                const res = await api.get(`/violation/reader/${readerId}`);
                 setViolations(res.data);
                 
                 const unpaidAmount = res.data
@@ -68,6 +68,7 @@ export default function Dashboard() {
         
         fetchViolations();
     }, [readerId]);
+
 
     const handleLogout = () => {
         logout();
