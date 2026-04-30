@@ -3,10 +3,10 @@ import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
 import { useContext, useEffect, useState } from "react";
-import { Avatar, Chip, IconButton } from "@mui/material";
+import { Avatar, Chip, IconButton, Button } from "@mui/material";
 import { 
-    HomeOutlined, CollectionsBookmarkOutlined, ReceiptLongOutlined, EditSquare, GroupOutlined,
-    PermIdentityOutlined, AssignmentIndOutlined, AddHomeWorkOutlined, NewspaperOutlined
+    HomeOutlined, CollectionsBookmarkOutlined, ReceiptLongOutlined, EditSquare,
+    PermIdentityOutlined, AssignmentIndOutlined, AddHomeWorkOutlined, NewspaperOutlined, AddBoxOutlined
 } from '@mui/icons-material';
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "@/lib/axios";
@@ -17,8 +17,6 @@ export default function AdminViolationManagement() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
     
-    // Nếu bạn có hook useAdminInfo thì có thể thay vào đây, 
-    // tạm thời mình dùng account email làm mặc định hiển thị
     const fullName = account?.fullName || "Quản trị viên";
     const avatar = account?.avatar || "";
 
@@ -28,6 +26,16 @@ export default function AdminViolationManagement() {
     // State cho việc sửa
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedViolation, setSelectedViolation] = useState(null);
+
+    // State cho tìm kiếm và bộ lọc giống trang Độc giả
+    const [search, setSearch] = useState("");
+    const [activeFilter, setActiveFilter] = useState(null); // null = Tất cả, 'unpaid' = Chưa nộp, 'paid' = Đã nộp
+
+    const statusList = [
+        { value: null, label: "Tất cả" },
+        { value: "unpaid", label: "Chưa nộp" },
+        { value: "paid", label: "Đã nộp" }
+    ];
 
     const fetchViolations = async () => {
         try {
@@ -51,6 +59,21 @@ export default function AdminViolationManagement() {
     const handleLogout = () => { logout(); router.push("/"); };
     const getImageUrl = (path) => path?.startsWith("http") ? path : `http://localhost:5000/${path}`;
 
+    // Logic lọc danh sách Vi phạm
+    const filteredViolations = violations.filter(v => {
+        // 1. Phân chia theo trạng thái
+        if (activeFilter && v.status !== activeFilter) {
+            return false;
+        }
+        
+        // 2. Lọc theo từ khóa tìm kiếm (tên người đọc, tên sách)
+        const s = search.toLowerCase();
+        const readerName = v.readerId?.fullName?.toLowerCase() || "";
+        const bookTitle = v.documentId?.title?.toLowerCase() || "";
+        
+        return readerName.includes(s) || bookTitle.includes(s);
+    });
+
     return (
         <div className="container">
             <div className="main">
@@ -68,50 +91,80 @@ export default function AdminViolationManagement() {
                     </div>
                 </div>
 
-                {/* SIDEBAR DÀNH RIÊNG CHO ADMIN */}
+                {/* SIDEBAR */}
                 <aside className="sidebar">
                     <div style={{marginTop:10}}>
                         <div className="webicon">
                             <div className="logo"></div>
-                            <div className="websiteName">LMS Admin</div>
+                            <div className="websiteName">LMS</div>
                         </div>
                     </div>
                     <nav>
-                        <p onClick={() => router.push("/admin/dashboard")}>
-                            <HomeOutlined></HomeOutlined>
-                            Trang chủ
-                        </p>
-                        <p onClick={() => router.push("/admin/availableBooks")}>
-                            <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
-                            Kho sách thư viện
-                        </p>
-                        <p onClick={() => router.push("/admin/upNewsandEvents")}>
-                            <NewspaperOutlined/>
-                            Đăng thông báo 
-                        </p>
-                        <a className="active">
-                            <ReceiptLongOutlined/> 
-                            Quản lý vi phạm
-                        </a>
-                        <p onClick={() => router.push("/admin/readerManagement")}>
-                            <PermIdentityOutlined/>
-                            Quản lý người đọc
-                        </p>
-                        <p onClick={() => router.push("/admin/librarianManagement")}>
-                            <AssignmentIndOutlined/>
-                            Quản lý thủ thư
-                        </p>
-                        <p onClick={() => router.push("/admin/publisherManagement")}>
-                            <AddHomeWorkOutlined/>
-                            Nhà xuất bản
-                        </p>
+                        <p onClick={() => router.push("/admin/dashboard")}><HomeOutlined/> Trang chủ</p>
+                        <p onClick={() => router.push("/admin/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
+                        <p onClick={() => router.push("/admin/upNewsandEvents")}><NewspaperOutlined/> Đăng thông báo</p>
+                        <a className="active"><ReceiptLongOutlined /> Quản lý vi phạm</a>
+                        <p onClick={() => router.push("/admin/readerManagement")}><PermIdentityOutlined/> Quản lý người đọc</p>
+                        <p onClick={() => router.push("/admin/librarianManagement")}><AssignmentIndOutlined/> Quản lý thủ thư</p>
+                        <p onClick={() => router.push("/admin/publisherManagement")}><AddHomeWorkOutlined/> Nhà xuất bản</p>
                     </nav>
                 </aside>
 
                 {/* NỘI DUNG CHÍNH */}
                 <div className={styles.main}>
+                    <div className={styles.mainHeader}>
+                        <h2>QUẢN LÝ VI PHẠM</h2>
+                    </div>
+
                     <div className={styles.header}>
-                        <div className={styles.mainHeader}><h2>QUẢN LÝ PHIẾU PHẠT VI PHẠM</h2></div>
+                        <div>
+                            {/* Thanh tìm kiếm */}
+                            <div className={styles.actionBar}>
+                                <div className={styles.searchContainer}>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Tìm kiếm vi phạm (Tên độc giả, Tên sách...)"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
+                                
+                            </div>
+
+                            {/* Bộ lọc trạng thái */}
+                            <div className={styles.subHeader}>
+                                <div className={styles.tableFilters}>
+                                    <ul>
+                                        {statusList.map((status) => (
+                                            <li
+                                                key={status.value || "all"}
+                                                className={`${activeFilter === status.value ? styles.active : ""}`}
+                                                onClick={() => setActiveFilter(status.value)}
+                                            >
+                                                {status.label}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Thống kê vi phạm */}
+                        <div className={styles.iventoryDashboard}>
+                            <div className={styles.iventoryDashboardHeader}>Thống kê vi phạm</div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "5px" }}>
+                                <div>
+                                    <p>Tổng số phiếu phạt:</p>
+                                    <p>Chưa nộp phạt:</p>
+                                    <p>Đã nộp phạt:</p>
+                                </div>
+                                <div style={{ textAlign: "right", fontWeight: "bold" }}>
+                                    <p>{violations.length}</p>
+                                    <p>{violations.filter(v => v.status === 'unpaid').length}</p>
+                                    <p>{violations.filter(v => v.status === 'paid').length}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <table className={styles.bookTable}>
@@ -124,35 +177,41 @@ export default function AdminViolationManagement() {
                                 <th style={{width: '250px'}}>Lý do</th>
                                 <th>Số tiền</th>
                                 <th>Trạng thái</th>
-                                <th>Hành động</th>
+                                <th style={{ textAlign: "center" }}>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {!loading && violations.map((v) => (
-                                <tr key={v._id} className={styles.desBar}>
-                                    <td>{format(new Date(v.createdAt), 'dd-MM-yyyy')}</td>
-                                    <td style={{textAlign: 'left', paddingLeft: '10px'}}><strong>{v.readerId?.fullName}</strong></td>
-                                    <td>{v.documentId?.image && <img src={getImageUrl(v.documentId.image)} className={styles.bookCover} alt="cover" />}</td>
-                                    <td style={{fontWeight: "bold"}}>{v.documentId?.title}</td>
-                                    <td style={{textAlign: "left"}}>{v.reason}</td>
-                                    <td style={{fontWeight: "bold", color: "#c62828"}}>{v.fineAmount?.toLocaleString('vi-VN')} đ</td>
-                                    <td>
-                                        <Chip 
-                                            label={v.status === 'unpaid' ? "Chưa nộp" : "Đã nộp"} 
-                                            color={v.status === 'unpaid' ? "error" : "success"} 
-                                            size="small" 
-                                        />
-                                    </td>
-                                    <td>
-                                        <IconButton color="primary" onClick={() => { setSelectedViolation(v); setIsEditOpen(true); }}>
-                                            <EditSquare fontSize="small" />
-                                        </IconButton>
-                                        <IconButton color="error" onClick={() => handleDelete(v._id)}>
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
+                            {!loading && filteredViolations.length > 0 ? (
+                                filteredViolations.map((v) => (
+                                    <tr key={v._id} className={styles.desBar}>
+                                        <td>{format(new Date(v.createdAt), 'dd-MM-yyyy')}</td>
+                                        <td style={{textAlign: 'left', paddingLeft: '10px', fontWeight: "bold"}}>{v.readerId?.fullName}</td>
+                                        <td>{v.documentId?.image && <img src={getImageUrl(v.documentId.image)} className={styles.bookCover} alt="cover" />}</td>
+                                        <td style={{fontWeight: "bold"}}>{v.documentId?.title}</td>
+                                        <td style={{textAlign: "left"}}>{v.reason}</td>
+                                        <td style={{fontWeight: "bold", color: "#c62828"}}>{v.fineAmount?.toLocaleString('vi-VN')} đ</td>
+                                        <td>
+                                            {v.status === 'unpaid' ? "Chưa nộp" : "Đã nộp"}
+                                        </td>
+                                        <td>
+                                            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                                                <IconButton color="primary" onClick={() => { setSelectedViolation(v); setIsEditOpen(true); }}>
+                                                    <EditSquare fontSize="small" />
+                                                </IconButton>
+                                                <IconButton color="error" onClick={() => handleDelete(v._id)}>
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="8" style={{ textAlign: "center", padding: "20px" }}>
+                                        Không tìm thấy phiếu phạt nào!
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>

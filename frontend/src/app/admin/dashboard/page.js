@@ -85,7 +85,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <nav>
-                        <a><HomeOutlined></HomeOutlined>Tổng quan</a>
+                        <a><HomeOutlined></HomeOutlined>Trang chủ</a>
                         <p onClick={() => router.push("/admin/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
