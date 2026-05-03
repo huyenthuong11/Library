@@ -21,7 +21,7 @@ export default function CreateViolationModal({ handleClose, readerId, documentId
 
         if (violationType === "late") {
             amount = (parseInt(daysLate) || 0) * 2000;
-            generatedReason = `Nộp muộn sách ${daysLate || 0} ngày: Phạt 2.000đ/ngày.`;
+            generatedReason = `Nộp muộn sách ${daysLate || 0} ngày.`;
         } else if (violationType === "damaged") {
             amount = (parseInt(bookPrice) || 0) * 0.5;
             generatedReason = `Làm hư hại sách: Phạt 50% giá bìa.`;

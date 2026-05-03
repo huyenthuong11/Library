@@ -123,7 +123,7 @@ const startCronJobs = () => {
                                         readerId: item.readerId,
                                         documentId: doc._id,
                                         copyId: item._id,
-                                        reason: `Hệ thống tự động phạt: Nộp muộn sách ${daysLate} ngày.`,
+                                        reason: `Nộp muộn sách ${daysLate} ngày.`,
                                         fineAmount: fine
                                     }
                                 },

@@ -243,6 +243,9 @@ export default function ReaderManagement() {
                                     </tr>
                                 );
                             })}
+                            <td colSpan="8" style={{ textAlign: "center", padding: "20px", color: "#c62828", fontWeight: "bold" }}>
+                                Không tìm thấy độc giả nào!
+                            </td>
                         </tbody>
                     </table>
                 </div>

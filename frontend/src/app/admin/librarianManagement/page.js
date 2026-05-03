@@ -263,7 +263,7 @@ export default function LibManagement() {
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
+                                    <td colSpan="8" style={{ textAlign: "center", padding: "20px", color: "#c62828", fontWeight: "bold" }}>
                                         Không tìm thấy thủ thư nào!
                                     </td>
                                 </tr>
