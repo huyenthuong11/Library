@@ -1,4 +1,3 @@
-
 .main {
     width: 100%;
     height: 100%;
@@ -14,9 +13,8 @@
 .header {
     width: 100%;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
 }
-
 
 .mainHeader {
     display: flex;
@@ -28,11 +26,94 @@
     width: 1000px;
 }
 
+/* === CSS CHO PHẦN 1: QUÉT THẺ MƯỢN SÁCH === */
+.readerInfo {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    align-items: center;
+    padding: 15px 5px;
+    font-family: Be Vietnam Pro, sans-serif;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+.cardAvatarImg {
+    width: clamp(140px, 10vw, 160px);
+    height: clamp(140px, 10vw, 160px);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.reaservedBook {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    align-items: center;
+    font-family: Be Vietnam Pro, sans-serif;
+    padding: 15px 5px;
+}
+
+.books {
+    width: 100%;
+    gap: 15px;
+    display: grid;
+    overflow-y: auto;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-auto-rows: min-content;
+    padding: 10px;
+    overflow-x: auto;
+}
+
+.card {
+    font-family: Quicksand, sans-serif;
+    border-radius: 12px;
+    background: rgb(255, 255, 255);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.bookImage {
+    width: 100%;
+    height: 220px;   
+    object-fit: cover;
+    border-bottom: 1px solid #ccc;
+}
+
+.bookDescription {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    font-size: 13px;
+}
+
+/* === CSS CHO PHẦN 2: BẢNG DANH SÁCH QUẢN LÝ === */
+.actionBar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
 .searchContainer {
     display: flex;
     align-items: center;
     width: 645px;
-    padding: 10px 15px,
 }
 
 .searchContainer input {
@@ -44,106 +125,69 @@
     font-size: 1em;
 }
 
-.readerInfo {
-    margin-top: 20px;
+.subHeader {
     display: flex;
-    flex-direction: column;
-    width: 280px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    border: 2px solid #ccc;
+    justify-content: space-between;
     align-items: center;
-    padding: 5px;
-    font-family: Be Vietnam Pro, sans-serif;
-    gap: 10px;
-    overflow-y: auto;
+    margin-bottom: 20px;
+    width: 850px;
+} 
+
+.tableFilters ul {
+    list-style: none;
+    padding: 0;
 }
 
-
-.cardAvatarImg {
-    width: clamp(180px, 10vw, 200px);
-    height: clamp(180px, 10vw, 200px);
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    border-radius: 50%;
-    flex-shrink: 0;
-    overflow: hidden;
+.tableFilters li {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 17px;
 }
 
-.reaservedBook {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    width: 990px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    border: 2px solid #ccc;
-    align-items: center;
-    font-family: Be Vietnam Pro, sans-serif;
-    padding: 5px;
+.tableFilters li.active {
+    background-color: #007bff;
+    color: #fff;
 }
 
-.books {
-    width: 990px;
-    gap: 10px;
-    display: grid;
-    overflow-y: auto;
-    grid-template-columns: repeat(5, 1fr);
-    grid-auto-rows: 450px;
+.iventoryDashboard {
+    background: #ccc;
+    font-size: 15px;
+    width: 300px;
+    margin-bottom: 20px;
+    border-radius: 8px;
     padding: 10px;
-    overflow-x: auto;
+    height: fit-content;
 }
 
-.card {
-    font-family: Quicksand, sans-serif;
-    grid-column: span 1;
-    grid-row: span 1;
-    border-radius: 16px;
-    white-space: wrap;
-    font-weight: 500;
-    background: rgb(255, 255, 255);
-    min-width: 0;
-    overflow: hidden;
-    font-size: clamp(10px, 1vw, 20px);
-    display: flex;
-    flex-direction: column;
-    margin-top: 10px;
+.iventoryDashboardHeader {
+    font-weight: bolder;
+    font-size: 18px;
 }
 
-.bookImage {
+.bookTable {
     width: 100%;
-    height: 250px;   
-    background: rgb(62, 27, 27);
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 1px solid #ccc;
-    box-shadow: 2px solid #ccc;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: #fff;
+    border-radius: 8px;
     overflow: hidden;
 }
 
-.bookImage img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
+.bookTable th,
+.bookTable td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #9ab9c7;
+    text-align: left;
 }
 
-.bookDescription {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    padding: 5px;
-    font-weight: bold;
-    font-size: 14px;
-    overflow-y: auto;
+.bookTable th {
+    background-color: #f2f2f2;
 }
 
-
-.bookAuthor {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;  
-    overflow: hidden;
-    text-overflow: ellipsis;
+.desBar {
+    background-color: #edeef1e3;
 }

@@ -1,133 +1,103 @@
-"use client";
+"use client"
+
+import useReaderList from "@/hook/useGetReaderList";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
-import { Avatar, Button } from "@mui/material";
-import {
-    HomeOutlined,
-    CollectionsBookmarkOutlined,
-    MedicalInformationOutlined,
-    ReceiptLongOutlined,
-    SearchOutlined
-} from "@mui/icons-material";
-import { useContext, useEffect, useState, useRef } from "react";
-import useLibrarianInfo from "@/hook/useLibrarianInfo";
+import { useContext, useEffect, useState } from "react";
+import { Avatar, Button, IconButton } from "@mui/material";
+import { 
+    HomeOutlined, CollectionsBookmarkOutlined, 
+    EditSquare, AddBoxOutlined, 
+    ReceiptLongOutlined, MedicalInformationOutlined,
+    Visibility
+} from '@mui/icons-material';
+import AddReaderModal from "./AddReaderModal"; 
+import EditReaderModal from "./EditReaderModal"; 
+import ReaderBorrowingModal from "./ReaderBorrowingModal";
 import api from "@/lib/axios";
-import { User, BookOpen, CheckCircle } from "lucide-react";
-import axios from "axios";
 
-export default function ReaderCheck() {
+export default function LibrarianReaderInformation() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
-    const { fullName, avatar } = useLibrarianInfo(account?.id);
+    const { readerList, refreshReaderList } = useReaderList();
+    
     const [search, setSearch] = useState("");
-    const [pendingData, setPendingData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const isScanning = useRef(false);
+    const [activeFilter, setActiveFilter] = useState(null);
+    
+    // State quản lý Modals
+    const [openAddReaderBar, setOpenAddReaderBar] = useState(false);
+    const [openEditModal, setOpenEditModal] = useState(false);
+    const [openBorrowModal, setOpenBorrowModal] = useState(false);
+    const [selectedReader, setSelectedReader] = useState(null);
 
-    const onScanSuccess = async (readerId) => {
-        setLoading(true);
+    const [inventory, setInventory] = useState({ total: 0, active: 0, inactive: 0 });
+
+    const statusList = [
+        { value: null, label: "Tất cả" },
+        { value: "activate", label: "Đã kích hoạt" },
+        { value: "deactivate", label: "Đã bị vô hiệu hóa" }
+    ];
+
+    const getInventory = async () => {
         try {
-            const res = await api.get(`/books/pendingBorrow/${readerId}`);
-            console.log(res.data);
-            if (res.data.data && res.data.data.length > 0) {
-                setPendingData({
-                    readerId,
-                    books: res.data.data,
-                    readerName: res.data.reader.fullName || "Chưa cập nhật",
-                    avatar: res.data.reader.avatar || "https://www.pinterest.com/minhanh_ptbk/avt-m%E1%BA%B7c-%C4%91%E1%BB%8Bnh-fb/",
-                    phoneNumber: res.data.reader.phoneNumber || "Chưa cập nhật",
-                    totalBorrow: res.data.reader.totalBorrow || 0,
-                    dateOfBirth: res.data.reader.dateOfBirth
-                    ? new Date(res.data.reader.dateOfBirth).toLocaleDateString("vi-VN") 
-                    : "Chưa cập nhật",
-                    borrowTurn: res.data.reader.borrowTurn || 0,
-                    violate: res.data.violate
-                });
-            } else {
-                alert("Không có sách nào đang chờ mượn!");
-                setPendingData(null);
-            }
-        } catch (err) {
-            console.error("Lỗi:", err);
-            alert("Lỗi truy xuất thông tin người dùng");
-        } finally {
-            setLoading(false);
+            const res = await api.get("/admin/accountsInventory");
+            setInventory({
+                total: res.data?.total || 0,
+                active: res.data?.active || 0,
+                inactive: res.data?.inactive || 0
+            });
+        } catch (error) { 
+            console.error("Lỗi khi lấy thống kê:", error); 
         }
     };
 
-    const confirmBorrow = async () => {
-        await api.patch(`/books/confirmByCard/${pendingData.readerId}`);
-        alert("Xác nhận mượn thành công!");
-        setPendingData(null);
+    useEffect(() => { getInventory(); }, []);
+
+    const handleLogout = () => { logout(); router.push("/"); };
+
+    const formatShortId = (reader) => {
+        const id = reader.accountId?._id || reader._id;
+        return id ? id.toString().slice(-7).toUpperCase() : "N/A";
     };
 
-    const handleLogout = () => {
-        logout();
-        router.push("/");
+    const handleOpenEdit = (reader) => {
+        setSelectedReader(reader);
+        setOpenEditModal(true);
     };
 
-    const getImageUrl = (path) => {
-        if(!path) return;
-        if (path.startsWith("http")) return path;
-        return `http://localhost:5000/${path}`;
-    }; 
-
-    const formatShortId = (id) => {
-        if (!id) return "N/A";
-        const strId = id.toString();
-        return `${strId.slice(-7).toUpperCase()}`;
+    const handleOpenBorrowHistory = (reader) => {
+        setSelectedReader(reader);
+        setOpenBorrowModal(true);
     };
 
-    useEffect(() => {
-        if (pendingData) return;
-        const interval = setInterval(async() => {
-            if (isScanning.current || pendingData) return;
-            try {
-                const res = await axios.get("http://192.168.1.3:5000/scanResult");
-                if (res.data) {
-                    isScanning.current = true;
-                    await onScanSuccess(res.data);
-                    await axios.delete("http://192.168.1.3:5000/scanResult");
-                    isScanning.current = false;
-                }
-            } catch (err) {
-
-            }
-        }, 2000);
-        return () => clearInterval(interval);
-    }, [pendingData]);
+    const filteredReaders = readerList?.filter(r => {
+        if (activeFilter) {
+            const status = r.accountId?.status || r.status;
+            if (status !== activeFilter) return false;
+        }
+        const s = search.toLowerCase();
+        const fullName = r.fullName?.toLowerCase() || "";
+        const id = formatShortId(r).toLowerCase();
+        return fullName.includes(s) || id.includes(s);
+    });
 
     return (
         <div className="container">
             <div className="main">
+                {/* HEADER */}
                 <div className="header">
-                        <div className="webicon">
+                    <div className="webicon"></div>
+                    <div className="user">
+                        <Avatar src={account?.avatar}></Avatar>
+                        <span>{account?.fullName || account?.email || "Thủ thư"}</span>
+                        <div className="sign">
+                            <a onClick={handleLogout}>Đăng xuất</a>
                         </div>
-                        <div className="user">
-                            {avatar ? (
-                                <Avatar
-                                    alt="User Avatar"
-                                    src={avatar}
-                                    sx={{
-                                        objectFit: 'cover',
-                                        border: '1px solid rgba(150, 149, 149, 0.65)'
-                                    }}
-                                />
-                            ) : (
-                                <Avatar></Avatar>
-                            )}
-                            {fullName ? (
-                                <span>{fullName}</span>
-                            ):(
-                                <span>{account?.email || "Email"}</span>
-                            )}
-                            <div className="sign">
-                                <a onClick={handleLogout}>Đăng xuất</a>
-                            </div>
-                        </div>
+                    </div>
                 </div>
 
+                {/* SIDEBAR DÀNH CHO THỦ THƯ */}
                 <aside className="sidebar">
                     <div style={{marginTop:10}}>
                         <div className="webicon">
@@ -136,146 +106,157 @@ export default function ReaderCheck() {
                         </div>
                     </div>
                     <nav>
-                        <p onClick={() => router.push("/librarian/dashboard")}>
-                            <HomeOutlined></HomeOutlined>
-                            Tổng quan
-                        </p>
-                        <p onClick={() => router.push("/librarian/availableBooks")}>
-                            <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
-                            Kho sách thư viện
-                        </p>
-                        <a>
-                            <MedicalInformationOutlined/>
-                            Thông tin người đọc
-                        </a>
-                        <p onClick={() => router.push("/librarian/violationManagement")}>
-                            <ReceiptLongOutlined></ReceiptLongOutlined>
-                            Quản lý vi phạm
-                        </p>
+                        <p onClick={() => router.push("/librarian/dashboard")}><HomeOutlined/> Tổng quan</p>
+                        <p onClick={() => router.push("/librarian/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
+                        <a className="active"><MedicalInformationOutlined/> Thông tin người đọc</a>
+                        <p onClick={() => router.push("/librarian/violationManagement")}><ReceiptLongOutlined/> Quản lý vi phạm</p>
                     </nav>
                 </aside>
 
                 <div className={styles.main}>
-                    <div className={styles.header}>
-                        <div className={styles.mainHeader}>
-                            <h2>KIỂM TRA THÔNG TIN NGƯỜI DÙNG</h2>
-                        </div>
-                        <div className={styles.searchContainer}>
-                            <input 
-                                type="text" 
-                                placeholder="Nhập ID người dùng..."
-                                value={search}
-                                onChange={(e) => {
-                                    setSearch(e.target.value);
-                                }}
-                            />
-                            <Button
-                                style={{
-                                    background: "white"
-                                }}
-                                onClick={() => onScanSuccess(search)}
-                            >
-                                <SearchOutlined/>
-                            </Button>
-                        </div>
+                    <div className={styles.mainHeader}>
+                        <h2>THÔNG TIN NGƯỜI ĐỌC</h2>
                     </div>
-                    {pendingData && (
-                        <div style={{display: 'flex', flex: '1', marginBottom: '20px', gap: '20px'}}>
-                            <div className={styles.readerInfo}>
-                                <div style={{fontSize: '20px', fontWeight: '500'}}>
-                                    THÔNG TIN NGƯỜI DÙNG
-                                </div>
-                                <div className={styles.cardAvatarImg}>
-                                    <Avatar
-                                        alt="User Avatar"
-                                        src={getImageUrl(pendingData.avatar)}
-                                        sx={{
-                                            width: 'clamp(180px, 10vw, 200px)',
-                                            height: 'clamp(180px, 10vw, 200px)',
-                                            objectFit: 'cover',
-                                            border: '2px solid rgba(150, 149, 149, 0.65)'
-                                        }}
+                    
+                    <div className={styles.header}>
+                        <div>
+                            <div className={styles.actionBar}>
+                                <div className={styles.searchContainer}>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Tìm kiếm người đọc (Tên, ID...)"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
                                     />
                                 </div>
-                                <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px'}}>
-                                    <div style={{fontSize: '15px'}}>
-                                        <strong>Tên người dùng:</strong> {pendingData.readerName}
-                                    </div>
-                                    <div style={{fontSize: '15px'}}>
-                                        <strong>Ngày sinh:</strong> {pendingData.dateOfBirth}
-                                    </div>
-                                    <div style={{fontSize: '15px'}}>
-                                        <strong>Số điện thoại:</strong> {pendingData.phoneNumber}
-                                    </div>
-                                    <div style={{fontSize: '15px'}}>
-                                        <strong>Tổng số lượt mượn:</strong> {pendingData.totalBorrow}
-                                    </div>
-                                    <div style={{fontSize: '15px'}}>
-                                        <strong>Thông tin nợ:</strong>
-                                        {
-                                            pendingData.violate.length > 0 ? (
-                                                pendingData.violate.map((v) => (
-                                                    <div>
-                                                        <div>
-                                                            Người dùng đang nợ {v.fineAmount} đồng do {v.reason} 
-                                                        </div>
-                                                        <div>
-                                                            Sách: {v.documentId.title} mã {formatShortId(v.copyId)}
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div>
-                                                    Người dùng không có khoản nợ nào.
-                                                </div>
-                                            )
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                            <div className={styles.reaservedBook}>
-                                <div style={{fontSize: '20px', fontWeight: '500'}}>
-                                    YÊU CẦU MƯỢN SÁCH CỦA NGƯỜI DÙNG
-                                </div>
-                                <div className={styles.books}>
-                                {pendingData.books.map((book) => (
-                                    <div key={book._id} className={styles.card}>
-                                        <img src={getImageUrl(book.image)} className={styles.bookImage}/>
-                                        <div className={styles.bookDescription}>
-                                            <div>Mã ISBN: {book.isbn}</div>
-                                            <div className={styles.bookAuthor}>Tên sách: {book.title}</div>
-                                            <div className={styles.bookAuthor}>Tác giả: {book.author}</div>
-                                            {book.reservedCopies.length > 0 && (
-                                                book.reservedCopies.map((c) => (
-                                                    <div key={c.copyId}>
-                                                        <div>Mã bản sao: {formatShortId(c.copyId)}</div>
-                                                    </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                                </div>  
-                                <Button
-                                    style={{
-                                        background: "#1b4764",
-                                        color: "white"
+                                <Button 
+                                    sx={{ 
+                                        backgroundColor: "#d2dfd5", 
+                                        color: "#0b485e", 
+                                        minWidth: "45px", 
+                                        height: "45px",
+                                        padding: "0",
+                                        borderRadius: "5px", 
+                                        marginLeft: "10px" 
                                     }}
-                                    onClick={() => confirmBorrow()}
+                                    onClick={() => setOpenAddReaderBar(true)}
+                                    title="Thêm người đọc"
                                 >
-                                    Xác Nhận
+                                    <AddBoxOutlined/>
                                 </Button>
                             </div>
+
+                            <div className={styles.subHeader}>
+                                <div className={styles.tableFilters}>
+                                    <ul>
+                                        {statusList.map((status) => (
+                                            <li
+                                                key={status.value || "all"}
+                                                className={`${activeFilter === status.value ? styles.active : ""}`}
+                                                onClick={() => setActiveFilter(status.value)}
+                                            >
+                                                {status.label}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
-                    )}
+
+                        <div className={styles.iventoryDashboard}>
+                            <div className={styles.iventoryDashboardHeader}>Thống kê người đọc</div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "5px" }}>
+                                <div>
+                                    <p>Tổng số người đọc:</p>
+                                    <p>Đang hoạt động:</p>
+                                    <p>Đã bị vô hiệu hóa:</p>
+                                </div>
+                                <div style={{ textAlign: "right", fontWeight: "bold" }}>
+                                    <p>{inventory.total}</p>
+                                    <p>{inventory.active}</p>
+                                    <p>{inventory.inactive}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table className={styles.bookTable}>
+                        <thead>
+                            <tr>
+                                <th>Mã người đọc</th>
+                                <th>Họ và tên</th>
+                                <th>Email tài khoản</th>
+                                <th>Số điện thoại</th>
+                                <th>Trạng thái</th>
+                                <th style={{ textAlign: "center" }}>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredReaders?.length > 0 ? (
+                                filteredReaders.map((reader) => {
+                                    const currentStatus = reader.accountId?.status || reader.status;
+                                    return (
+                                        <tr key={reader._id} className={styles.desBar}>
+                                            <td>{formatShortId(reader)}</td>
+                                            <td style={{ fontWeight: "bold", color: "#0b485e" }}>{reader.fullName}</td>
+                                            <td>{reader.accountId?.email || "N/A"}</td>
+                                            <td>{reader.phoneNumber || "Chưa cập nhật"}</td>
+                                            <td>
+                                                <span style={{ color: currentStatus === "activate" ? "green" : "red", fontWeight: "500" }}>
+                                                    {currentStatus === "activate" ? "Đã kích hoạt" : "Đã vô hiệu hóa"}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                                                    <IconButton color="info" onClick={() => handleOpenBorrowHistory(reader)} title="Xem tình trạng mượn sách">
+                                                        <Visibility />
+                                                    </IconButton>
+
+                                                    <IconButton color="primary" onClick={() => handleOpenEdit(reader)} title="Sửa thông tin">
+                                                        <EditSquare />
+                                                    </IconButton>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" style={{ textAlign: "center", padding: "20px", color: "#c62828", fontWeight: "bold" }}>
+                                        Không tìm thấy người đọc nào!
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div className="footer">
-                <div className={styles.word}>THƯ VIỆN CẦU GIẤY</div>
-                <div className={styles.word}>Address: Cầu Giấy, Hà Nội, Việt Nam</div>
-                <div className={styles.word}>Contact: 0912 xxx xxx</div>
-                <div className={styles.word}>Copyright © Library System</div>
-            </div>
+
+            {/* MODALS */}
+            {openAddReaderBar && (
+                <AddReaderModal 
+                    open={openAddReaderBar} 
+                    handleClose={() => setOpenAddReaderBar(false)} 
+                    refreshData={() => { refreshReaderList(); getInventory(); }}
+                />
+            )}
+
+            {openEditModal && (
+                <EditReaderModal
+                    open={openEditModal}
+                    handleClose={() => setOpenEditModal(false)}
+                    refreshData={() => { refreshReaderList(); getInventory(); }}
+                    readerData={selectedReader}
+                />
+            )}
+
+            {openBorrowModal && (
+                <ReaderBorrowingModal
+                    open={openBorrowModal}
+                    handleClose={() => setOpenBorrowModal(false)}
+                    readerData={selectedReader}
+                />
+            )}
         </div>
-    )
+    );
 }

@@ -214,38 +214,43 @@ export default function ReaderManagement() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredReaders?.map((reader) => {
-                                const currentStatus = reader.accountId?.status || reader.status;
-                                return (
-                                    <tr key={reader._id} className={styles.desBar}>
-                                        <td>{formatShortId(reader)}</td>
-                                        <td style={{ fontWeight: "bold" }}>{reader.fullName}</td>
-                                        <td>{reader.accountId?.email || "N/A"}</td>
-                                        <td>{reader.phoneNumber || "Chưa cập nhật"}</td>
-                                        <td>
-                                            {currentStatus === "activate" ? "Đã kích hoạt" : "Đã vô hiệu hóa"}
-                                        </td>
-                                        <td>
-                                            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-                                                <IconButton color="primary" onClick={() => handleOpenEdit(reader)}>
-                                                    <EditSquare />
-                                                </IconButton>
-                                                
-                                                <IconButton 
-                                                    color={currentStatus === "activate" ? "error" : "success"} 
-                                                    onClick={() => handleToggleStatus(reader.accountId?._id, currentStatus)}
-                                                    title={currentStatus === "activate" ? "Vô hiệu hóa" : "Mở khóa"}
-                                                >
-                                                    {currentStatus === "activate" ? <DeleteIcon /> : <RestoreIcon />}
-                                                </IconButton>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                            <td colSpan="8" style={{ textAlign: "center", padding: "20px", color: "#c62828", fontWeight: "bold" }}>
-                                Không tìm thấy độc giả nào!
-                            </td>
+                            {filteredReaders?.length > 0 ? (
+                                filteredReaders.map((reader) => {
+                                    const currentStatus = reader.accountId?.status || reader.status;
+                                    return (
+                                        <tr key={reader._id} className={styles.desBar}>
+                                            <td>{formatShortId(reader)}</td>
+                                            <td style={{ fontWeight: "bold" }}>{reader.fullName}</td>
+                                            <td>{reader.accountId?.email || "N/A"}</td>
+                                            <td>{reader.phoneNumber || "Chưa cập nhật"}</td>
+                                            <td>
+                                                {currentStatus === "activate" ? "Đã kích hoạt" : "Đã vô hiệu hóa"}
+                                            </td>
+                                            <td>
+                                                <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                                                    <IconButton color="primary" onClick={() => handleOpenEdit(reader)}>
+                                                        <EditSquare />
+                                                    </IconButton>
+                                                    
+                                                    <IconButton 
+                                                        color={currentStatus === "activate" ? "error" : "success"} 
+                                                        onClick={() => handleToggleStatus(reader.accountId?._id, currentStatus)}
+                                                        title={currentStatus === "activate" ? "Vô hiệu hóa" : "Mở khóa"}
+                                                    >
+                                                        {currentStatus === "activate" ? <DeleteIcon /> : <RestoreIcon />}
+                                                    </IconButton>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" style={{ textAlign: "center", padding: "20px", color: "#c62828", fontWeight: "bold" }}>
+                                        Không tìm thấy độc giả nào!
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -265,4 +270,4 @@ export default function ReaderManagement() {
             />
         </div>
     );
-}
+}   
