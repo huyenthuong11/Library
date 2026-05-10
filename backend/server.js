@@ -5,7 +5,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv"; 
 import mongoose from "mongoose";
-
+import path from "path";
+import { fileURLToPath } from "url";
 import "./src/config/env.js";
 import startCronJobs from "./src/services/cronJobService.js";
 
@@ -24,6 +25,9 @@ import recommendRoutes from "./src/routes/recommendRoutes.js";
 import ebookRoutes from "./src/routes/ebookRoutes.js";
 import violationRoutes from "./src/routes/violationRoutes.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 //load env
 dotenv.config();
 
@@ -33,8 +37,12 @@ console.log("ENV TEST: - server.js:15", process.env.MONGO_URI);
 //middleware
 app.use(cors());
 app.use(express.json());
-
+app.use(express.static(path.join(__dirname, "public")));
 let latestScan = null;
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "scan.html"));
+});
 
 app.post("/scan", (req, res) => {
     const { readerId } = req.body;
