@@ -6,7 +6,8 @@ import { useContext, useEffect, useState } from "react";
 import { Avatar, Chip, IconButton, Button } from "@mui/material";
 import { 
     HomeOutlined, CollectionsBookmarkOutlined, ReceiptLongOutlined, EditSquare,
-    PermIdentityOutlined, AssignmentIndOutlined, AddHomeWorkOutlined, NewspaperOutlined, AddBoxOutlined
+    PermIdentityOutlined, AssignmentIndOutlined, 
+    AddHomeWorkOutlined, NewspaperOutlined, AddBoxOutlined, MenuBookOutlined
 } from '@mui/icons-material';
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "@/lib/axios";
@@ -102,6 +103,10 @@ export default function AdminViolationManagement() {
                     <nav>
                         <p onClick={() => router.push("/admin/dashboard")}><HomeOutlined/> Trang chủ</p>
                         <p onClick={() => router.push("/admin/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
+                        <p onClick={() => router.push("/admin/ebookManagement")}>
+                            <MenuBookOutlined />
+                            Kho Ebook
+                        </p>
                         <p onClick={() => router.push("/admin/upNewsandEvents")}><NewspaperOutlined/> Đăng thông báo</p>
                         <a className="active"><ReceiptLongOutlined /> Quản lý vi phạm</a>
                         <p onClick={() => router.push("/admin/readerManagement")}><PermIdentityOutlined/> Quản lý người đọc</p>

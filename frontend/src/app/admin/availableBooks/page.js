@@ -7,7 +7,7 @@ import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     PermIdentityOutlined, AssignmentIndOutlined, 
     AddHomeWorkOutlined, ReceiptLongOutlined,
-    AddBoxOutlined, EditSquare, CancelOutlined, 
+    AddBoxOutlined, EditSquare, CancelOutlined,MenuBookOutlined, 
     SaveOutlined, AddCircleOutlined, NewspaperOutlined} 
     from '@mui/icons-material';
 import useAvailableBooks from "@/hook/useAvailableBooks";
@@ -228,6 +228,10 @@ export default function AdminAvailableBook() {
                         <nav>
                             <p onClick={() => router.push("/admin/dashboard")}><HomeOutlined/> Trang chủ</p>
                             <a className="active"><CollectionsBookmarkOutlined/> Kho sách thư viện</a>
+                            <p onClick={() => router.push("/admin/ebookManagement")}>
+                                <MenuBookOutlined />
+                                Kho Ebook
+                            </p>
                             <p onClick={() => router.push("/admin/upNewsandEvents")}>
                                 <NewspaperOutlined/>
                                 Đăng thông báo 
@@ -328,19 +332,19 @@ export default function AdminAvailableBook() {
                         <table className={styles.bookTable}>
                             <thead>
                                 <tr>
-                                    <th>Mã Sách</th>
+                                    <th>Mã sách</th>
                                     <th>Ảnh bìa</th>
-                                    <th>Tên Sách</th>
-                                    <th>Tác Giả</th>
-                                    <th>Thể Loại</th>
-                                    <th>Nhà XB</th>
-                                    <th>Năm XB</th>
+                                    <th>Tên sách</th>
+                                    <th>Tác giả</th>
+                                    <th>Thể loại</th>
+                                    <th>Nhà xuất bản</th>
+                                    <th>Năm xuất bản</th>
                                     <th>Giá bìa</th>
-                                    <th>Tổng Copies</th>
+                                    <th>Tổng bản sao</th>
                                     <th>Sẵn có</th>
                                     <th>
                                         <div style={{ display: "flex", justifyContent: "center" }}>
-                                            Hành Động
+                                            Hành động
                                         </div>
                                     </th>
                                 </tr>

@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { Avatar, Chip, IconButton, Button } from "@mui/material";
 import { 
     HomeOutlined, CollectionsBookmarkOutlined, ReceiptLongOutlined, EditSquare,
-    MedicalInformationOutlined 
+    MedicalInformationOutlined, PermIdentityOutlined,  AssignmentIndOutlined
 } from '@mui/icons-material';
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "@/lib/axios";
@@ -96,9 +96,20 @@ export default function LibrarianViolationManagement() {
                         </div>
                     </div>
                     <nav>
-                        <p onClick={() => router.push("/librarian/dashboard")}><HomeOutlined/> Trang chủ</p>
+                        <p onClick={() => router.push("/librarian/dashboard")}><HomeOutlined/> Tổng quan</p>
                         <p onClick={() => router.push("/librarian/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
-                        <p onClick={() => router.push("/librarian/readerCheck")}><MedicalInformationOutlined/> Thông tin người đọc</p>
+                        <p onClick={() => router.push("/librarian/ebookManagement")}>
+                            <MedicalInformationOutlined></MedicalInformationOutlined>
+                            Kho Ebook
+                        </p>
+                        <p onClick={() => router.push("/librarian/readerCheck")}>
+                            <AssignmentIndOutlined/>
+                            Thông tin người đọc
+                        </p>
+                        <p onClick={() => router.push("/librarian/readerManagement")}>
+                            <PermIdentityOutlined></PermIdentityOutlined>
+                            Quản lý người dùng
+                        </p>
                         <a className="active"><ReceiptLongOutlined /> Quản lý vi phạm</a>
                     </nav>
                 </aside>

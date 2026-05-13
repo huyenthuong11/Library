@@ -8,7 +8,7 @@ import { Avatar, Button, IconButton } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     PermIdentityOutlined, AssignmentIndOutlined, 
     AddHomeWorkOutlined, EditSquare, AddBoxOutlined, 
-    ReceiptLongOutlined, NewspaperOutlined} 
+    ReceiptLongOutlined, NewspaperOutlined, MenuBookOutlined} 
     from '@mui/icons-material';
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreIcon from '@mui/icons-material/Restore';
@@ -137,6 +137,10 @@ export default function LibManagement() {
                         <p onClick={() => router.push("/admin/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        <p onClick={() => router.push("/admin/ebookManagement")}>
+                            <MenuBookOutlined />
+                            Kho Ebook
                         </p>
                         <p onClick={() => router.push("/admin/upNewsandEvents")}>
                             <NewspaperOutlined/>

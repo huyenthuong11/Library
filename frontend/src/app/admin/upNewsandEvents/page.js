@@ -8,7 +8,7 @@ import { Avatar, Button } from "@mui/material";
 import { HomeOutlined, CollectionsBookmarkOutlined, 
     PermIdentityOutlined, AssignmentIndOutlined, 
     AddHomeWorkOutlined, EditSquare, AddBoxOutlined, 
-    ReceiptLongOutlined, NewspaperOutlined} 
+    ReceiptLongOutlined, NewspaperOutlined, MenuBookOutlined} 
     from '@mui/icons-material';
 import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -105,6 +105,10 @@ export default function UpdateNewsAndEvents() {
                         <p onClick={() => router.push("/admin/availableBooks")}>
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
+                        </p>
+                        <p onClick={() => router.push("/admin/ebookManagement")}>
+                            <MenuBookOutlined />
+                            Kho Ebook
                         </p>
                         <a>
                             <NewspaperOutlined/>
