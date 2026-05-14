@@ -72,7 +72,7 @@ export default function ViolationModal({ handleClose, borrowedBooks = [] }) {
                                 marginBottom: "15px", backgroundColor: "#ffebee"
                             }}>
                                 <div style={{ fontSize: "17px", fontWeight: "bold", marginBottom: "8px" }}>
-                                    📖 Sách: {v.documentId?.title || "Không rõ tên sách"}
+                                    Sách: {v.documentId?.title || "Không rõ tên sách"}
                                 </div>
                                 <div style={{ marginBottom: "5px" }}><strong>Lý do:</strong> {v.reason}</div>
                                 <div style={{ marginBottom: "5px", color: "#c62828", fontSize: "16px" }}>
@@ -96,7 +96,7 @@ export default function ViolationModal({ handleClose, borrowedBooks = [] }) {
                                     marginBottom: "15px", backgroundColor: "#fff8e1"
                                 }}>
                                     <div style={{ fontSize: "17px", fontWeight: "bold", marginBottom: "8px", color: "#e65100" }}>
-                                        📖 Sách: {book.title}
+                                        Sách: {book.title}
                                     </div>
                                     <div style={{ marginBottom: "5px" }}>
                                         <strong>Hạn trả:</strong> {format(new Date(book.locations.dueDate), 'dd/MM/yyyy')}

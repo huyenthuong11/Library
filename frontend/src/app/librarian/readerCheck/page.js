@@ -8,7 +8,7 @@ import {
     CollectionsBookmarkOutlined,
     MedicalInformationOutlined,
     ReceiptLongOutlined,
-    SearchOutlined, 
+    SearchOutlined,
     PermIdentityOutlined,
     AssignmentIndOutlined
 } from "@mui/icons-material";
@@ -16,7 +16,7 @@ import { useContext, useEffect, useState, useRef } from "react";
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import api from "@/lib/axios";
 import { User, BookOpen, CheckCircle } from "lucide-react";
-import axios from "axios";
+import api2 from "@/lib/axios2";
 
 export default function ReaderCheck() {
     const router = useRouter();
@@ -86,11 +86,11 @@ export default function ReaderCheck() {
         const interval = setInterval(async() => {
             if (isScanning.current || pendingData) return;
             try {
-                const res = await axios.get("http://192.168.1.3:5000/scanResult");
+                const res = await api2.get("/scanResult");
                 if (res.data) {
                     isScanning.current = true;
                     await onScanSuccess(res.data);
-                    await axios.delete("http://192.168.1.3:5000/scanResult");
+                    await api2.delete("/scanResult");
                     isScanning.current = false;
                 }
             } catch (err) {
@@ -150,14 +150,10 @@ export default function ReaderCheck() {
                             <MedicalInformationOutlined></MedicalInformationOutlined>
                             Kho Ebook
                         </p>
-                        <p onClick={() => router.push("/librarian/readerCheck")}>
+                        <a>
                             <AssignmentIndOutlined/>
                             Thông tin người đọc
-                        </p>
-                        <p onClick={() => router.push("/librarian/readerManagement")}>
-                            <PermIdentityOutlined></PermIdentityOutlined>
-                            Quản lý người dùng
-                        </p>
+                        </a>
                         <p onClick={() => router.push("/librarian/violationManagement")}>
                             <ReceiptLongOutlined></ReceiptLongOutlined>
                             Quản lý vi phạm

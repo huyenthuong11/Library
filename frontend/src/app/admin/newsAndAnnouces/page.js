@@ -78,7 +78,6 @@ export default function DashboardNotiCard() {
 
     return (
         <div className={styles.notiList}>
-            {/* 1. Thêm tham số index vào đây */}
             {notifications.map((item, index) => { 
                 const typeClass = typeMapping[item.displayType] || styles[item.status] || "";
 
