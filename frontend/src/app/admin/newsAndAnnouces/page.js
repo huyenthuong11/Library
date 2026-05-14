@@ -15,7 +15,7 @@ export default function DashboardNotiCard() {
             } catch (error) {
                 console.log("Tải thông báo thất bại", error);
             }
-        };
+        };  
 
         getNotifications();
         const interval = setInterval(getNotifications, 5000);
@@ -78,11 +78,11 @@ export default function DashboardNotiCard() {
 
     return (
         <div className={styles.notiList}>
-            {notifications.map((item) => {
+            {notifications.map((item, index) => { 
                 const typeClass = typeMapping[item.displayType] || styles[item.status] || "";
 
                 return (
-                    <div key={item._id} className={`${styles.item} ${typeClass}`}>
+                    <div key={item._id || `noti-${index}`} className={`${styles.item} ${typeClass}`}>
                         <p className={styles.content}>{renderContent(item)}</p>
 
                         <div className={styles.footer}>

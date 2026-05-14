@@ -8,29 +8,27 @@ import { useContext, useEffect, useState } from "react";
 import { Avatar, Button, IconButton } from "@mui/material";
 import { 
     HomeOutlined, CollectionsBookmarkOutlined, 
-    PermIdentityOutlined, AssignmentIndOutlined, 
-    AddHomeWorkOutlined, EditSquare, AddBoxOutlined, 
-    ReceiptLongOutlined, NewspaperOutlined,
-    Visibility, MenuBookOutlined
+    EditSquare, AddBoxOutlined, AssignmentIndOutlined,
+    ReceiptLongOutlined, PermIdentityOutlined,
+    MedicalInformationOutlined, Visibility
 } from '@mui/icons-material';
-import DeleteIcon from "@mui/icons-material/Delete";
-import RestoreIcon from '@mui/icons-material/Restore';
-import AddReaderModal from "./AddReaderModal";
-import EditReaderModal from "./EditReaderModal";
-import ReaderBorrowingModal from "./ReaderBorrowingModal"; // Import modal mượn sách
+import AddReaderModal from "./AddReaderModal"; 
+import EditReaderModal from "./EditReaderModal"; 
+import ReaderBorrowingModal from "./ReaderBorrowingModal";
 import api from "@/lib/axios";
 
-export default function ReaderManagement() {
+export default function LibrarianReaderManagement() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
     const { readerList, refreshReaderList } = useReaderList();
     
     const [search, setSearch] = useState("");
     const [activeFilter, setActiveFilter] = useState(null);
-    const [openAddReaderBar, setOpenAddReaderBar] = useState(false);
     
+    // State quản lý Modals
+    const [openAddReaderBar, setOpenAddReaderBar] = useState(false);
     const [openEditModal, setOpenEditModal] = useState(false);
-    const [openBorrowModal, setOpenBorrowModal] = useState(false); // Thêm state cho modal mượn sách
+    const [openBorrowModal, setOpenBorrowModal] = useState(false);
     const [selectedReader, setSelectedReader] = useState(null);
 
     const [inventory, setInventory] = useState({ total: 0, active: 0, inactive: 0 });
@@ -68,25 +66,9 @@ export default function ReaderManagement() {
         setOpenEditModal(true);
     };
 
-    // Thêm hàm xử lý mở modal xem lịch sử mượn
     const handleOpenBorrowHistory = (reader) => {
         setSelectedReader(reader);
         setOpenBorrowModal(true);
-    };
-
-    const handleToggleStatus = async (accountId, currentStatus) => {
-        const actionText = currentStatus === "activate" ? "vô hiệu hóa" : "mở khóa";
-        if (confirm(`Bạn có chắc chắn muốn ${actionText} tài khoản này?`)) {
-            try {
-                const res = await api.patch(`/admin/toggleAccountStatus/${accountId}`);
-                alert(res.data.message);
-                refreshReaderList();
-                getInventory();
-            } catch (error) {
-                console.error(error);
-                alert("Lỗi khi thực hiện thay đổi trạng thái");
-            }
-        }
     };
 
     const filteredReaders = readerList?.filter(r => {
@@ -103,17 +85,19 @@ export default function ReaderManagement() {
     return (
         <div className="container">
             <div className="main">
+                {/* HEADER */}
                 <div className="header">
                     <div className="webicon"></div>
                     <div className="user">
-                        <Avatar></Avatar>
-                        <span>{account?.email || "Email"}</span>
+                        <Avatar src={account?.avatar}></Avatar>
+                        <span>{account?.fullName || account?.email || "Thủ thư"}</span>
                         <div className="sign">
                             <a onClick={handleLogout}>Đăng xuất</a>
                         </div>
                     </div>
                 </div>
 
+                {/* SIDEBAR DÀNH CHO THỦ THƯ */}
                 <aside className="sidebar">
                     <div style={{marginTop:10}}>
                         <div className="webicon">
@@ -122,44 +106,24 @@ export default function ReaderManagement() {
                         </div>
                     </div>
                     <nav>
-                        <p onClick={() => router.push("/admin/dashboard")}>
-                            <HomeOutlined></HomeOutlined>
-                            Trang chủ
-                        </p>
-                        <p onClick={() => router.push("/admin/availableBooks")}>
-                            <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
-                            Kho sách thư viện
-                        </p>
-                        <p onClick={() => router.push("/admin/ebookManagement")}>
-                            <MenuBookOutlined />
+                        <p onClick={() => router.push("/librarian/dashboard")}><HomeOutlined/> Tổng quan</p>
+                        <p onClick={() => router.push("/librarian/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
+                        <p onClick={() => router.push("/librarian/ebookManagement")}>
+                            <MedicalInformationOutlined></MedicalInformationOutlined>
                             Kho Ebook
                         </p>
-                        <p onClick={() => router.push("/admin/upNewsandEvents")}>
-                            <NewspaperOutlined/>
-                            Đăng thông báo 
-                        </p>
-                        <p onClick={() => router.push("/admin/violationManagement")}>
-                            <ReceiptLongOutlined />
-                            Quản lý vi phạm
-                        </p>
-                        <a className="active">
-                            <PermIdentityOutlined/>
-                            Quản lý người đọc
-                        </a>
-                        <p onClick={() => router.push("/admin/librarianManagement")}>
+                        <p onClick={() => router.push("/librarian/readerCheck")}>
                             <AssignmentIndOutlined/>
-                            Quản lý thủ thư
+                            Thông tin người đọc
                         </p>
-                        <p onClick={() => router.push("/admin/publisherManagement")}>
-                            <AddHomeWorkOutlined/>
-                            Nhà xuất bản
-                        </p>
+                        <a className="active"><PermIdentityOutlined/> Quản lý người dùng</a>
+                        <p onClick={() => router.push("/librarian/violationManagement")}><ReceiptLongOutlined/> Quản lý vi phạm</p>
                     </nav>
                 </aside>
 
                 <div className={styles.main}>
                     <div className={styles.mainHeader}>
-                        <h2>QUẢN LÝ ĐỘC GIẢ</h2>
+                        <h2>QUẢN LÝ NGƯỜI DÙNG</h2>
                     </div>
                     
                     <div className={styles.header}>
@@ -168,14 +132,23 @@ export default function ReaderManagement() {
                                 <div className={styles.searchContainer}>
                                     <input 
                                         type="text" 
-                                        placeholder="Tìm kiếm độc giả (Tên, ID...)"
+                                        placeholder="Tìm kiếm người dùng (Tên, ID...)"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                     />
                                 </div>
                                 <Button 
-                                    sx={{ backgroundColor: "#d2dfd5", color: "#0b485e", padding: "10px 15px", borderRadius: "5px", marginLeft: "10px" }}
+                                    sx={{ 
+                                        backgroundColor: "#d2dfd5", 
+                                        color: "#0b485e", 
+                                        minWidth: "45px", 
+                                        height: "45px",
+                                        padding: "0",
+                                        borderRadius: "5px", 
+                                        marginLeft: "10px" 
+                                    }}
                                     onClick={() => setOpenAddReaderBar(true)}
+                                    title="Thêm người dùng"
                                 >
                                     <AddBoxOutlined/>
                                 </Button>
@@ -199,10 +172,10 @@ export default function ReaderManagement() {
                         </div>
 
                         <div className={styles.iventoryDashboard}>
-                            <div className={styles.iventoryDashboardHeader}>Thống kê độc giả</div>
+                            <div className={styles.iventoryDashboardHeader}>Thống kê người dùng</div>
                             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "5px" }}>
                                 <div>
-                                    <p>Tổng số độc giả:</p>
+                                    <p>Tổng số người dùng:</p>
                                     <p>Đang hoạt động:</p>
                                     <p>Đã bị vô hiệu hóa:</p>
                                 </div>
@@ -218,7 +191,7 @@ export default function ReaderManagement() {
                     <table className={styles.bookTable}>
                         <thead>
                             <tr>
-                                <th>Mã độc giả</th>
+                                <th>Mã người dùng</th>
                                 <th>Họ và tên</th>
                                 <th>Email tài khoản</th>
                                 <th>Số điện thoại</th>
@@ -233,29 +206,22 @@ export default function ReaderManagement() {
                                     return (
                                         <tr key={reader._id} className={styles.desBar}>
                                             <td>{formatShortId(reader)}</td>
-                                            <td style={{ fontWeight: "bold" }}>{reader.fullName}</td>
+                                            <td style={{ fontWeight: "bold", color: "#0b485e" }}>{reader.fullName}</td>
                                             <td>{reader.accountId?.email || "N/A"}</td>
                                             <td>{reader.phoneNumber || "Chưa cập nhật"}</td>
                                             <td>
-                                                {currentStatus === "activate" ? "Đã kích hoạt" : "Đã vô hiệu hóa"}
+                                                <span style={{ color: currentStatus === "activate" ? "green" : "red", fontWeight: "500" }}>
+                                                    {currentStatus === "activate" ? "Đã kích hoạt" : "Đã vô hiệu hóa"}
+                                                </span>
                                             </td>
                                             <td>
                                                 <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-                                                    {/* Thêm nút Xem lịch sử mượn */}
                                                     <IconButton color="info" onClick={() => handleOpenBorrowHistory(reader)} title="Xem tình trạng mượn sách">
                                                         <Visibility />
                                                     </IconButton>
 
                                                     <IconButton color="primary" onClick={() => handleOpenEdit(reader)} title="Sửa thông tin">
                                                         <EditSquare />
-                                                    </IconButton>
-                                                    
-                                                    <IconButton 
-                                                        color={currentStatus === "activate" ? "error" : "success"} 
-                                                        onClick={() => handleToggleStatus(reader.accountId?._id, currentStatus)}
-                                                        title={currentStatus === "activate" ? "Vô hiệu hóa" : "Mở khóa"}
-                                                    >
-                                                        {currentStatus === "activate" ? <DeleteIcon /> : <RestoreIcon />}
                                                     </IconButton>
                                                 </div>
                                             </td>
@@ -265,7 +231,7 @@ export default function ReaderManagement() {
                             ) : (
                                 <tr>
                                     <td colSpan="6" style={{ textAlign: "center", padding: "20px", color: "#c62828", fontWeight: "bold" }}>
-                                        Không tìm thấy độc giả nào!
+                                        Không tìm thấy người dùng nào!
                                     </td>
                                 </tr>
                             )}
@@ -274,20 +240,24 @@ export default function ReaderManagement() {
                 </div>
             </div>
 
-            <AddReaderModal 
-                open={openAddReaderBar} 
-                handleClose={() => setOpenAddReaderBar(false)} 
-                refreshData={() => { refreshReaderList(); getInventory(); }}
-            />
+            {/* MODALS */}
+            {openAddReaderBar && (
+                <AddReaderModal 
+                    open={openAddReaderBar} 
+                    handleClose={() => setOpenAddReaderBar(false)} 
+                    refreshData={() => { refreshReaderList(); getInventory(); }}
+                />
+            )}
 
-            <EditReaderModal
-                open={openEditModal}
-                handleClose={() => setOpenEditModal(false)}
-                refreshData={() => { refreshReaderList(); getInventory(); }}
-                readerData={selectedReader}
-            />
+            {openEditModal && (
+                <EditReaderModal
+                    open={openEditModal}
+                    handleClose={() => setOpenEditModal(false)}
+                    refreshData={() => { refreshReaderList(); getInventory(); }}
+                    readerData={selectedReader}
+                />
+            )}
 
-            {/* Gọi component ReaderBorrowingModal */}
             {openBorrowModal && (
                 <ReaderBorrowingModal
                     open={openBorrowModal}

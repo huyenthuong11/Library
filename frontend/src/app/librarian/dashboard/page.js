@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
 import { useContext, useEffect, useState } from "react";
 import { Avatar } from "@mui/material";
-import { HomeOutlined, CollectionsBookmarkOutlined, 
-    MedicalInformationOutlined, ReceiptLongOutlined} 
+import { HomeOutlined, CollectionsBookmarkOutlined, AssignmentIndOutlined,
+    MedicalInformationOutlined, ReceiptLongOutlined, PermIdentityOutlined} 
     from '@mui/icons-material';
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
 import CategoryPieChart from "../categoryChart/page";
@@ -112,9 +112,17 @@ export default function Dashboard() {
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
                         </p>
+                        <p onClick={() => router.push("/librarian/ebookManagement")}>
+                            <MedicalInformationOutlined></MedicalInformationOutlined>
+                            Kho Ebook
+                        </p>
                         <p onClick={() => router.push("/librarian/readerCheck")}>
-                            <MedicalInformationOutlined/>
+                            <AssignmentIndOutlined/>
                             Thông tin người đọc
+                        </p>
+                        <p onClick={() => router.push("/librarian/readerManagement")}>
+                            <PermIdentityOutlined></PermIdentityOutlined>
+                            Quản lý người dùng
                         </p>
                         <p onClick={() => router.push("/librarian/violationManagement")}>
                             <ReceiptLongOutlined></ReceiptLongOutlined>

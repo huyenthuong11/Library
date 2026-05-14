@@ -6,13 +6,10 @@ import Violation from "../models/Violation.js";
 
 const startCronJobs = () => {
 
-    // 1. RESET SÁCH ĐẶT TRƯỚC HẾT HẠN (Giữ nguyên logic cũ)
+    // 1. RESET SÁCH ĐẶT TRƯỚC HẾT HẠN (Chạy mỗi giờ 1 lần)
     cron.schedule("0 * * * *", async () => {
-
         const now = new Date();
-
         try {
-
             const docs = await Document.find(
                 {
                     locations: {
@@ -38,13 +35,13 @@ const startCronJobs = () => {
                     expiredItems.forEach(item => {
                         if(item.readerId) {
                             const readerId = item.readerId.toString();
-                            readerTurnMap[readerId] = (readerTurnMap[readerId] || 0) +1;
+                            readerTurnMap[readerId] = (readerTurnMap[readerId] || 0) + 1;
                         }
                     });
 
                     docBulkOps.push({
                         updateOne: {
-                            filter: {_id: doc._id},
+                            filter: { _id: doc._id },
                             update: {
                                 $set: {
                                     "locations.$[elem].status": "available",
@@ -53,7 +50,7 @@ const startCronJobs = () => {
                                     "locations.$[elem].createdAt": null,
                                     "locations.$[elem].dueDate": null
                                 },
-                                $inc: {availableCopies: expiredItems.length}
+                                $inc: { availableCopies: expiredItems.length }
                             },
                             arrayFilters: [{ "elem.status": "reserved", "elem.dueDate": { $lt: now } }]
                         }
@@ -68,29 +65,27 @@ const startCronJobs = () => {
             if(readerIds.length > 0) {
                 const readerBulkOps = readerIds.map(id => ({
                     updateOne: {
-                        filter: {_id: id},
-                        update: {$inc: {borrowTurn: readerTurnMap[id]}}
+                        filter: { _id: id },
+                        update: { $inc: { borrowTurn: readerTurnMap[id] } }
                     }
                 }));
                 await Reader.bulkWrite(readerBulkOps);
             }
 
-            console.log(`[Cron] Reset ${result.modifiedCount} documents`);
+            console.log(`[Cron] Reset ${result.modifiedCount} documents (Reserved Expired)`);
 
         } catch (err) {
             console.error("Cron reserved error:", err);
         }
-
     }, { timezone: "Asia/Ho_Chi_Minh" });
 
 
-    // 2. QUÉT SÁCH QUÁ HẠN VÀ TỰ ĐỘNG TẠO/CẬP NHẬT BIÊN BẢN PHẠT
+    // 2. QUÉT SÁCH QUÁ HẠN VÀ TỰ ĐỘNG TẠO/CẬP NHẬT BIÊN BẢN PHẠT (Chạy lúc 00:00 mỗi ngày)
+    // MẸO: Nếu bạn muốn test ngay bây giờ, hãy đổi "0 0 * * *" thành "* * * * *" (chạy mỗi phút)
     cron.schedule("0 0 * * *", async () => {
-
         const now = new Date();
-
         try {
-            // Bước 2.1: Quét tìm tất cả các sách Đang Mượn hoặc Đã Quá Hạn mà dueDate < now
+            // Quét tìm tất cả các sách Đang Mượn hoặc Đã Quá Hạn mà dueDate < now
             const docs = await Document.find(
                 {
                     locations: {
@@ -139,12 +134,12 @@ const startCronJobs = () => {
                 });
             });
 
-            // Bước 2.2: Chạy lệnh ghi hàng loạt Biên Bản vào CSDL
+            // Chạy lệnh ghi hàng loạt Biên Bản vào CSDL
             if (violationOps.length > 0) {
                 await Violation.bulkWrite(violationOps);
             }
 
-            // Bước 2.3: Đổi status của sách từ borrowed -> overdue
+            // Đổi status của sách từ borrowed -> overdue
             const result = await Document.updateMany(
                 {
                     "locations.status": "borrowed",
@@ -168,47 +163,44 @@ const startCronJobs = () => {
         } catch (err) {
             console.error("Cron overdue error:", err);
         }
-
     }, { timezone: "Asia/Ho_Chi_Minh" });
 
-    //deactivate acc
+    // 3. KHÓA TÀI KHOẢN (DEACTIVATE ACC) (Chạy lúc 00:12 mỗi ngày)
     cron.schedule("12 0 * * *", async () => {
         const dateLimit = new Date();
         dateLimit.setDate(dateLimit.getDate() - 15);
         try {
             const exAcc = await Document.aggregate([
-                {$unwind: "$locations"},
-                {$match: 
-                    {
+                { $unwind: "$locations" },
+                { $match: {
                         "locations.status": "overdue",
-                        "locations.dueDate": {$lt: dateLimit}
+                        "locations.dueDate": { $lt: dateLimit }
                     }
                 },
-                {$lookup: {
+                { $lookup: {
                     from: "readers",
                     localField: "locations.readerId",
                     foreignField: "_id",
                     as: "reader"
                 }},
-                {$unwind: "$reader"},
-                {$unwind: "$account"},
-                {$group: {_id: "$reader.accountId"}}
+                { $unwind: "$reader" },
+                { $group: { _id: "$reader.accountId" } }
             ]);
 
             const accIds = exAcc.map(item => item._id);
 
             if(accIds.length > 0) {
                 await Account.updateMany(
-                    {_id: {$in: accIds}},
-                    {$set: {status: "deactivate"}}
-                )
+                    { _id: { $in: accIds } },
+                    { $set: { status: "deactivate" } }
+                );
             }
 
-            console.log(`Đã khóa ${accIds.length} tài khoản quá hạn.`)
+            console.log(`[Cron] Đã khóa ${accIds.length} tài khoản trễ hạn quá 15 ngày.`);
         } catch (error) {
-            console.error("Lỗi khi chạy cron job:", error);
+            console.error("Lỗi khi chạy cron job khóa tài khoản:", error);
         }
-    })
+    }, { timezone: "Asia/Ho_Chi_Minh" });
 };
 
 export default startCronJobs;

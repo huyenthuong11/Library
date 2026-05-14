@@ -8,7 +8,9 @@ import {
     CollectionsBookmarkOutlined,
     MedicalInformationOutlined,
     ReceiptLongOutlined,
-    SearchOutlined
+    SearchOutlined,
+    PermIdentityOutlined,
+    AssignmentIndOutlined
 } from "@mui/icons-material";
 import { useContext, useEffect, useState, useRef } from "react";
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
@@ -144,8 +146,12 @@ export default function ReaderCheck() {
                             <CollectionsBookmarkOutlined></CollectionsBookmarkOutlined>
                             Kho sách thư viện
                         </p>
+                        <p onClick={() => router.push("/librarian/ebookManagement")}>
+                            <MedicalInformationOutlined></MedicalInformationOutlined>
+                            Kho Ebook
+                        </p>
                         <a>
-                            <MedicalInformationOutlined/>
+                            <AssignmentIndOutlined/>
                             Thông tin người đọc
                         </a>
                         <p onClick={() => router.push("/librarian/violationManagement")}>
