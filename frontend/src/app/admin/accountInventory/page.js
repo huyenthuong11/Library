@@ -44,7 +44,7 @@ export default function AccInventory() {
                 <div className={`${styles['statItem']} ${styles['blue']}`}>
                     <div className={styles.statHeader}>
                         <div className={styles.icon}><User size={17} color="#2563EB" /></div>
-                        <div className={styles.number}>{accountsInventory.totalReader}</div>
+                        <div className={styles.number}>{accountsInventory.total}</div>
                     </div>
                     <p className={styles.label}>Số người đọc</p>
                 </div>

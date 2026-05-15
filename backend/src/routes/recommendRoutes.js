@@ -140,7 +140,7 @@ router.post("/chatbot/:readerId", authMiddleware, checkRole(["reader"]), checkSt
 
         const reader = await Reader.findById(req.params.readerId);
 
-        const aiReply = await recommendBook(userMessage, reader.fullName, history.reverse());
+        const aiReply = await recommendBook(userMessage, reader.fullName, history.reverse(), req.params.readerId);
 
         const newAiChatMessage = await ChatHistory.create({
             readerId: req.params.readerId,

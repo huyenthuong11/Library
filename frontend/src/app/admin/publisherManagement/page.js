@@ -148,10 +148,10 @@ export default function AdminPublisherManagement() {
                     <table className={styles.bookTable}>
                         <thead>
                             <tr>
-                                <th style={{width: '25%'}}>Tên nhà xuất bản</th>
+                                <th style={{width: '400px'}}>Tên nhà xuất bản</th>
                                 <th>Email liên hệ</th>
-                                <th>Số điện thoại</th>
-                                <th style={{width: '30%'}}>Địa chỉ</th>
+                                <th style={{width: '200px'}}>Số điện thoại</th>
+                                <th style={{width: '400px'}}>Địa chỉ</th>
                                 <th style={{ textAlign: "center" }}>Hành động</th>
                             </tr>
                         </thead>
