@@ -21,8 +21,12 @@ async function getBooksFromDB(query, readerId) {
     const docs = await Document.find({
       _id: { $nin: borrowedIds },
       $or:[
-        {title: {$regex: query, $options: 'i'}},
-        {author: {$regex: query, $options: 'i'}},
+        {title: {
+            $in: keywords.map(k => new RegExp(k, "i"))
+          }},
+        {author: {
+            $in: keywords.map(k => new RegExp(k, "i"))
+          }},
         {
           category: {
             $in: keywords.map(k => new RegExp(k, "i"))
@@ -41,9 +45,9 @@ async function getBooksFromDB(query, readerId) {
 
     const eDocs = await EBook.find({
       $or: [
-        {title: {$regex: query, $options: 'i'}},
-        {author: {$regex: query, $options: 'i'}},
-        {content: {$regex: query, $options: 'i'}}
+        {title: {$in: keywords.map(k => new RegExp(k, "i"))}},
+        {author: {$in: keywords.map(k => new RegExp(k, "i"))}},
+        {content: {$in: keywords.map(k => new RegExp(k, "i"))}}
       ]
     }).limit(2);
 
@@ -160,8 +164,8 @@ Khi suy luận keyword tìm kiếm:
 - Không dùng nguyên văn câu người dùng làm keyword tìm kiếm
 - Hãy suy luận và mở rộng thành các keyword liên quan
 - Ưu tiên keyword phổ biến và dễ xuất hiện trong tên sách, thể loại hoặc nội dung Ebook.
-
-Keyword nên bao gồm:
+- lưu ý nếu người dùng chỉ nhắc đến cảm xúc hãy phân tích xem cảm xúc đó thì cần cuốn sách nào để chữa lành cảm xúc đó, đừng chỉ dùng cảm xúc làm keyword tìm kiếm mà hãy suy luận ra chủ đề hoặc thể loại sách phù hợp với cảm xúc đó. 
+ví dụ: người dùng thấy chán thì có thể suy luận là ra thể loại novel hoặc truyện tranh để giải trí, người dùng thấy áp lực thì có thể suy luận ra thể loại self-help để giúp họ giải tỏa áp lực, người dùng thấy tò mò về thế giới thì có thể suy luận ra chủ đề khoa học hoặc du lịch để thỏa mãn,...
 - chủ đề
 - cảm xúc
 - lĩnh vực liên quan
@@ -170,25 +174,6 @@ Keyword nên bao gồm:
 Mục tiêu là giúp tìm kiếm được cả:
 - sách vật lý
 - E-book
-
-Ví dụ:
-- "mất động lực"
-  -> "phát triển bản thân động lực self-help"
-
-- "mình đang stress"
-  -> "tâm lý học chữa lành healing mindfulness"
-
-- "muốn tập trung học"
-  -> "học tập productivity giáo dục"
-
-- "mình hơi buồn"
-  -> "healing tâm lý yêu bản thân"
-
-- "muốn đọc gì nhẹ nhàng"
-  -> "tiểu thuyết chữa lành nhẹ nhàng"
-
-- "muốn học đầu tư"
-  -> "tài chính đầu tư kinh doanh"
 
 Sau khi suy luận keyword phù hợp, hãy gọi tool:
 search_books_from_db
