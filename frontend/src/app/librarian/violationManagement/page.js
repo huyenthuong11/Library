@@ -12,13 +12,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import api from "@/lib/axios";
 import { format } from 'date-fns';
 import EditViolationModal from "./EditViolationModal";
+import useLibrarianInfo from "@/hook/useLibrarianInfo";
 
 export default function LibrarianViolationManagement() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
     
-    const fullName = account?.fullName || "Thủ thư";
-    const avatar = account?.avatar || "";
+        const { fullName, avatar } = useLibrarianInfo(account?.id);
 
     const [violations, setViolations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -77,14 +77,27 @@ export default function LibrarianViolationManagement() {
                 <div className="header">
                     <div className="webicon"></div>
                     <div className="user">
-                        {avatar ? (
-                            <Avatar alt="Librarian Avatar" src={avatar} sx={{ objectFit: 'cover', border: '1px solid rgba(150, 149, 149, 0.65)' }} />
-                        ) : (
-                            <Avatar></Avatar>
-                        )}
-                        <span>{fullName || account?.email || "Thủ thư"}</span>
-                        <div className="sign"><a onClick={handleLogout}>Đăng xuất</a></div>
-                    </div>
+                                            {avatar ? (
+                                                <Avatar
+                                                    alt="User Avatar"
+                                                    src={getImageUrl(avatar)}
+                                                    sx={{
+                                                        objectFit: 'cover',
+                                                        border: '1px solid rgba(150, 149, 149, 0.65)'
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Avatar></Avatar>
+                                            )}
+                                            {fullName ? (
+                                                <span>{fullName}</span>
+                                            ):(
+                                                <span>{account?.email || "Email"}</span>
+                                            )}
+                                            <div className="sign">
+                                                <a onClick={handleLogout}>Đăng xuất</a>
+                                            </div>
+                                        </div>
                 </div>
 
                 {/* SIDEBAR DÀNH RIÊNG CHO THỦ THƯ */}

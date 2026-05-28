@@ -5,22 +5,20 @@ import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../context/AuthContext";
 import { useContext, useEffect, useState } from "react";
 import { Avatar, Button, IconButton } from "@mui/material";
-import { 
-    HomeOutlined, CollectionsBookmarkOutlined, MenuBookOutlined,
-    PermIdentityOutlined, AssignmentIndOutlined, 
-    AddHomeWorkOutlined, EditSquare, AddBoxOutlined, 
-    ReceiptLongOutlined, NewspaperOutlined 
-} from '@mui/icons-material';
+import { HomeOutlined, CollectionsBookmarkOutlined, 
+    MedicalInformationOutlined, ReceiptLongOutlined,
+    AddBoxOutlined, EditSquare, CancelOutlined, 
+    SaveOutlined, AddCircleOutlined, PermIdentityOutlined, AssignmentIndOutlined} 
+    from '@mui/icons-material';
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddEbookModal from "./AddEbookModal";
 import EditEbookModal from "./EditEbookModal";
 import api from "@/lib/axios";
 import useLibrarianInfo from "@/hook/useLibrarianInfo";
-import { set } from "date-fns";
 export default function AdminEbookManagement() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
-    const { fullName, avatar } = useLibrarianInfo(account?._id);
+    const { fullName, avatar } = useLibrarianInfo(account?.id);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [eBooks, setEBooks] = useState(null);
@@ -104,7 +102,7 @@ export default function AdminEbookManagement() {
                         {avatar ? (
                             <Avatar
                                 alt="User Avatar"
-                                src={`http://localhost:5000/${avatar}`}
+                                src={getImageUrl(avatar)}
                                 sx={{
                                     objectFit: 'cover',
                                     border: '1px solid rgba(150, 149, 149, 0.65)'
@@ -132,14 +130,27 @@ export default function AdminEbookManagement() {
                         </div>
                     </div>
                     <nav>
-                        <p onClick={() => router.push("/admin/dashboard")}><HomeOutlined/> Trang chủ</p>
-                        <p onClick={() => router.push("/admin/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
-                        <a className="active"><MenuBookOutlined/> Kho Ebook</a>
-                        <p onClick={() => router.push("/admin/upNewsandEvents")}><NewspaperOutlined/> Đăng thông báo</p>
-                        <p onClick={() => router.push("/admin/violationManagement")}><ReceiptLongOutlined /> Quản lý vi phạm</p>
-                        <p onClick={() => router.push("/admin/readerManagement")}><PermIdentityOutlined/> Quản lý người đọc</p>
-                        <p onClick={() => router.push("/admin/librarianManagement")}><AssignmentIndOutlined/> Quản lý thủ thư</p>
-                        <p onClick={() => router.push("/admin/publisherManagement")}><AddHomeWorkOutlined/> Nhà xuất bản</p>
+                        <p onClick={() => router.push("/librarian/dashboard")}><HomeOutlined/> Tổng quan</p>
+                        <p onClick={() => router.push("/librarian/availableBooks")}>
+                            <CollectionsBookmarkOutlined/>
+                            Kho sách thư viện
+                        </p>
+                        <a onClick={() => router.push("/librarian/ebookManagement")}>
+                            <MedicalInformationOutlined></MedicalInformationOutlined>
+                            Kho Ebook
+                        </a>
+                        <p onClick={() => router.push("/librarian/readerCheck")}>
+                            <AssignmentIndOutlined/>
+                                Thông tin người đọc
+                        </p>
+                        <p onClick={() => router.push("/librarian/readerManagement")}>
+                            <PermIdentityOutlined></PermIdentityOutlined>
+                            Quản lý người dùng
+                        </p>
+                        <p onClick={() => router.push("/librarian/violationManagement")}>
+                            <ReceiptLongOutlined></ReceiptLongOutlined>
+                            Quản lý vi phạm
+                        </p>
                     </nav>
                 </aside>
 
@@ -210,10 +221,10 @@ export default function AdminEbookManagement() {
                                         </div>
                                       );
                                     })())}
-                                        <td style={{ fontWeight: "bold", color: "#0b485e" }}>
+                                        <td style={{ fontWeight: "bold", color: "#0b485e", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                             {ebook.title}
                                         </td>
-                                        <td>
+                                        <td style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                             {ebook.author || "N/A"}
                                         </td>
                                         <td style={{ fontWeight: "bold", color: "green", textAlign: "center" }}>
