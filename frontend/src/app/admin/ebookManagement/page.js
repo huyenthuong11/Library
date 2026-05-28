@@ -19,24 +19,30 @@ import api from "@/lib/axios";
 export default function AdminEbookManagement() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
-    
-    const [ebooks, setEbooks] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [eBooks, setEBooks] = useState(null);
     const [search, setSearch] = useState("");
     
     const [openAddModal, setOpenAddModal] = useState(false);
     const [openEditModal, setOpenEditModal] = useState(false);
     const [selectedEbook, setSelectedEbook] = useState(null);
 
-    const fetchEbooks = async () => {
+    const getEBooks = async () => {
         try {
-            const res = await api.get("/ebooks/all"); 
-            setEbooks(res.data); 
-        } catch (error) { 
-            console.error("Lỗi khi lấy danh sách Ebook:", error); 
+            const response = await api.get(`/eBooks/all?page=${currentPage}`, {
+                params: {search}
+            });
+            const data = response.data.data;
+            const totalPage = response.data.totalPages;
+            setEBooks(data);
+            setTotalPages(totalPage);
+        } catch (error) {
+            console.log("Lỗi tải danh sách ebook");
         }
-    };
+    }
 
-    useEffect(() => { fetchEbooks(); }, []);
+    useEffect(() => { getEBooks(); }, []);
 
     const handleLogout = () => { logout(); router.push("/"); };
 
@@ -48,9 +54,9 @@ export default function AdminEbookManagement() {
     const handleDelete = async (id) => {
         if (confirm(`Bạn có chắc chắn muốn xóa Ebook này khỏi hệ thống?`)) {
             try {
-                await api.delete(`/ebooks/delete/${id}`);
+                await api.delete(`/eBooks/delete/${id}`);
                 alert("Đã xóa Ebook thành công!");
-                fetchEbooks();
+                getEBooks();
             } catch (error) {
                 console.error(error);
                 alert("Lỗi khi xóa Ebook!");
@@ -63,7 +69,7 @@ export default function AdminEbookManagement() {
         return path.startsWith("http") ? path : `http://localhost:5000/${path}`;
     };
 
-    const filteredEbooks = ebooks?.filter(e => {
+    const filteredEbooks = eBooks?.filter(e => {
         const s = search.toLowerCase();
         const title = e.title?.toLowerCase() || "";
         const author = e.author?.toLowerCase() || "";
@@ -134,7 +140,7 @@ export default function AdminEbookManagement() {
                             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "5px" }}>
                                 <div><p>Tổng số Ebook:</p></div>
                                 <div style={{ textAlign: "right", fontWeight: "bold" }}>
-                                    <p>{ebooks.length} cuốn</p>
+                                    <p>{eBooks?.length || 0} cuốn</p>
                                 </div>
                             </div>
                         </div>
@@ -181,12 +187,26 @@ export default function AdminEbookManagement() {
                             )}
                         </tbody>
                     </table>
-                    
+                    <div className={styles.pagination}>
+                        <Button 
+                            disabled={currentPage === 1} 
+                            onClick={() => setCurrentPage(prev => prev - 1)}
+                        >
+                            Trang trước
+                        </Button>
+                        <span>Trang {currentPage} / {totalPages}</span>
+                        <Button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(prev => prev + 1)}
+                        >
+                            Trang sau
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            {openAddModal && <AddEbookModal open={openAddModal} handleClose={() => setOpenAddModal(false)} onSuccess={fetchEbooks} />}
-            {openEditModal && <EditEbookModal open={openEditModal} handleClose={() => setOpenEditModal(false)} onSuccess={fetchEbooks} ebook={selectedEbook} />}
+            {openAddModal && <AddEbookModal open={openAddModal} handleClose={() => setOpenAddModal(false)} onSuccess={getEBooks} />}
+            {openEditModal && <EditEbookModal open={openEditModal} handleClose={() => setOpenEditModal(false)} onSuccess={getEBooks} ebook={selectedEbook} />}
         </div>
     );
 }

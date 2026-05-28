@@ -7,36 +7,45 @@ import { useContext, useEffect, useState } from "react";
 import { Avatar, Button, IconButton } from "@mui/material";
 import { 
     HomeOutlined, CollectionsBookmarkOutlined, MenuBookOutlined,
-    PermIdentityOutlined, AssignmentIndOutlined,
+    PermIdentityOutlined, AssignmentIndOutlined, 
     AddHomeWorkOutlined, EditSquare, AddBoxOutlined, 
-    ReceiptLongOutlined, NewspaperOutlined, MedicalInformationOutlined 
+    ReceiptLongOutlined, NewspaperOutlined 
 } from '@mui/icons-material';
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddEbookModal from "./AddEbookModal";
 import EditEbookModal from "./EditEbookModal";
 import api from "@/lib/axios";
-
+import useLibrarianInfo from "@/hook/useLibrarianInfo";
+import { set } from "date-fns";
 export default function AdminEbookManagement() {
     const router = useRouter();
     const { account, logout } = useContext(AuthContext);
-    
-    const [ebooks, setEbooks] = useState([]);
+    const { fullName, avatar } = useLibrarianInfo(account?._id);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [eBooks, setEBooks] = useState(null);
     const [search, setSearch] = useState("");
-    
+    const [totalEBooks, setTotalEBooks] = useState(0);
     const [openAddModal, setOpenAddModal] = useState(false);
     const [openEditModal, setOpenEditModal] = useState(false);
     const [selectedEbook, setSelectedEbook] = useState(null);
 
-    const fetchEbooks = async () => {
+    const getEBooks = async () => {
         try {
-            const res = await api.get("/ebooks/all"); 
-            setEbooks(res.data); 
-        } catch (error) { 
-            console.error("Lỗi khi lấy danh sách Ebook:", error); 
+            const response = await api.get(`/eBooks/all?page=${currentPage}`, {
+                params: {search}
+            });
+            const data = response.data.data;
+            const totalPage = response.data.totalPages;
+            setEBooks(data);
+            setTotalPages(totalPage);
+            setTotalEBooks(response.data.totalEBooks);
+        } catch (error) {
+            console.log("Lỗi tải danh sách ebook");
         }
-    };
+    }
 
-    useEffect(() => { fetchEbooks(); }, []);
+    useEffect(() => { getEBooks(); }, []);
 
     const handleLogout = () => { logout(); router.push("/"); };
 
@@ -48,9 +57,9 @@ export default function AdminEbookManagement() {
     const handleDelete = async (id) => {
         if (confirm(`Bạn có chắc chắn muốn xóa Ebook này khỏi hệ thống?`)) {
             try {
-                await api.delete(`/ebooks/delete/${id}`);
+                await api.delete(`/eBooks/delete/${id}`);
                 alert("Đã xóa Ebook thành công!");
-                fetchEbooks();
+                getEBooks();
             } catch (error) {
                 console.error(error);
                 alert("Lỗi khi xóa Ebook!");
@@ -63,21 +72,52 @@ export default function AdminEbookManagement() {
         return path.startsWith("http") ? path : `http://localhost:5000/${path}`;
     };
 
-    const filteredEbooks = ebooks?.filter(e => {
+    const filteredEbooks = eBooks?.filter(e => {
         const s = search.toLowerCase();
         const title = e.title?.toLowerCase() || "";
         const author = e.author?.toLowerCase() || "";
         return title.includes(s) || author.includes(s);
     });
 
+    const getEbookStyle = (title) => {
+        let hash = 0; 
+        for (let i = 0; i < title.length; i++) {
+            hash = title.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        const h = Math.abs(hash % 360);
+        const s = 30;
+        const l = 90;
+
+        return {
+            backgroundColor: `hsl(${h}, ${s}%, ${l}%)`,
+            color: `hsl(${h}, ${s}%, 20%)`,
+            borderColor: `hsl(${h}, ${s}%, 80%)`
+        }
+    };
     return (
         <div className="container">
             <div className="main">
                 <div className="header">
                     <div className="webicon"></div>
                     <div className="user">
-                        <Avatar src={account?.avatar}></Avatar>
-                        <span>{account?.email || "Admin"}</span>
+                        {avatar ? (
+                            <Avatar
+                                alt="User Avatar"
+                                src={`http://localhost:5000/${avatar}`}
+                                sx={{
+                                    objectFit: 'cover',
+                                    border: '1px solid rgba(150, 149, 149, 0.65)'
+                                }}
+                            />
+                        ) : (
+                            <Avatar></Avatar>
+                        )}
+                        {fullName ? (
+                            <span>{fullName}</span>
+                        ):(
+                            <span>{account?.email || "Email"}</span>
+                        )}
                         <div className="sign">
                             <a onClick={handleLogout}>Đăng xuất</a>
                         </div>
@@ -92,12 +132,14 @@ export default function AdminEbookManagement() {
                         </div>
                     </div>
                     <nav>
-                        <p onClick={() => router.push("/librarian/dashboard")}><HomeOutlined/> Tổng quan</p>
-                                                <p onClick={() => router.push("/librarian/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
-                                                <a className="active"><MedicalInformationOutlined/> Kho Ebook</a>
-                                                <p onClick={() => router.push("/librarian/readerCheck")}><AssignmentIndOutlined/> Thông tin người đọc</p>
-                                                <p onClick={() => router.push("/librarian/readerCheck")}><PermIdentityOutlined/> Quản lý người dùng</p>
-                                                <p onClick={() => router.push("/librarian/violationManagement")}><ReceiptLongOutlined/> Quản lý vi phạm</p>
+                        <p onClick={() => router.push("/admin/dashboard")}><HomeOutlined/> Trang chủ</p>
+                        <p onClick={() => router.push("/admin/availableBooks")}><CollectionsBookmarkOutlined/> Kho sách thư viện</p>
+                        <a className="active"><MenuBookOutlined/> Kho Ebook</a>
+                        <p onClick={() => router.push("/admin/upNewsandEvents")}><NewspaperOutlined/> Đăng thông báo</p>
+                        <p onClick={() => router.push("/admin/violationManagement")}><ReceiptLongOutlined /> Quản lý vi phạm</p>
+                        <p onClick={() => router.push("/admin/readerManagement")}><PermIdentityOutlined/> Quản lý người đọc</p>
+                        <p onClick={() => router.push("/admin/librarianManagement")}><AssignmentIndOutlined/> Quản lý thủ thư</p>
+                        <p onClick={() => router.push("/admin/publisherManagement")}><AddHomeWorkOutlined/> Nhà xuất bản</p>
                     </nav>
                 </aside>
 
@@ -132,7 +174,7 @@ export default function AdminEbookManagement() {
                             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "5px" }}>
                                 <div><p>Tổng số Ebook:</p></div>
                                 <div style={{ textAlign: "right", fontWeight: "bold" }}>
-                                    <p>{ebooks.length} cuốn</p>
+                                    <p>{totalEBooks || 0} cuốn</p>
                                 </div>
                             </div>
                         </div>
@@ -152,13 +194,26 @@ export default function AdminEbookManagement() {
                             {filteredEbooks?.length > 0 ? (
                                 filteredEbooks.map((ebook) => (
                                     <tr key={ebook._id} className={styles.desBar}>
-                                        <td style={{ textAlign: "center" }}>
-                                            <img src={getImageUrl(ebook.image)} alt="cover" style={{ width: "50px", height: "70px", objectFit: "cover", borderRadius: "4px" }} />
-                                        </td>
-                                        <td style={{ fontWeight: "bold", color: "#0b485e", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                        {((() => {
+                                      const eStyle = getEbookStyle(ebook.title);
+                                      return (
+                                        <div
+                                          className={styles.bookCoverBox}
+                                          style={{
+                                            backgroundColor: eStyle.backgroundColor,
+                                            borderColor: eStyle.borderColor,
+                                            color: eStyle.color,
+                                          }}
+                                        >
+                                          <div className={styles.bookTitleOnCover}>{ebook.title}</div>
+                                          <div className={styles.ebookAuthorOnCover}>{ebook.author}</div>
+                                        </div>
+                                      );
+                                    })())}
+                                        <td style={{ fontWeight: "bold", color: "#0b485e" }}>
                                             {ebook.title}
                                         </td>
-                                        <td style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                        <td>
                                             {ebook.author || "N/A"}
                                         </td>
                                         <td style={{ fontWeight: "bold", color: "green", textAlign: "center" }}>
@@ -179,12 +234,26 @@ export default function AdminEbookManagement() {
                             )}
                         </tbody>
                     </table>
-                    
+                    <div className={styles.pagination}>
+                        <Button 
+                            disabled={currentPage === 1} 
+                            onClick={() => setCurrentPage(prev => prev - 1)}
+                        >
+                            Trang trước
+                        </Button>
+                        <span>Trang {currentPage} / {totalPages}</span>
+                        <Button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(prev => prev + 1)}
+                        >
+                            Trang sau
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            {openAddModal && <AddEbookModal open={openAddModal} handleClose={() => setOpenAddModal(false)} onSuccess={fetchEbooks} />}
-            {openEditModal && <EditEbookModal open={openEditModal} handleClose={() => setOpenEditModal(false)} onSuccess={fetchEbooks} ebook={selectedEbook} />}
+            {openAddModal && <AddEbookModal open={openAddModal} handleClose={() => setOpenAddModal(false)} onSuccess={getEBooks} />}
+            {openEditModal && <EditEbookModal open={openEditModal} handleClose={() => setOpenEditModal(false)} onSuccess={getEBooks} ebook={selectedEbook} />}
         </div>
     );
 }
