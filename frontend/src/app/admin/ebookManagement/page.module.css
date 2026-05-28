@@ -230,3 +230,12 @@
     border: 1px solid rgb(110, 109, 109);
     width: 100%;
 }
+
+.pagination {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+}

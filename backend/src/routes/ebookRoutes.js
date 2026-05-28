@@ -39,16 +39,38 @@ const router = express.Router();
 // Lấy tất cả Ebook (Đã tối ưu chống tràn RAM)
 router.get("/all", authMiddleware, checkRole(["admin", "librarian"]), async (req, res) => {
     try {
-        console.log("1. Bắt đầu lấy danh sách Ebook cho Admin...");
+        const page = parseInt(req.query.page) || 1;
+        const skip = (page - 1) * 15;
+        const {search} = req.query;
         
-        // BẮT BUỘC PHẢI CÓ .select("-content") ĐỂ TRÁNH QUÁ TẢI SERVER
-        const ebooks = await EBook.find().sort({ createdAt: -1 }).select("-content");
-        
-        console.log(`2. Lấy thành công ${ebooks.length} cuốn Ebook!`);
-        res.status(200).json(ebooks);
-    } catch (err) {
-        console.error("=== LỖI 500 TẠI GET /ebooks/all ===", err);
-        res.status(500).json({ message: "Lỗi server khi lấy danh sách Ebook" });
+        let query = {};
+        let sort = { createdAt: 1 };
+        let projection = {};
+
+        if (search) {
+            query = { $text: { $search: search } };
+            projection = { score: { $meta: "textScore" } };
+            sort = { score: { $meta: "textScore" } };
+        }
+
+        const availableEBooks = await EBook
+        .find({
+            ...query,
+        }, projection)
+        .sort(sort)
+        .skip(skip)
+        .limit(15)
+        .select("-readerId")
+        .select("-content");
+
+        const totalBooks =  availableEBooks.length
+        res.status(200).json({
+            data: availableEBooks,
+            totalPages: Math.ceil(totalBooks / 15),
+            totalBooks: totalBooks
+        });
+    } catch (error) {
+        res.status(500).json("Lấy danh sách Ebook thất bại");
     }
 });
 

@@ -132,11 +132,15 @@ router.post("/chatbot/:readerId", authMiddleware, checkRole(["reader"]), checkSt
             role: "user"
         });
 
+        const twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
         const history = await ChatHistory
-            .find({readerId: req.params.readerId})
-            .sort({ createdAt: -1 })
-            .limit(10)
-            .lean();
+            .find({
+                readerId: req.params.readerId,
+                createdAt: { $gte: twoDaysAgo }
+            })
+            .sort({ createdAt: 1 });
 
         const reader = await Reader.findById(req.params.readerId);
 
