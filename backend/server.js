@@ -32,8 +32,6 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
-console.log("ENV TEST: - server.js:15", process.env.MONGO_URI);
-
 //middleware
 app.use(cors());
 app.use(express.json());
