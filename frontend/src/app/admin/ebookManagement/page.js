@@ -66,7 +66,7 @@ export default function AdminEbookManagement() {
 
     const getImageUrl = (path) => {
         if (!path) return "https://via.placeholder.com/50x70?text=No+Cover";
-        return path.startsWith("http") ? path : `http://localhost:5000/${path}`;
+        return path.startsWith("http") ? path : `${process.env.NEXT_PUBLIC_API_URL}/${path}`;
     };
 
     const filteredEbooks = eBooks?.filter(e => {

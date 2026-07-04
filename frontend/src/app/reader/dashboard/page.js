@@ -123,7 +123,7 @@ export default function Dashboard() {
 
     const getImageUrl = (path) => {
         if (path.startsWith("http")) return path;
-        return `http://localhost:5000/${path}`;
+        return `${process.env.NEXT_PUBLIC_API_URL}/${path}`;
     }; 
     
     // LOGIC ĐÃ SỬA: Tính toán sách quá hạn thực tế (trễ từ 1 NGÀY trở lên) để đồng bộ với Modal

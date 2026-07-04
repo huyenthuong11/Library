@@ -121,7 +121,7 @@ export default function BookStore() {
 
     const getImageUrl = (path) => {
         if (path.startsWith("http")) return path;
-        return `http://localhost:5000/${path}`;
+        return `${process.env.NEXT_PUBLIC_API_URL}/${path}`;
     }; 
     
     const filteredBook = borrowedBookList?.filter((book) => {

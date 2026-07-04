@@ -57,7 +57,7 @@ export default function LibrarianViolationManagement() {
     };
 
     const handleLogout = () => { logout(); router.push("/"); };
-    const getImageUrl = (path) => path?.startsWith("http") ? path : `http://localhost:5000/${path}`;
+    const getImageUrl = (path) => path?.startsWith("http") ? path : `${process.env.NEXT_PUBLIC_API_URL}/${path}`;
 
     // Logic lọc danh sách Vi phạm
     const filteredViolations = violations.filter(v => {

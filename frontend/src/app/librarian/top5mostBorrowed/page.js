@@ -24,7 +24,7 @@ export default function Top5MostBorrowed() {
     const getImageUrl = (path) => {
         if(!path) return "http://localhost:5000/default-book-cover.jpg";
         if (path.startsWith("http") || path.startsWith("https")) return path;
-        return `http://localhost:5000/${path}`;
+        return `${process.env.NEXT_PUBLIC_API_URL}/${path}`;
     };
 
     return(

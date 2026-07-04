@@ -4,7 +4,7 @@ import styles from './BorrowModal.module.css';
 export default function BorrowModal({ handleClose, data }) {
     const getImageUrl = (path) => {
         if (path.startsWith("http")) return path;
-        return `http://localhost:5000/${path}`;
+        return `${process.env.NEXT_PUBLIC_API_URL}/${path}`;
     }; 
     const formatShortId = (id) => {
         if (!id) return "N/A";
